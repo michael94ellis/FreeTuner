@@ -17,10 +17,11 @@ class Metronome: ObservableObject {
     @Published var bpm: Int = 120
     @Published var timeSignature: TimeSignature = .fourFour
     @Published var currentBeat: Int = 0
+//    @Published var accentedBeats: Set<Int> = [0] // Beat 0 (first beat) is accented by default
     
     // Audio buffers for click sounds
     private var normalClickBuffer: AVAudioPCMBuffer?
-    private var accentedClickBuffer: AVAudioPCMBuffer?
+//    private var accentedClickBuffer: AVAudioPCMBuffer?
     
     struct TimeSignature {
         let beats: Int
@@ -105,13 +106,13 @@ class Metronome: ObservableObject {
         normalBuffer.frameLength = frameCount
         normalClickBuffer = normalBuffer
         
-        // Generate accented click
-        guard let accentedBuffer = AVAudioPCMBuffer(pcmFormat: mainMixerFormat, frameCapacity: frameCount) else {
-            print("Failed to create accented audio buffer")
-            return
-        }
-        accentedBuffer.frameLength = frameCount
-        accentedClickBuffer = accentedBuffer
+//        // Generate accented click
+//        guard let accentedBuffer = AVAudioPCMBuffer(pcmFormat: mainMixerFormat, frameCapacity: frameCount) else {
+//            print("Failed to create accented audio buffer")
+//            return
+//        }
+//        accentedBuffer.frameLength = frameCount
+//        accentedClickBuffer = accentedBuffer
         
         // Generate normal click sound
         for channel in 0..<Int(channelCount) {
@@ -132,22 +133,22 @@ class Metronome: ObservableObject {
         }
         
         // Generate accented click sound (higher pitch and slightly louder)
-        for channel in 0..<Int(channelCount) {
-            guard let channelData = accentedClickBuffer!.floatChannelData?[channel] else { 
-                print("Failed to access accented channel \(channel)")
-                continue 
-            }
-            
-            for i in 0..<Int(frameCount) {
-                let t = Double(i) / sampleRate
-                let fadeIn = min(1.0, t / 0.01) // 10ms fade in
-                let fadeOut = min(1.0, (duration - t) / 0.01) // 10ms fade out
-                let envelope = fadeIn * fadeOut
-                
-                let sample = sin(2.0 * .pi * accentedFrequency * t) * envelope * 0.4
-                channelData[i] = Float(sample)
-            }
-        }
+//        for channel in 0..<Int(channelCount) {
+//            guard let channelData = accentedClickBuffer!.floatChannelData?[channel] else { 
+//                print("Failed to access accented channel \(channel)")
+//                continue 
+//            }
+//            
+//            for i in 0..<Int(frameCount) {
+//                let t = Double(i) / sampleRate
+//                let fadeIn = min(1.0, t / 0.01) // 10ms fade in
+//                let fadeOut = min(1.0, (duration - t) / 0.01) // 10ms fade out
+//                let envelope = fadeIn * fadeOut
+//                
+//                let sample = sin(2.0 * .pi * accentedFrequency * t) * envelope * 0.4
+//                channelData[i] = Float(sample)
+//            }
+//        }
         
         print("Click sounds generated successfully")
     }
@@ -194,12 +195,11 @@ class Metronome: ObservableObject {
             guard let self = self else { return }
             
             beatCount += 1
-            let isFirstBeat = beatCount == 1
             
             DispatchQueue.main.async {
                 self.currentBeat = beatCount
             }
-            self.playClick(isFirstBeat: isFirstBeat)
+            self.playClick(beatIndex: beatCount) // Convert to 0-based index
             
             // Reset beat count when we complete a measure
             if beatCount >= self.timeSignature.beats {
@@ -208,7 +208,7 @@ class Metronome: ObservableObject {
         }
         
         // Play first click immediately
-        playClick(isFirstBeat: true)
+        playClick(beatIndex: 0)
     }
     
     func stop() {
@@ -218,10 +218,12 @@ class Metronome: ObservableObject {
         timer = nil
     }
     
-    private func playClick(isFirstBeat: Bool = false) {
-        let buffer = isFirstBeat ? accentedClickBuffer : normalClickBuffer
+    private func playClick(beatIndex: Int) {
+        print(beatIndex)
+//        let isAccented = accentedBeats.contains(beatIndex - 1)
+//        let buffer = isAccented ? accentedClickBuffer : normalClickBuffer
         
-        guard let buffer = buffer else { 
+        guard let buffer = normalClickBuffer else {
             print("No click buffer available")
             return 
         }
@@ -237,17 +239,14 @@ class Metronome: ObservableObject {
             }
         }
         
-        if isFirstBeat {
-            print("FirstBeat")
-        }
-        let clickType = isFirstBeat ? "accented" : "normal"
-        print("Playing \(clickType) click: format=\(buffer.format), frameLength=\(buffer.frameLength)")
+//        let clickType = isAccented ? "accented" : "normal"
+//        print("Playing \(clickType) click for beat \(beatIndex + 1): format=\(buffer.format), frameLength=\(buffer.frameLength)")
         clickPlayer.scheduleBuffer(buffer, at: nil, options: [], completionHandler: nil)
         clickPlayer.play()
     }
     
     func setBPM(_ newBPM: Int) {
-        bpm = max(40, min(200, newBPM)) // Limit BPM range
+        bpm = newBPM
         
         if isPlaying {
             stop()
