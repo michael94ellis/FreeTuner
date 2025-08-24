@@ -126,6 +126,7 @@ struct TunerView: View {
                 .cornerRadius(15)
             }
             .padding(.horizontal)
+            Spacer()
         }
         .padding()
         .onAppear {
