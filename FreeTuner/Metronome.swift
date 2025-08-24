@@ -23,7 +23,7 @@ class Metronome: ObservableObject {
     private var normalClickBuffer: AVAudioPCMBuffer?
     private var accentedClickBuffer: AVAudioPCMBuffer?
     
-    struct TimeSignature {
+    struct TimeSignature: Equatable {
         let beats: Int
         let noteValue: Int
         let name: String
@@ -260,8 +260,52 @@ class Metronome: ObservableObject {
         if isPlaying {
             stop()
         }
-        // Reset accented beats to just the first beat when changing time signature
-        accentedBeats = [0]
+        // Set appropriate accent pattern based on time signature
+        setAccentPatternForTimeSignature(signature)
+    }
+    
+    private func setAccentPatternForTimeSignature(_ signature: TimeSignature) {
+        switch signature {
+        case .twoTwo, .twoFour:
+            // 2/2 and 2/4: Strong accent on beat 1
+            accentedBeats = [0]
+            
+        case .threeFour:
+            // 3/4: Strong accent on beat 1, medium accent on beat 3
+            accentedBeats = [0, 2]
+            
+        case .fourFour:
+            // 4/4: Strong accent on beat 1, medium accent on beat 3
+            accentedBeats = [0, 2]
+            
+        case .fiveFour:
+            // 5/4: Strong accent on beat 1, medium accent on beat 4
+            accentedBeats = [0, 3]
+            
+        case .sixFour:
+            // 6/4: Strong accent on beat 1, medium accent on beat 4
+            accentedBeats = [0, 3]
+            
+        case .threeEight:
+            // 3/8: Strong accent on beat 1
+            accentedBeats = [0]
+            
+        case .sixEight:
+            // 6/8: Strong accent on beat 1, medium accent on beat 4
+            accentedBeats = [0, 3]
+            
+        case .nineEight:
+            // 9/8: Strong accent on beat 1, medium accent on beat 4 and 7
+            accentedBeats = [0, 3, 6]
+            
+        case .twelveEight:
+            // 12/8: Strong accent on beat 1, medium accent on beat 4, 7, and 10
+            accentedBeats = [0, 3, 6, 9]
+            
+        default:
+            // Fallback: just accent the first beat
+            accentedBeats = [0]
+        }
     }
     
     func toggleAccent(for beatIndex: Int) {
