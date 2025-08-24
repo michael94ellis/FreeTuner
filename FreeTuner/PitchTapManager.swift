@@ -10,7 +10,7 @@ import AVFoundation
 class PitchTapManager {
     private let engine = AVAudioEngine()
     private var analyzer: PitchAnalyzer?
-    private var fftSize: Int = 1024  // Default, will be adjusted based on actual buffer size
+    private var fftSize: Int = 2048  // Increased for better frequency resolution
     private var inputFormat: AVAudioFormat?
     private let queue = DispatchQueue(label: "PitchTapQueue")
 
@@ -66,14 +66,13 @@ class PitchTapManager {
 
     private func installTap() {
         guard let format = inputFormat else {
-            print("Audio format not initialized")
+            assertionFailure("Audio format not initialized")
             return
         }
         
-        print("Installing tap with format: sampleRate=\(format.sampleRate), channels=\(format.channelCount)")
         
-        // Request a reasonable buffer size, but be prepared to adapt
-        let requestedBufferSize = AVAudioFrameCount(1024)
+        // Request a buffer size that matches our FFT size for consistency
+        let requestedBufferSize = AVAudioFrameCount(fftSize)
         
         engine.inputNode.installTap(onBus: 0,
                                     bufferSize: requestedBufferSize,
@@ -81,33 +80,55 @@ class PitchTapManager {
             guard let self = self else { return }
 
             self.queue.async {
-                print("tap queue - buffer frameLength: \(buffer.frameLength)")
-                guard let channelData = buffer.floatChannelData?[0] else { 
-                    print("No channel data available")
-                    return 
+                guard let channelData = buffer.floatChannelData?[0] else {
+                    assertionFailure("No channel data available")
+                    return
                 }
                 let frameLength = Int(buffer.frameLength)
 
-                // Adapt FFT size to match the actual buffer size
-                if self.fftSize != frameLength {
-                    print("Adjusting FFT size from \(self.fftSize) to \(frameLength)")
-                    self.fftSize = frameLength
+                // Handle buffer size mismatch by processing in chunks
+                if frameLength != self.fftSize {
+                    assertionFailure("Buffer size mismatch: expected \(self.fftSize), got \(frameLength)")
                     
-                    // Reinitialize analyzer with new FFT size
-                    self.analyzer = PitchAnalyzer(sampleRate: Float(format.sampleRate), fftSize: frameLength)
+                    // Process the buffer in chunks of fftSize
+                    let numChunks = frameLength / self.fftSize
+                    for chunk in 0..<numChunks {
+                        let startIndex = chunk * self.fftSize
+                        
+                        // Extract chunk of samples
+                        let chunkSamples = Array(UnsafeBufferPointer(
+                            start: channelData.advanced(by: startIndex),
+                            count: self.fftSize
+                        ))
+                        
+                        
+                        guard let analyzer = self.analyzer else {
+                            assertionFailure("Analyzer not initialized")
+                            return
+                        }
+
+                        let result = analyzer.analyze(buffer: chunkSamples)
+                        // Call the callback with the first chunk that has a valid pitch
+                        if let pitch = result.dominantFrequency {
+                            self.onPitchDetected?(pitch, result.spectrum)
+                            return // Use the first valid pitch found
+                        }
+                    }
+                    
+                    // If no valid pitch found in any chunk, call with 0
+                    self.onPitchDetected?(0, [])
+                    return
                 }
 
-                // Copy samples into array
+                // Copy samples into array (when buffer size matches FFT size)
                 let samples = Array(UnsafeBufferPointer(start: channelData, count: frameLength))
-                print("Processing \(samples.count) samples with FFT size \(self.fftSize)")
 
                 guard let analyzer = self.analyzer else {
-                    print("Analyzer not initialized")
+                    assertionFailure("Analyzer not initialized")
                     return
                 }
 
                 let result = analyzer.analyze(buffer: samples)
-                print("Analysis result - dominant frequency: \(result.dominantFrequency ?? 0)")
                 
                 // Always call the callback with spectrum data, even if no dominant pitch
                 if let pitch = result.dominantFrequency {

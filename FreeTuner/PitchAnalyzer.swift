@@ -30,11 +30,58 @@ class PitchAnalyzer {
     deinit {
         vDSP_destroy_fftsetup(fftSetup)
     }
+    
+    /// Apply parabolic interpolation around the peak bin to estimate true frequency
+    /// This improves frequency resolution beyond the FFT bin resolution
+    private func parabolicInterpolation(
+        magnitudes: [Float],
+        frequencies: [Float],
+        peakIndex: Int
+    ) -> Float {
+        let count = magnitudes.count
+        
+        // Need at least 3 points for interpolation
+        guard count >= 3, peakIndex > 0, peakIndex < count - 1 else {
+            return frequencies[peakIndex]
+        }
+        
+        let y0 = magnitudes[peakIndex - 1]  // Left neighbor
+        let y1 = magnitudes[peakIndex]      // Peak
+        let y2 = magnitudes[peakIndex + 1]  // Right neighbor
+        
+        // Convert from dB back to linear scale for interpolation
+        let linearY0 = pow(10.0, y0 / 20.0)
+        let linearY1 = pow(10.0, y1 / 20.0)
+        let linearY2 = pow(10.0, y2 / 20.0)
+        
+        // Parabolic interpolation formula
+        // peak_offset = 0.5 * (y0 - y2) / (y0 - 2*y1 + y2)
+        let numerator = linearY0 - linearY2
+        let denominator = linearY0 - 2.0 * linearY1 + linearY2
+        
+        // Avoid division by zero
+        guard abs(denominator) > 1e-10 else {
+            return frequencies[peakIndex]
+        }
+        
+        let peakOffset = 0.5 * numerator / denominator
+        
+        // Clamp the offset to prevent going out of bounds
+        let clampedOffset = max(-0.5, min(0.5, peakOffset))
+        
+        // Calculate the interpolated frequency
+        let binSpacing = frequencies[1] - frequencies[0]
+        let interpolatedFrequency = frequencies[peakIndex] + clampedOffset * binSpacing
+        
+//        print("Interpolation: peak=\(frequencies[peakIndex])Hz, offset=\(clampedOffset), result=\(interpolatedFrequency)Hz")
+        
+        return interpolatedFrequency
+    }
 
     /// Analyze a PCM buffer and return dominant frequency + full spectrum
     func analyze(buffer: [Float]) -> (dominantFrequency: Float?, spectrum: [(frequency: Float, magnitude: Float)]) {
         guard buffer.count == fftSize else {
-            print("Buffer size must match fftSize")
+            assertionFailure("Buffer size must match fftSize")
             return (nil, [])
         }
 
@@ -56,7 +103,7 @@ class PitchAnalyzer {
         // Perform FFT
         vDSP_fft_zrip(fftSetup, &splitComplex, 1, log2n, FFTDirection(FFT_FORWARD))
 
-        // Compute magnitudes
+        // Compute magnitudes (only need first half due to symmetry)
         var magnitudes = [Float](repeating: 0, count: fftSize / 2)
         vDSP_zvmags(&splitComplex, 1, &magnitudes, 1, vDSP_Length(fftSize / 2))
 
@@ -64,7 +111,8 @@ class PitchAnalyzer {
         var zero: Float = 1e-10
         vDSP_vdbcon(magnitudes, 1, &zero, &magnitudes, 1, vDSP_Length(magnitudes.count), 0)
 
-        // Map bins to frequencies
+        // Map bins to frequencies (corrected formula)
+        // Bin 0 = DC (0 Hz), Bin N/2 = Nyquist frequency (sampleRate/2)
         let binFrequencies = (0..<magnitudes.count).map { i in
             Float(i) * sampleRate / Float(fftSize)
         }
@@ -73,7 +121,9 @@ class PitchAnalyzer {
         let minBin = max(0, Int(minFrequency * Float(fftSize) / sampleRate))
         let maxBin = min(magnitudes.count - 1, Int(maxFrequency * Float(fftSize) / sampleRate))
         
-        print("Frequency range: \(minFrequency)-\(maxFrequency) Hz, bins: \(minBin)-\(maxBin)")
+//        print("Frequency range: \(minFrequency)-\(maxFrequency) Hz, bins: \(minBin)-\(maxBin)")
+//        print("Sample rate: \(sampleRate) Hz, FFT size: \(fftSize), bin spacing: \(sampleRate / Float(fftSize)) Hz")
+//        print("First few frequencies: \(Array(binFrequencies.prefix(10)))")
         
         // Extract the relevant frequency range
         let relevantMagnitudes = Array(magnitudes[minBin...maxBin])
@@ -82,23 +132,38 @@ class PitchAnalyzer {
         // Find the maximum magnitude in the relevant range
         guard let maxMagnitude = relevantMagnitudes.max(),
               let maxIndex = relevantMagnitudes.firstIndex(of: maxMagnitude) else {
-            print("No valid magnitude found in relevant range")
+//            print("No valid magnitude found in relevant range")
             let spectrum = zip(binFrequencies, magnitudes).map { ($0, $1) }
             return (nil, spectrum)
         }
         
-        let dominantFrequency = relevantFrequencies[maxIndex]
+        let rawFrequency = relevantFrequencies[maxIndex]
+//        print("Raw peak: bin \(maxIndex + minBin) at \(rawFrequency) Hz (magnitude: \(maxMagnitude) dB)")
         
-        print("Max magnitude: \(maxMagnitude) dB at \(dominantFrequency) Hz")
+        // Apply parabolic interpolation around the peak bin for more accurate frequency estimation
+        let interpolatedFrequency = parabolicInterpolation(
+            magnitudes: relevantMagnitudes,
+            frequencies: relevantFrequencies,
+            peakIndex: maxIndex
+        )
+        
+//        print("Max magnitude: \(maxMagnitude) dB at \(interpolatedFrequency) Hz (interpolated)")
+//        
+//        // Debug: Check if this looks like a reasonable frequency
+//        if interpolatedFrequency > 0 && interpolatedFrequency < sampleRate / 2 {
+//            print("✅ Frequency within valid range (0-\(sampleRate/2) Hz)")
+//        } else {
+//            print("❌ Frequency outside valid range: \(interpolatedFrequency) Hz")
+//        }
         
         // Apply noise threshold (only detect if magnitude is above a certain threshold)
         let noiseThreshold: Float = -60.0 // dB threshold
         if maxMagnitude > noiseThreshold {
-            print("✅ Pitch detected: \(dominantFrequency) Hz (magnitude: \(maxMagnitude) dB)")
+//            print("✅ Pitch detected: \(interpolatedFrequency) Hz (magnitude: \(maxMagnitude) dB)")
             let spectrum = zip(binFrequencies, magnitudes).map { ($0, $1) }
-            return (dominantFrequency, spectrum)
+            return (interpolatedFrequency, spectrum)
         } else {
-            print("❌ Below noise threshold: \(maxMagnitude) dB < \(noiseThreshold) dB")
+//            print("❌ Below noise threshold: \(maxMagnitude) dB < \(noiseThreshold) dB")
             let spectrum = zip(binFrequencies, magnitudes).map { ($0, $1) }
             return (nil, spectrum)
         }

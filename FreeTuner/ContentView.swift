@@ -71,15 +71,6 @@ struct ContentView: View {
             DispatchQueue.main.async {
                 self.currentPitch = pitch > 0 ? pitch : nil
                 self.currentSpectrum = spectrum
-                
-                if pitch > 0 {
-                    print("🎯 Detected pitch: \(pitch) Hz")
-                    if let note = self.noteConverter.frequencyToNote(pitch) {
-                        print("🎵 Musical note: \(note.name)\(note.octave) (\(note.cents)¢)")
-                    }
-                } else {
-                    print("📊 Spectrum updated - no dominant pitch detected")
-                }
             }
         }
     }
@@ -94,7 +85,7 @@ struct ContentView: View {
             isListening = true
         } catch {
             errorMessage = "Failed to start audio: \(error.localizedDescription)"
-            print("Audio engine failed to start: \(error)")
+            assertionFailure("Audio engine failed to start: \(error)")
         }
     }
 }
