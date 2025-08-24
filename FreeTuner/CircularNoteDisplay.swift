@@ -77,8 +77,8 @@ struct CircularNoteDisplay: View {
                 
                 // Tuning indicator (needle)
                 if let note = detectedNote {
-                    let angle = noteAngle(for: note.name)
-                    let needleLength = radius + 20
+                    let angle = noteAngle(for: note.name) + 90
+                    let needleLength: CGFloat = (radius + CGFloat((note.octave - 2) * 25))
                     
                     Rectangle()
                         .fill(centsColor(note.cents))
