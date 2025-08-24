@@ -9,84 +9,95 @@ import SwiftUI
 
 struct ContentView: View {
     
+    
+    enum ViewState {
+        case tuner
+        case metronome
+        case both
+    }
     let pitchManager = AudioInputManager()
     let noteConverter = NoteConverter()
+    @StateObject private var metronome = Metronome()
     
     @State private var isListening = false
     @State private var errorMessage: String?
     @State private var currentPitch: Float?
     @State private var currentSpectrum: [(frequency: Float, magnitude: Float)] = []
+    @State private var viewState: ViewState = .tuner
 
     var body: some View {
-        VStack(spacing: 20) {
-            GeometryReader { geo in
-                // Circular Note Display
-                TunerCircleView(
-                    detectedNote: currentPitch.flatMap { noteConverter.frequencyToNote($0) },
-                    isListening: isListening
+        // Tuner Tab
+        VStack {
+            
+            Picker("Mode", selection: $viewState, content: {
+                Label(title: {
+                    Text("Tuner")
+                }, icon: {
+                    Image(systemName: "tuningfork")
+                })
+                .tag(ViewState.tuner)
+                Label(title: {
+                    Text("Metronome")
+                }, icon: {
+                    Image(systemName: "timer")
+                })
+                .tag(ViewState.metronome)
+                Label(title: {
+                    Text("Both")
+                }, icon: {
+                    Image(systemName: "music.note.list")
+                })
+                .tag(ViewState.both)
+            })
+            .pickerStyle(.segmented)
+            
+            switch viewState {
+            case .tuner:
+                TunerView(
+                    pitchManager: pitchManager,
+                    noteConverter: noteConverter,
+                    isListening: $isListening,
+                    errorMessage: $errorMessage,
+                    currentPitch: $currentPitch,
+                    currentSpectrum: $currentSpectrum
                 )
-                .frame(maxWidth: geo.size.width, maxHeight: geo.size.height)
+                .id("tuner")
+            case .metronome:
+                MetronomeView(metronome: metronome)
+                    .id("metronome")
+            case .both:
+                ViewThatFits {
+                    HStack {
+                        TunerView(
+                            pitchManager: pitchManager,
+                            noteConverter: noteConverter,
+                            isListening: $isListening,
+                            errorMessage: $errorMessage,
+                            currentPitch: $currentPitch,
+                            currentSpectrum: $currentSpectrum
+                        )
+                        .id("tuner")
+                        MetronomeView(metronome: metronome)
+                            .id("metronome")
+                    }
+                    VStack {
+                        TunerView(
+                            pitchManager: pitchManager,
+                            noteConverter: noteConverter,
+                            isListening: $isListening,
+                            errorMessage: $errorMessage,
+                            currentPitch: $currentPitch,
+                            currentSpectrum: $currentSpectrum
+                        )
+                        .id("tuner")
+                        MetronomeView(metronome: metronome)
+                            .id("metronome")
+                    }
+                    
+                }
             }
             
-            if let error = errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-                    .multilineTextAlignment(.center)
-                    .padding()
-            }
-            
-            // Control Button
-            Button(action: {
-                if isListening {
-                    pitchManager.stop()
-                    isListening = false
-                    currentSpectrum = []
-                } else {
-                    startListening()
-                }
-            }) {
-                HStack {
-                    Image(systemName: isListening ? "stop.circle.fill" : "mic.circle.fill")
-                        .font(.title2)
-                    Text(isListening ? "Stop Tuning" : "Start Tuning")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(isListening ? Color.red : Color.blue)
-                .cornerRadius(15)
-            }
-            .padding(.horizontal)
-        }
-        .padding()
-        .onAppear {
-            setupPitchDetection()
-        }
     }
-    
-    private func setupPitchDetection() {
-        pitchManager.onPitchDetected = { pitch, spectrum in
-            DispatchQueue.main.async {
-                self.currentPitch = pitch > 0 ? pitch : nil
-                self.currentSpectrum = spectrum
-            }
-        }
-    }
-    
-    private func startListening() {
-        errorMessage = nil
-        currentPitch = nil
-        currentSpectrum = []
-        
-        do {
-            try pitchManager.start()
-            isListening = true
-        } catch {
-            errorMessage = "Failed to start audio: \(error.localizedDescription)"
-            assertionFailure("Audio engine failed to start: \(error)")
-        }
     }
 }
 
