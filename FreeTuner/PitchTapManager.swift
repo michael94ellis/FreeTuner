@@ -51,7 +51,7 @@ class PitchTapManager {
         let audioSession = AVAudioSession.sharedInstance()
         
         // Request microphone permission
-        try audioSession.requestRecordPermission { [weak self] granted in
+        audioSession.requestRecordPermission { [weak self] granted in
             DispatchQueue.main.async {
                 if !granted {
                     print("Microphone permission denied")

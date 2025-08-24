@@ -81,43 +81,4 @@ class NoteConverter {
         let midiNote = noteIndex + (octave + 1) * 12
         return a4Frequency * pow(2, Float(midiNote - a4MidiNote) / 12)
     }
-    
-    /// Check if a frequency is close to being in tune (within tolerance)
-    func isInTune(_ frequency: Float, tolerance: Int = 10) -> Bool {
-        guard let note = frequencyToNote(frequency) else { return false }
-        return abs(note.cents) <= tolerance
-    }
-    
-    /// Get tuning direction (sharper or flatter)
-    func getTuningDirection(_ frequency: Float) -> String {
-        guard let note = frequencyToNote(frequency) else { return "Unknown" }
-        
-        if note.cents == 0 {
-            return "In Tune"
-        } else if note.cents > 0 {
-            return "Sharper"
-        } else {
-            return "Flatter"
-        }
-    }
-}
-
-// Extension for common note frequencies
-extension NoteConverter {
-    /// Common reference frequencies
-    static let commonNotes: [String: Float] = [
-        "A4": 440.0,
-        "C4": 261.63,
-        "D4": 293.66,
-        "E4": 329.63,
-        "F4": 349.23,
-        "G4": 392.00,
-        "B4": 493.88
-    ]
-    
-    /// Get the closest standard note name for a frequency
-    func getClosestStandardNote(_ frequency: Float) -> String? {
-        guard let note = frequencyToNote(frequency) else { return nil }
-        return "\(note.name)\(note.octave)"
-    }
 }

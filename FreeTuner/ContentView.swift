@@ -19,40 +19,22 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("FreeTuner")
-                .font(.largeTitle)
-                .fontWeight(.bold)
             
-            // Pitch Display
-            VStack(spacing: 8) {
-                if let pitch = currentPitch, pitch > 0 {
-                    Text("\(Int(pitch)) Hz")
-                        .font(.system(size: 36, weight: .medium, design: .monospaced))
-                        .foregroundColor(.green)
-                    
-                    let noteString = noteConverter.frequencyToNoteString(pitch)
-                    Text(noteString)
-                        .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(noteConverter.isInTune(pitch) ? .green : .orange)
-                    
-                    let direction = noteConverter.getTuningDirection(pitch)
-                    Text(direction)
-                        .font(.caption)
-                        .foregroundColor(direction == "In Tune" ? .green : .secondary)
-                } else {
-                    Text("No pitch detected")
-                        .font(.title2)
-                        .foregroundColor(.secondary)
-                }
-            }
+            // Circular Note Display
+            CircularNoteDisplay(
+                detectedNote: currentPitch.flatMap { noteConverter.frequencyToNote($0) },
+                isListening: isListening
+            )
+            .frame(maxWidth: 350, maxHeight: 350)
             
-            // Pitch Graph
+            // Spectrum Graph (optional - can be toggled)
             VStack(spacing: 8) {
                 Text("Frequency Spectrum")
                     .font(.headline)
                     .foregroundColor(.primary)
                 
                 PitchGraphView(spectrum: currentSpectrum)
+                    .frame(height: 120)
                 
                 FrequencyLabelsView(spectrum: currentSpectrum)
             }
@@ -65,6 +47,7 @@ struct ContentView: View {
                     .padding()
             }
             
+            // Control Button
             Button(action: {
                 if isListening {
                     pitchManager.stop()
@@ -74,14 +57,18 @@ struct ContentView: View {
                     startListening()
                 }
             }) {
-                Text(isListening ? "Stop Listening" : "Start Listening")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(isListening ? Color.red : Color.blue)
-                    .cornerRadius(10)
+                HStack {
+                    Image(systemName: isListening ? "stop.circle.fill" : "mic.circle.fill")
+                        .font(.title2)
+                    Text(isListening ? "Stop Tuning" : "Start Tuning")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(isListening ? Color.red : Color.blue)
+                .cornerRadius(15)
             }
             .padding(.horizontal)
         }
