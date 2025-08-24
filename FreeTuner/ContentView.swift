@@ -16,7 +16,7 @@ struct ContentView: View {
         case both
     }
     let pitchManager = AudioInputManager()
-    let noteConverter = NoteConverter()
+    @StateObject private var noteConverter = NoteConverter()
     @StateObject private var metronome = Metronome()
     
     @State private var isListening = false

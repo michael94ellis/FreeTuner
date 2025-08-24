@@ -16,8 +16,76 @@ struct TunerView: View {
     @Binding var currentPitch: Float?
     @Binding var currentSpectrum: [(frequency: Float, magnitude: Float)]
     
+    @State private var showingTemperamentPicker = false
+    @State private var showingA4FrequencyPicker = false
+    
     var body: some View {
         VStack(spacing: 20) {
+            // Settings Row
+            HStack(spacing: 12) {
+                // Temperament Selector
+                Button(action: {
+                    showingTemperamentPicker = true
+                }) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Temperament")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Text(noteConverter.getTemperament().rawValue)
+                                .font(.title3)
+                                .fontWeight(.medium)
+                                .foregroundColor(.primary)
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.down")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                // A4 Frequency Selector
+                Button(action: {
+                    showingA4FrequencyPicker = true
+                }) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("A4 Reference")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Text("\(Int(noteConverter.getA4Frequency())) Hz")
+                                .font(.title3)
+                                .fontWeight(.medium)
+                                .foregroundColor(.primary)
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.down")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            
             GeometryReader { geo in
                 // Circular Note Display
                 TunerCircleView(
@@ -62,6 +130,12 @@ struct TunerView: View {
         .padding()
         .onAppear {
             setupPitchDetection()
+        }
+        .sheet(isPresented: $showingTemperamentPicker) {
+            TemperamentPickerView(noteConverter: noteConverter)
+        }
+        .sheet(isPresented: $showingA4FrequencyPicker) {
+            A4FrequencyPickerView(noteConverter: noteConverter)
         }
     }
     

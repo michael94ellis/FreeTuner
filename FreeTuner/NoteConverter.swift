@@ -7,39 +7,23 @@
 
 import Foundation
 
-class NoteConverter {
-    // A4 is the reference note (440 Hz)
-    private let a4Frequency: Float = 440.0
-    private let a4MidiNote: Int = 69
+class NoteConverter: ObservableObject {
+    private let temperamentConverter = TemperamentConverter()
+    @Published private var currentTemperament: Temperament = .equal
     
-    // Note names in order
-    private let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+    /// Set the current temperament
+    func setTemperament(_ temperament: Temperament) {
+        currentTemperament = temperament
+    }
     
-    /// Convert frequency to the closest musical note
+    /// Get the current temperament
+    func getTemperament() -> Temperament {
+        return currentTemperament
+    }
+    
+    /// Convert frequency to the closest musical note using current temperament
     func frequencyToNote(_ frequency: Float) -> Note? {
-        guard frequency > 0 else { return nil }
-        
-        // Calculate MIDI note number
-        let midiNote = 12 * log2(frequency / a4Frequency) + Float(a4MidiNote)
-        let roundedMidiNote = round(midiNote)
-        
-        // Calculate cents deviation
-        let cents = Int(round((midiNote - roundedMidiNote) * 100))
-        
-        // Extract note name and octave
-        let noteIndex = Int(roundedMidiNote) % 12
-        let octave = Int(roundedMidiNote) / 12 - 1 // C0 is MIDI note 12
-        
-        guard noteIndex >= 0 && noteIndex < noteNames.count else { return nil }
-        
-        let noteName = noteNames[noteIndex]
-        
-        return Note(
-            name: noteName,
-            octave: octave,
-            frequency: frequency,
-            cents: cents
-        )
+        return temperamentConverter.frequencyToNote(frequency, temperament: currentTemperament)
     }
     
     /// Get a human-readable string representation of the note
@@ -65,13 +49,23 @@ class NoteConverter {
         }
     }
     
-    /// Get the frequency of a specific note
+    /// Get the frequency of a specific note using current temperament
     func noteToFrequency(_ noteName: String, octave: Int) -> Float? {
-        guard let noteIndex = noteNames.firstIndex(of: noteName.uppercased()) else {
-            return nil
-        }
-        
-        let midiNote = noteIndex + (octave + 1) * 12
-        return a4Frequency * pow(2, Float(midiNote - a4MidiNote) / 12)
+        return temperamentConverter.noteToFrequency(noteName, octave: octave, temperament: currentTemperament)
+    }
+    
+    /// Get cents deviation for a note in current temperament compared to equal temperament
+    func getCentsDeviation(_ noteName: String) -> Int {
+        return temperamentConverter.getCentsDeviation(noteName, temperament: currentTemperament)
+    }
+    
+    /// Set the A4 reference frequency
+    func setA4Frequency(_ frequency: Float) {
+        temperamentConverter.setA4Frequency(frequency)
+    }
+    
+    /// Get the current A4 reference frequency
+    func getA4Frequency() -> Float {
+        return temperamentConverter.getA4Frequency()
     }
 }

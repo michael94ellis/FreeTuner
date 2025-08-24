@@ -24,10 +24,33 @@ struct TunerCircleView: View {
             let radius = size * 0.35
             
             ZStack {
-                // Background circle
                 Circle()
-                    .stroke(Color.gray.opacity(0.3), lineWidth: 2)
-                    .frame(width: size * 0.7, height: size * 0.7)
+                    .stroke(
+                        AngularGradient(
+                            gradient: Gradient(colors: [.green, .orange, .red]),
+                            center: .center
+                        ),
+                        lineWidth: 4
+                    )
+                    .frame(width: size * 0.75, height: size * 0.75)
+                    .blur(radius: 1)
+                
+                ForEach(0..<12, id: \.self) { i in
+                    let startAngle = Angle(degrees: Double(i) * 30 - 105)
+                    let endAngle = Angle(degrees: Double(i) * 30 - 75)
+                    
+                    Path { path in
+                        path.addArc(
+                            center: center,
+                            radius: radius * 0.85,
+                            startAngle: startAngle,
+                            endAngle: endAngle,
+                            clockwise: false
+                        )
+                    }
+                    .stroke(Color.gray.opacity(0.15), lineWidth: 20)
+                }
+
                 
                 // Note labels around the circle
                 ForEach(0..<12, id: \.self) { noteIndex in
