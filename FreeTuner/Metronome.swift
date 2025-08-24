@@ -17,11 +17,11 @@ class Metronome: ObservableObject {
     @Published var bpm: Int = 120
     @Published var timeSignature: TimeSignature = .fourFour
     @Published var currentBeat: Int = 0
-//    @Published var accentedBeats: Set<Int> = [0] // Beat 0 (first beat) is accented by default
+    @Published var accentedBeats: Set<Int> = [0] // Beat 0 (first beat) is accented by default
     
     // Audio buffers for click sounds
     private var normalClickBuffer: AVAudioPCMBuffer?
-//    private var accentedClickBuffer: AVAudioPCMBuffer?
+    private var accentedClickBuffer: AVAudioPCMBuffer?
     
     struct TimeSignature {
         let beats: Int
@@ -106,13 +106,13 @@ class Metronome: ObservableObject {
         normalBuffer.frameLength = frameCount
         normalClickBuffer = normalBuffer
         
-//        // Generate accented click
-//        guard let accentedBuffer = AVAudioPCMBuffer(pcmFormat: mainMixerFormat, frameCapacity: frameCount) else {
-//            print("Failed to create accented audio buffer")
-//            return
-//        }
-//        accentedBuffer.frameLength = frameCount
-//        accentedClickBuffer = accentedBuffer
+        // Generate accented click
+        guard let accentedBuffer = AVAudioPCMBuffer(pcmFormat: mainMixerFormat, frameCapacity: frameCount) else {
+            print("Failed to create accented audio buffer")
+            return
+        }
+        accentedBuffer.frameLength = frameCount
+        accentedClickBuffer = accentedBuffer
         
         // Generate normal click sound
         for channel in 0..<Int(channelCount) {
@@ -133,22 +133,22 @@ class Metronome: ObservableObject {
         }
         
         // Generate accented click sound (higher pitch and slightly louder)
-//        for channel in 0..<Int(channelCount) {
-//            guard let channelData = accentedClickBuffer!.floatChannelData?[channel] else { 
-//                print("Failed to access accented channel \(channel)")
-//                continue 
-//            }
-//            
-//            for i in 0..<Int(frameCount) {
-//                let t = Double(i) / sampleRate
-//                let fadeIn = min(1.0, t / 0.01) // 10ms fade in
-//                let fadeOut = min(1.0, (duration - t) / 0.01) // 10ms fade out
-//                let envelope = fadeIn * fadeOut
-//                
-//                let sample = sin(2.0 * .pi * accentedFrequency * t) * envelope * 0.4
-//                channelData[i] = Float(sample)
-//            }
-//        }
+        for channel in 0..<Int(channelCount) {
+            guard let channelData = accentedClickBuffer!.floatChannelData?[channel] else { 
+                print("Failed to access accented channel \(channel)")
+                continue 
+            }
+            
+            for i in 0..<Int(frameCount) {
+                let t = Double(i) / sampleRate
+                let fadeIn = min(1.0, t / 0.01) // 10ms fade in
+                let fadeOut = min(1.0, (duration - t) / 0.01) // 10ms fade out
+                let envelope = fadeIn * fadeOut
+                
+                let sample = sin(2.0 * .pi * accentedFrequency * t) * envelope * 0.4
+                channelData[i] = Float(sample)
+            }
+        }
         
         print("Click sounds generated successfully")
     }
@@ -189,22 +189,23 @@ class Metronome: ObservableObject {
         
         isPlaying = true
         let interval = 60.0 / Double(bpm)
-        var beatCount = 0
+        var beatCount = 1
         
         timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
             guard let self = self else { return }
+            
+            // Reset beat count when we complete a measure
+            if beatCount >= self.timeSignature.beats {
+                beatCount = 0
+            }
             
             beatCount += 1
             
             DispatchQueue.main.async {
                 self.currentBeat = beatCount
             }
-            self.playClick(beatIndex: beatCount) // Convert to 0-based index
+            self.playClick(beatIndex: beatCount - 1) // Convert to 0-based index for accent system
             
-            // Reset beat count when we complete a measure
-            if beatCount >= self.timeSignature.beats {
-                beatCount = 0
-            }
         }
         
         // Play first click immediately
@@ -219,11 +220,10 @@ class Metronome: ObservableObject {
     }
     
     private func playClick(beatIndex: Int) {
-        print(beatIndex)
-//        let isAccented = accentedBeats.contains(beatIndex - 1)
-//        let buffer = isAccented ? accentedClickBuffer : normalClickBuffer
+        let isAccented = accentedBeats.contains(beatIndex)
+        let buffer = isAccented ? accentedClickBuffer : normalClickBuffer
         
-        guard let buffer = normalClickBuffer else {
+        guard let buffer = buffer else {
             print("No click buffer available")
             return 
         }
@@ -239,8 +239,8 @@ class Metronome: ObservableObject {
             }
         }
         
-//        let clickType = isAccented ? "accented" : "normal"
-//        print("Playing \(clickType) click for beat \(beatIndex + 1): format=\(buffer.format), frameLength=\(buffer.frameLength)")
+        let clickType = isAccented ? "accented" : "normal"
+        print("Playing \(clickType) click for beat \(beatIndex): format=\(buffer.format), frameLength=\(buffer.frameLength)")
         clickPlayer.scheduleBuffer(buffer, at: nil, options: [], completionHandler: nil)
         clickPlayer.play()
     }
@@ -256,6 +256,24 @@ class Metronome: ObservableObject {
     
     func setTimeSignature(_ signature: TimeSignature) {
         timeSignature = signature
+        // Stop metronome when time signature changes to prevent confusion
+        if isPlaying {
+            stop()
+        }
+        // Reset accented beats to just the first beat when changing time signature
+        accentedBeats = [0]
+    }
+    
+    func toggleAccent(for beatIndex: Int) {
+        if accentedBeats.contains(beatIndex) {
+            accentedBeats.remove(beatIndex)
+        } else {
+            accentedBeats.insert(beatIndex)
+        }
+    }
+    
+    func isAccented(beatIndex: Int) -> Bool {
+        return accentedBeats.contains(beatIndex)
     }
     
     deinit {

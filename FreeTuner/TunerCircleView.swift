@@ -27,7 +27,7 @@ struct TunerCircleView: View {
                 Circle()
                     .stroke(
                         AngularGradient(
-                            gradient: Gradient(colors: [.green, .orange, .red]),
+                            gradient: Gradient(colors: [.green, .orange, .red, .green, .green]),
                             center: .center
                         ),
                         lineWidth: 4

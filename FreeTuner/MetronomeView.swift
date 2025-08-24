@@ -22,6 +22,7 @@ struct MetronomeView: View {
                     .font(.title2)
                     .fontWeight(.semibold)
                 
+                Spacer()
                 // BPM Display
                 VStack(spacing: 8) {
                     Text("\(metronome.bpm)")
@@ -37,166 +38,149 @@ struct MetronomeView: View {
                 // Beat Indicator
                 VStack(spacing: 4) {
                     if metronome.isPlaying {
-                        Text("Beat \(metronome.currentBeat + 1) of \(metronome.timeSignature.beats)")
+                        Text("Beat \(metronome.currentBeat) of \(metronome.timeSignature.beats)")
                             .font(.caption)
                             .foregroundColor(.secondary)
-                    }                    
-                    
-                    // BPM Slider Section
-                    DisclosureGroup("BPM Control", isExpanded: $isBPMExpanded) {
-                        VStack(spacing: 12) {
-                            // BPM Slider
-                            HStack {
-                                Text("40")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                
-                                Slider(
-                                    value: Binding(
-                                        get: { Double(metronome.bpm) },
-                                        set: { metronome.setBPM(Int($0)) }
-                                    ),
-                                    in: 40...200,
-                                    step: 1
-                                )
-                                .accentColor(.blue)
-                                
-                                Text("200")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .padding(.top, 8)
+                    } else {
+                        Text("Set accent pattern")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
                     
-                    // Time Signature Section
-                    DisclosureGroup("Time Signature", isExpanded: $isTimeSignatureExpanded) {
-                        VStack(spacing: 12) {
-                            Button(action: {
-                                showingTimeSignaturePicker = true
-                            }) {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("\(metronome.timeSignature.beats)/\(metronome.timeSignature.noteValue)")
-                                            .font(.title3)
-                                            .fontWeight(.semibold)
-                                        
-                                        if metronome.timeSignature.name != "\(metronome.timeSignature.beats)/\(metronome.timeSignature.noteValue)" {
-                                            Text(metronome.timeSignature.name)
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                        }
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    Image(systemName: "chevron.down")
-                                        .font(.caption)
+                    Text("Tap circles to toggle accents")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .padding(.bottom, 4)
+                    
+                    HStack(spacing: 4) {
+                        ForEach(0...metronome.timeSignature.beats - 1, id: \.self) { beat in
+                            VStack(spacing: 4) {
+                                Text("\(beat + 1)")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                
+                                Button(action: {
+                                    metronome.toggleAccent(for: beat)
+                                }) {
+                                    Circle()
+                                        .fill(beat == metronome.currentBeat - 1 ? Color.blue :
+                                                metronome.isAccented(beatIndex: beat) ? Color.orange : Color.gray.opacity(0.3))
+                                        .frame(width: 32, height: 32)
+                                        .padding(12)
+                                        .scaleEffect(beat == metronome.currentBeat - 1 ? 1.2 : 1.0)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(Color.primary.opacity(0.2), lineWidth: 1)
+                                        )
+                                        .contentShape(Rectangle())
                                 }
-                                .foregroundColor(.primary)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 12)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                )
+                                .buttonStyle(PlainButtonStyle())
+                                .animation(.easeInOut(duration: 0.1), value: metronome.currentBeat)
+                                .animation(.easeInOut(duration: 0.2), value: metronome.accentedBeats)
                             }
                         }
-                        .padding(.top, 8)
                     }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    
-                    // Play/Stop Button
-                    Button(action: {
-                        if metronome.isPlaying {
-                            metronome.stop()
-                        } else {
-                            metronome.start()
-                        }
-                    }) {
+                }
+                .padding(.vertical, 8)
+                
+                // BPM Slider Section
+                DisclosureGroup("BPM Control", isExpanded: $isBPMExpanded) {
+                    VStack(spacing: 12) {
+                        // BPM Slider
                         HStack {
-                            Image(systemName: metronome.isPlaying ? "stop.circle.fill" : "play.circle.fill")
-                                .font(.title)
-                            Text(metronome.isPlaying ? "Stop" : "Start")
-                                .font(.title3)
-                                .fontWeight(.semibold)
+                            Text("40")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Slider(
+                                value: Binding(
+                                    get: { Double(metronome.bpm) },
+                                    set: { metronome.setBPM(Int($0)) }
+                                ),
+                                in: 40...200,
+                                step: 1
+                            )
+                            .accentColor(.blue)
+                            
+                            Text("200")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                         }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(metronome.isPlaying ? Color.red : Color.green)
-                        .cornerRadius(12)
                     }
-                    .padding(.top, 10)
+                    .padding(.top, 8)
                 }
                 .padding()
-            }
-            .background(Color(.systemBackground))
-            .sheet(isPresented: $showingTimeSignaturePicker) {
-                TimeSignaturePickerView(metronome: metronome)
-            }
-        }
-    }
-}
-
-struct TimeSignaturePickerView: View {
-    @ObservedObject var metronome: Metronome
-    @Environment(\.dismiss) private var dismiss
-    
-    let timeSignatures = Metronome.TimeSignature.allValues
-    
-    var body: some View {
-        NavigationView {
-            List {
-                ForEach(timeSignatures, id: \.name) { signature in
-                    Button(action: {
-                        metronome.setTimeSignature(signature)
-                        dismiss()
-                    }) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("\(signature.beats)/\(signature.noteValue)")
-                                    .font(.title2)
-                                    .fontWeight(.medium)
-                                
-                                if signature.name != "\(signature.beats)/\(signature.noteValue)" {
-                                    Text(signature.name)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+                
+                // Time Signature Section
+                DisclosureGroup("Time Signature", isExpanded: $isTimeSignatureExpanded) {
+                    VStack(spacing: 12) {
+                        Button(action: {
+                            showingTimeSignaturePicker = true
+                        }) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("\(metronome.timeSignature.beats)/\(metronome.timeSignature.noteValue)")
+                                        .font(.title3)
+                                        .fontWeight(.semibold)
+                                    
+                                    if metronome.timeSignature.name != "\(metronome.timeSignature.beats)/\(metronome.timeSignature.noteValue)" {
+                                        Text(metronome.timeSignature.name)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
                                 }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.down")
+                                    .font(.caption)
                             }
-                            
-                            Spacer()
-                            
-                            if metronome.timeSignature.beats == signature.beats &&
-                                metronome.timeSignature.noteValue == signature.noteValue {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.blue)
-                            }
+                            .foregroundColor(.primary)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                            )
                         }
-                        .foregroundColor(.primary)
                     }
+                    .padding(.top, 8)
                 }
-            }
-            .navigationTitle("Time Signature")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+                
+                Spacer()
+                // Play/Stop Button
+                Button(action: {
+                    if metronome.isPlaying {
+                        metronome.stop()
+                    } else {
+                        metronome.start()
                     }
+                }) {
+                    HStack {
+                        Image(systemName: metronome.isPlaying ? "stop.circle.fill" : "play.circle.fill")
+                            .font(.title)
+                        Text(metronome.isPlaying ? "Stop" : "Start")
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(metronome.isPlaying ? Color.red : Color.green)
+                    .cornerRadius(12)
                 }
+                .padding(.top, 10)
             }
+            .padding()
+        }
+        .background(Color(.systemBackground))
+        .sheet(isPresented: $showingTimeSignaturePicker) {
+            TimeSignaturePickerView(metronome: metronome)
         }
     }
-}
-
-#Preview {
-    MetronomeView(metronome: Metronome())
-        .padding()
 }
