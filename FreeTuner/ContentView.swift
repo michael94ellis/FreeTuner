@@ -19,26 +19,14 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            
-            // Circular Note Display
-            CircularNoteDisplay(
-                detectedNote: currentPitch.flatMap { noteConverter.frequencyToNote($0) },
-                isListening: isListening
-            )
-            .frame(maxWidth: 350, maxHeight: 350)
-            
-            // Spectrum Graph (optional - can be toggled)
-            VStack(spacing: 8) {
-                Text("Frequency Spectrum")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
-                PitchGraphView(spectrum: currentSpectrum)
-                    .frame(height: 120)
-                
-                FrequencyLabelsView(spectrum: currentSpectrum)
+            GeometryReader { geo in
+                // Circular Note Display
+                CircularNoteDisplay(
+                    detectedNote: currentPitch.flatMap { noteConverter.frequencyToNote($0) },
+                    isListening: isListening
+                )
+                .frame(maxWidth: geo.size.width, maxHeight: geo.size.height)
             }
-            .padding(.horizontal)
             
             if let error = errorMessage {
                 Text(error)
