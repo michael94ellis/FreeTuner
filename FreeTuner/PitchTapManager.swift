@@ -88,7 +88,6 @@ class PitchTapManager {
 
                 // Handle buffer size mismatch by processing in chunks
                 if frameLength != self.fftSize {
-                    assertionFailure("Buffer size mismatch: expected \(self.fftSize), got \(frameLength)")
                     
                     // Process the buffer in chunks of fftSize
                     let numChunks = frameLength / self.fftSize
