@@ -33,18 +33,12 @@ struct CircularNoteDisplay: View {
                 ForEach(0..<12, id: \.self) { noteIndex in
                     let angle = Double(noteIndex) * 30 - 90 // Start from top (12 o'clock)
                     let noteName = noteNames[noteIndex]
-                    
-                    // Position for each octave of this note
-                    ForEach(octaveRange, id: \.self) { octave in
-                        let octaveRadius = radius + CGFloat(octave - 2) * 25
-                        let x = center.x + cos(angle * .pi / 180) * octaveRadius
-                        let y = center.y + sin(angle * .pi / 180) * octaveRadius
-                        
-                        Text("\(noteName)\(octave)")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(noteColor(for: noteName, octave: octave))
-                            .position(x: x, y: y)
-                    }
+                    let x = center.x + cos(angle * .pi / 180) * (radius * 0.95)
+                    let y = center.y + sin(angle * .pi / 180) * (radius * 0.95)
+                    Text("\(noteName)")
+                        .font(.system(size: 24, weight: .medium))
+                        .foregroundColor(noteColor(for: noteName))
+                        .position(x: x, y: y)
                 }
                 
                 // Center indicator
@@ -78,14 +72,14 @@ struct CircularNoteDisplay: View {
                 // Tuning indicator (needle)
                 if let note = detectedNote {
                     let angle = noteAngle(for: note.name) + 90
-                    let needleLength: CGFloat = (radius + CGFloat((note.octave - 2) * 25))
+                    let needleLength: CGFloat = radius * 0.90
                     
                     Rectangle()
                         .fill(centsColor(note.cents))
                         .frame(width: 3, height: needleLength)
                         .offset(y: -needleLength / 2)
                         .rotationEffect(.degrees(angle))
-                        .animation(.easeInOut(duration: 0.3), value: note.cents)
+                        .animation(.easeInOut(duration: 0.1), value: note.cents)
                 }
                 
                 // Pulse animation when listening
@@ -107,7 +101,7 @@ struct CircularNoteDisplay: View {
         return Double(index) * 30 - 90 // Convert to degrees, starting from top
     }
     
-    private func noteColor(for noteName: String, octave: Int) -> Color {
+    private func noteColor(for noteName: String, octave: Int = 0) -> Color {
         guard let detectedNote = detectedNote else { return .secondary }
         
         if detectedNote.name == noteName && detectedNote.octave == octave {
