@@ -1,5 +1,5 @@
 //
-//  CircularNoteDisplay.swift
+//  TunerCircleView.swift
 //  FreeTuner
 //
 //  Created by Michael Ellis on 8/24/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CircularNoteDisplay: View {
+struct TunerCircleView: View {
     let detectedNote: Note?
     let isListening: Bool
     
@@ -135,13 +135,13 @@ struct CircularNoteDisplay: View {
 
 #Preview {
     VStack {
-        CircularNoteDisplay(
+        TunerCircleView(
             detectedNote: Note(name: "A", octave: 4, frequency: 440.0, cents: 5),
             isListening: true
         )
         .frame(width: 300, height: 300)
         
-        CircularNoteDisplay(
+        TunerCircleView(
             detectedNote: nil,
             isListening: false
         )

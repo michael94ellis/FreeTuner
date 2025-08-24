@@ -1,5 +1,5 @@
 //
-//  PitchTapManager.swift
+//  AudioInputManager.swift
 //  FreeTuner
 //
 //  Created by Michael Ellis on 8/24/25.
@@ -7,18 +7,14 @@
 
 import AVFoundation
 
-class PitchTapManager {
+class AudioInputManager {
     private let engine = AVAudioEngine()
     private var analyzer: PitchAnalyzer?
-    private var fftSize: Int = 2048  // Increased for better frequency resolution
+    private var fftSize: Int = 2048
     private var inputFormat: AVAudioFormat?
     private let queue = DispatchQueue(label: "PitchTapQueue")
 
     var onPitchDetected: ((Float, [(frequency: Float, magnitude: Float)]) -> Void)?
-
-    init() {
-        // fftSize will be set dynamically based on the actual buffer size
-    }
 
     func start() throws {
         // Configure audio session first

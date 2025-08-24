@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     
-    let pitchManager = PitchTapManager()
+    let pitchManager = AudioInputManager()
     let noteConverter = NoteConverter()
     
     @State private var isListening = false
@@ -21,7 +21,7 @@ struct ContentView: View {
         VStack(spacing: 20) {
             GeometryReader { geo in
                 // Circular Note Display
-                CircularNoteDisplay(
+                TunerCircleView(
                     detectedNote: currentPitch.flatMap { noteConverter.frequencyToNote($0) },
                     isListening: isListening
                 )

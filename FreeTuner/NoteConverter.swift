@@ -7,13 +7,6 @@
 
 import Foundation
 
-struct Note {
-    let name: String
-    let octave: Int
-    let frequency: Float
-    let cents: Int // Cents deviation from perfect pitch
-}
-
 class NoteConverter {
     // A4 is the reference note (440 Hz)
     private let a4Frequency: Float = 440.0
