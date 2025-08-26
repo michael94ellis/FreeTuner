@@ -12,6 +12,7 @@ struct FreeTunerApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .preferredColorScheme(.light) // You can change this to .dark or nil for auto
         }
     }
 }

@@ -8,13 +8,6 @@
 import SwiftUI
 
 struct ContentView: View {
-    
-    
-    enum ViewState {
-        case tuner
-        case metronome
-        case both
-    }
     let pitchManager = AudioInputManager()
     @StateObject private var noteConverter = NoteConverter()
     @StateObject private var metronome = Metronome()
@@ -23,12 +16,21 @@ struct ContentView: View {
     @State private var errorMessage: String?
     @State private var currentPitch: Float?
     @State private var currentSpectrum: [(frequency: Float, magnitude: Float)] = []
-    @State private var viewState: ViewState = .tuner
-
+    
     var body: some View {
-        GeometryReader { geo in
+        ZStack {
+            // Background gradient
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(.systemBackground),
+                    Color(.systemGray6).opacity(0.3)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
             
-            let tunerView: some View =
+            TabView {
                 TunerView(
                     pitchManager: pitchManager,
                     noteConverter: noteConverter,
@@ -37,57 +39,29 @@ struct ContentView: View {
                     currentPitch: $currentPitch,
                     currentSpectrum: $currentSpectrum
                 )
-                .id("tuner")
-                .frame(width: geo.size.width, height: geo.size.height)
-            
-            // Tuner Tab
-            VStack {
-                
-                Picker("Mode", selection: $viewState, content: {
-                    Label(title: {
-                        Text("Tuner")
-                    }, icon: {
-                        Image(systemName: "tuningfork")
-                    })
-                    .tag(ViewState.tuner)
-                    Label(title: {
-                        Text("Metronome")
-                    }, icon: {
-                        Image(systemName: "timer")
-                    })
-                    .tag(ViewState.metronome)
-                    Label(title: {
-                        Text("Both")
-                    }, icon: {
-                        Image(systemName: "music.note.list")
-                    })
-                    .tag(ViewState.both)
-                })
-                .pickerStyle(.segmented)
-                
-                switch viewState {
-                case .tuner:
-                    tunerView
-                case .metronome:
-                    MetronomeView(metronome: metronome)
-                        .id("metronome")
-                case .both:
-                    ViewThatFits {
-                        HStack {
-                            tunerView
-                            MetronomeView(metronome: metronome)
-                                .id("metronome")
-                        }
-                        ScrollView {
-                            VStack {
-                                tunerView
-                                MetronomeView(metronome: metronome)
-                                    .id("metronome")
-                            }
-                        }
-                    }
+                .tabItem {
+                    Image(systemName: "tuningfork")
+                    Text("Tuner")
                 }
+                .tag(0)
+                
+                // Metronome Tab
+                MetronomeView(metronome: metronome)
+                    .tabItem {
+                        Image(systemName: "timer")
+                        Text("Metronome")
+                    }
+                    .tag(1)
+                
+                // Tuning fork can play different notes in different octaves
+//                TuningForkView()
+//                .tabItem {
+//                    Image(systemName: "music.note.list")
+//                    Text("Notes")
+//                }
+//                .tag(2)
             }
+            .accentColor(.blue)
         }
     }
 }
