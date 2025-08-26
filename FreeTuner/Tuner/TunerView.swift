@@ -45,8 +45,10 @@ struct TunerView: View {
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.secondary)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 80)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color(.systemBackground))
@@ -81,8 +83,10 @@ struct TunerView: View {
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.secondary)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 80)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color(.systemBackground))

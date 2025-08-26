@@ -46,8 +46,6 @@ struct MetronomeView: View {
                 .foregroundColor(.primary)
                 .padding(.top, 10)
             
-            Spacer()
-            
             // BPM Display with enhanced styling
             VStack(spacing: 12) {
                 Text("\(Int(metronome.bpm))")
@@ -83,7 +81,6 @@ struct MetronomeView: View {
                     }
                 }
             }
-            .padding(.vertical, 20)
             
             // Beat Indicator with modern design
             VStack(spacing: 16) {
@@ -294,8 +291,6 @@ struct MetronomeView: View {
                 )
             }
             .padding(.horizontal, 20)
-            
-            Spacer()
             
             // Enhanced Play/Stop Button
             Button(action: {
