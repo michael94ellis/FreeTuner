@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TunerCircleView: View {
     let detectedNote: Note?
-    let isListening: Bool
+    @Binding var isListening: Bool
     
     // Note names in order (like a clock face)
     private let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
@@ -97,7 +97,7 @@ struct TunerCircleView: View {
                         .animation(.easeInOut(duration: 0.2), value: detectedNote?.name)
                 }
                 
-                // Center indicator with enhanced styling
+                // Center indicator
                 VStack(spacing: 8) {
                     if let note = detectedNote {
                         Text(note.name)
@@ -142,20 +142,22 @@ struct TunerCircleView: View {
                                     .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
                             )
                     } else {
-                        Text("?")
-                            .font(.system(size: 56, weight: .bold, design: .rounded))
-                            .foregroundColor(.secondary)
-                            .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-                        
-                        Text("No Note Detected")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.systemGray6).opacity(0.5))
-                            )
+                        VStack(spacing: 8) {
+                            Text("?")
+                                .font(.system(size: 56, weight: .bold, design: .rounded))
+                                .foregroundColor(.secondary)
+                                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                            
+                            Text("No Note Detected")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(.systemGray6).opacity(0.5))
+                                )
+                        }
                     }
                 }
                 
@@ -220,7 +222,6 @@ struct TunerCircleView: View {
                 }
             }
         }
-//        .aspectRatio(1, contentMode: .fit)
     }
     
     private func noteAngle(for noteName: String) -> Double {
@@ -264,13 +265,13 @@ struct TunerCircleView: View {
     VStack {
         TunerCircleView(
             detectedNote: Note(name: "A", octave: 4, frequency: 440.0, cents: 5),
-            isListening: true
+            isListening: .constant(true)
         )
         .frame(width: 300, height: 300)
         
         TunerCircleView(
             detectedNote: nil,
-            isListening: false
+            isListening: .constant(false)
         )
         .frame(width: 300, height: 300)
     }

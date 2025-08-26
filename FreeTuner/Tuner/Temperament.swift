@@ -91,7 +91,11 @@ enum Temperament: String, CaseIterable {
 }
 
 class TemperamentConverter: ObservableObject {
-    @Published var a4Frequency: Float = 440.0
+    @Published var a4Frequency: Float = 440.0 {
+        didSet {
+            objectWillChange.send()
+        }
+    }
     private let a4MidiNote: Int = 69
     
     // Note names in order

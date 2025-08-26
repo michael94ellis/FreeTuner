@@ -18,6 +18,7 @@ struct TunerView: View {
     
     @State private var showingTemperamentPicker = false
     @State private var showingA4FrequencyPicker = false
+    @State var pitchDetectionTask: Task<Void, Never>?
     
     var body: some View {
         VStack(spacing: 24) {
@@ -97,10 +98,28 @@ struct TunerView: View {
             }
             .padding(.horizontal, 20)
             
-            TunerCircleView(
-                detectedNote: currentPitch.flatMap { noteConverter.frequencyToNote($0) },
-                isListening: isListening
-            )
+            // Add tap hint when not listening
+            Text(isListening ? "Listening…" : "🎙 Tap anywhere to start")
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundColor(isListening ? .white : .blue)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule()
+                        .fill(isListening ? Color.blue : Color.blue.opacity(0.1))
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.blue.opacity(isListening ? 0.5 : 0.3), lineWidth: 1)
+                        )
+                )
+                .animation(.easeInOut(duration: 0.2), value: isListening)
+                .accessibilityLabel(isListening ? "Voice recognition active" : "Tap to start listening")
+
+            
+            TunerCircleView(detectedNote: currentPitch.flatMap {
+                noteConverter.frequencyToNote($0)
+            },
+                            isListening: $isListening)
             .padding(.horizontal, 20)
             
             // Error message with better styling
@@ -128,51 +147,22 @@ struct TunerView: View {
                 .padding(.horizontal, 20)
             }
             
-            // Enhanced Control Button
-            Button(action: {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    if isListening {
-                        pitchManager.stop()
-                        isListening = false
-                        currentSpectrum = []
-                    } else {
-                        startListening()
-                    }
-                }
-            }) {
-                HStack(spacing: 12) {
-                    Image(systemName: isListening ? "stop.circle.fill" : "mic.circle.fill")
-                        .font(.system(size: 24, weight: .medium))
-                    
-                    Text(isListening ? "Stop Tuning" : "Start Tuning")
-                        .font(.system(size: 18, weight: .semibold))
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 18)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: isListening ?
-                                                   [Color.red, Color.red.opacity(0.8)] :
-                                                    [Color.blue, Color.purple]
-                                                  ),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .shadow(color: isListening ? .red.opacity(0.3) : .blue.opacity(0.3), radius: 8, x: 0, y: 4)
-                )
-                .scaleEffect(isListening ? 0.98 : 1.0)
-                .animation(.easeInOut(duration: 0.1), value: isListening)
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+
             Spacer()
         }
-        .onAppear {
-            setupPitchDetection()
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                if isListening {
+                    pitchManager.stop()
+                    isListening = false
+                    currentSpectrum = []
+                    pitchDetectionTask?.cancel()
+                    pitchDetectionTask = nil
+                } else {
+                    startListening()
+                }
+            }
         }
         .sheet(isPresented: $showingTemperamentPicker) {
             TemperamentPickerView(noteConverter: noteConverter)
@@ -183,10 +173,14 @@ struct TunerView: View {
     }
     
     private func setupPitchDetection() {
-        pitchManager.onPitchDetected = { pitch, spectrum in
-            DispatchQueue.main.async {
-                self.currentPitch = pitch > 0 ? pitch : nil
-                self.currentSpectrum = spectrum
+        pitchDetectionTask = Task {
+            guard let pitchStream = pitchManager.stream else { return }
+            
+            for await (pitch, spectrum) in pitchStream {
+                await MainActor.run {
+                    self.currentPitch = pitch > 0 ? pitch : nil
+                    self.currentSpectrum = spectrum
+                }
             }
         }
     }
@@ -195,7 +189,7 @@ struct TunerView: View {
         errorMessage = nil
         currentPitch = nil
         currentSpectrum = []
-        
+        setupPitchDetection()
         do {
             try pitchManager.start()
             isListening = true

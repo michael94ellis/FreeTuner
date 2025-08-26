@@ -62,6 +62,7 @@ class NoteConverter: ObservableObject {
     /// Set the A4 reference frequency
     func setA4Frequency(_ frequency: Float) {
         temperamentConverter.setA4Frequency(frequency)
+        objectWillChange.send()
     }
     
     /// Get the current A4 reference frequency

@@ -14,7 +14,12 @@ class AudioInputManager {
     private var inputFormat: AVAudioFormat?
     private let queue = DispatchQueue(label: "PitchTapQueue")
 
-    var onPitchDetected: ((Float, [(frequency: Float, magnitude: Float)]) -> Void)?
+    private var pitchStream: AsyncStream<(Float, [(frequency: Float, magnitude: Float)])>?
+    private var pitchContinuation: AsyncStream<(Float, [(frequency: Float, magnitude: Float)])>.Continuation?
+    
+    var stream: AsyncStream<(Float, [(frequency: Float, magnitude: Float)])>? {
+        return pitchStream
+    }
 
     func start() throws {
         // Configure audio session first
@@ -41,6 +46,9 @@ class AudioInputManager {
     func stop() {
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
+        pitchContinuation?.finish()
+        pitchContinuation = nil
+        pitchStream = nil
     }
     
     private func configureAudioSession() throws {
@@ -69,6 +77,10 @@ class AudioInputManager {
         
         // Request a buffer size that matches our FFT size for consistency
         let requestedBufferSize = AVAudioFrameCount(fftSize)
+        
+        pitchStream = AsyncStream<(Float, [(frequency: Float, magnitude: Float)])> { continuation in
+            self.pitchContinuation = continuation
+        }
         
         engine.inputNode.installTap(onBus: 0,
                                     bufferSize: requestedBufferSize,
@@ -105,13 +117,13 @@ class AudioInputManager {
                         let result = analyzer.analyze(buffer: chunkSamples)
                         // Call the callback with the first chunk that has a valid pitch
                         if let pitch = result.dominantFrequency {
-                            self.onPitchDetected?(pitch, result.spectrum)
+                            self.pitchContinuation?.yield((pitch, result.spectrum))
                             return // Use the first valid pitch found
                         }
                     }
                     
                     // If no valid pitch found in any chunk, call with 0
-                    self.onPitchDetected?(0, [])
+                    self.pitchContinuation?.yield((0, []))
                     return
                 }
 
@@ -127,10 +139,10 @@ class AudioInputManager {
                 
                 // Always call the callback with spectrum data, even if no dominant pitch
                 if let pitch = result.dominantFrequency {
-                    self.onPitchDetected?(pitch, result.spectrum)
+                    self.pitchContinuation?.yield((pitch, result.spectrum))
                 } else {
                     // Call with 0 pitch but still provide spectrum for visualization
-                    self.onPitchDetected?(0, result.spectrum)
+                    self.pitchContinuation?.yield((0, result.spectrum))
                 }
             }
         }
