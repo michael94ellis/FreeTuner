@@ -126,31 +126,7 @@ struct TunerView: View {
                             isListening: $isListening)
             .padding(.horizontal, 20)
             
-            // Error message with better styling
-            if let error = errorMessage {
-                HStack {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
-                        .font(.system(size: 16, weight: .medium))
-                    
-                    Text(error)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.primary)
-                        .multilineTextAlignment(.leading)
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.orange.opacity(0.1))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
-                        )
-                )
-                .padding(.horizontal, 20)
-            }
-            
+            errorMessageView
 
             Spacer()
         }
@@ -173,6 +149,33 @@ struct TunerView: View {
         }
         .sheet(isPresented: $showingA4FrequencyPicker) {
             A4FrequencyPickerView(noteConverter: noteConverter)
+        }
+    }
+    
+    @ViewBuilder
+    var errorMessageView: some View {
+        // Error message with better styling
+        if let error = errorMessage {
+            HStack {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+                    .font(.system(size: 16, weight: .medium))
+                
+                Text(error)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.orange.opacity(0.1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                    )
+            )
         }
     }
     
