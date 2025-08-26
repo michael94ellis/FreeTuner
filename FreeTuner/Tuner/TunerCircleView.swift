@@ -163,7 +163,9 @@ struct TunerCircleView: View {
                 
                 // Enhanced tuning indicator (needle)
                 if let note = detectedNote {
-                    let angle = noteAngle(for: note.name) + 90
+                    let baseAngle = noteAngle(for: note.name)
+                    let centsOffset = Double(note.cents) * 0.6 // 0.6 degrees per cent for fine tuning
+                    let angle = baseAngle + centsOffset + 90
                     let needleLength: CGFloat = radius * 0.90
                     
                     Rectangle()
