@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct A4FrequencyPickerView: View {
-    @ObservedObject var noteConverter: NoteConverter
+    @Bindable var noteConverter: NoteConverter
     @Environment(\.dismiss) private var dismiss
     @State private var selectedA4Frequency: Float
     
@@ -52,13 +52,13 @@ struct A4FrequencyPickerView: View {
                             Text("\(Int(selectedA4Frequency)) Hz")
                                 .font(.system(size: 48, weight: .bold, design: .rounded))
                                 .foregroundColor(.primary)
-                                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
                         }
                         .padding(24)
                         .background(
                             RoundedRectangle(cornerRadius: 16)
                                 .fill(Color(.systemBackground))
-                                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+                                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
@@ -180,7 +180,7 @@ struct A4FrequencyPickerView: View {
                         .background(
                             RoundedRectangle(cornerRadius: 16)
                                 .fill(Color(.systemBackground))
-                                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+                                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
@@ -217,5 +217,13 @@ struct A4FrequencyPickerView: View {
 }
 
 #Preview {
-    A4FrequencyPickerView(noteConverter: NoteConverter())
+    Group {
+        A4FrequencyPickerView(noteConverter: NoteConverter())
+            .preferredColorScheme(.light)
+            .previewDisplayName("Light Mode")
+        
+        A4FrequencyPickerView(noteConverter: NoteConverter())
+            .preferredColorScheme(.dark)
+            .previewDisplayName("Dark Mode")
+    }
 }

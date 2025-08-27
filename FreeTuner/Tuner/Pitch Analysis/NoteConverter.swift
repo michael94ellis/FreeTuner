@@ -7,21 +7,12 @@
 
 import Foundation
 
-class NoteConverter: ObservableObject {
+@Observable
+class NoteConverter {
+    @ObservationIgnored
     private let temperamentConverter = TemperamentConverter()
-    @Published private var currentTemperament: Temperament = .equal
-    @Published private var currentKey: String = "C" // For just intonation
-    
-    /// Set the current musical key (important for just intonation)
-    func setKey(_ key: String) {
-        currentKey = key
-        objectWillChange.send()
-    }
-    
-    /// Get the current musical key
-    func getKey() -> String {
-        return currentKey
-    }
+    var currentTemperament: Temperament = .equal
+    var currentKey: String = "C" // For just intonation
     
     /// Convert frequency to the closest musical note using current temperament
     func frequencyToNote(_ frequency: Float) -> Note? {
@@ -64,11 +55,10 @@ class NoteConverter: ObservableObject {
     /// Set the A4 reference frequency
     func setA4Frequency(_ frequency: Float) {
         temperamentConverter.setA4Frequency(frequency)
-        objectWillChange.send()
     }
     
     /// Get the current A4 reference frequency
     func getA4Frequency() -> Float {
-        return temperamentConverter.getA4Frequency()
+        return temperamentConverter.a4Frequency
     }
 }

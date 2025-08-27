@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct TemperamentPickerView: View {
-    @ObservedObject var noteConverter: NoteConverter
+    @Bindable var noteConverter: NoteConverter
     @Environment(\.dismiss) private var dismiss
     @State private var selectedTemperament: Temperament
     private let temperamentConverter = TemperamentConverter()
     
     init(noteConverter: NoteConverter) {
         self.noteConverter = noteConverter
-        self._selectedTemperament = State(initialValue: noteConverter.getTemperament())
+        self._selectedTemperament = State(initialValue: noteConverter.currentTemperament)
     }
     
     var body: some View {
@@ -105,7 +105,7 @@ struct TemperamentPickerView: View {
                                 .background(
                                     RoundedRectangle(cornerRadius: 16)
                                         .fill(Color(.systemBackground))
-                                        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+                                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
                                 )
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 16)
@@ -137,7 +137,7 @@ struct TemperamentPickerView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Apply") {
                         withAnimation(.easeInOut(duration: 0.2)) {
-                            noteConverter.setTemperament(selectedTemperament)
+                            noteConverter.currentTemperament = selectedTemperament
                             dismiss()
                         }
                     }
@@ -150,5 +150,11 @@ struct TemperamentPickerView: View {
 }
 
 #Preview {
-    TemperamentPickerView(noteConverter: NoteConverter())
+    Group {
+        TemperamentPickerView(noteConverter: NoteConverter())
+            .preferredColorScheme(.light)
+        
+        TemperamentPickerView(noteConverter: NoteConverter())
+            .preferredColorScheme(.dark)
+    }
 }

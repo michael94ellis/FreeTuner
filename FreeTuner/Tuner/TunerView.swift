@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TunerView: View {
     let pitchManager: AudioInputManager
-    @ObservedObject var  noteConverter: NoteConverter
+    @State var noteConverter: NoteConverter
     
     @Binding var isListening: Bool
     @Binding var errorMessage: String?
@@ -22,85 +22,8 @@ struct TunerView: View {
     
     var body: some View {
         VStack(spacing: 24) {
-            // Settings Row with modern card design
-            HStack(spacing: 16) {
-                // Temperament Selector
-                Button(action: {
-                    showingTemperamentPicker = true
-                }) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Temperament")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.secondary)
-                            
-                            Text(noteConverter.getTemperament().rawValue)
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.primary)
-                        }
-                        
-                        Spacer()
-                        
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 80)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemBackground))
-                            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                    )
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(PlainButtonStyle())
-                
-                // A4 Frequency Selector
-                Button(action: {
-                    showingA4FrequencyPicker = true
-                }) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("A4 Reference")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.secondary)
-                            
-                            Text("\(Int(noteConverter.getA4Frequency())) Hz")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.primary)
-                        }
-                        
-                        Spacer()
-                        
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 80)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemBackground))
-                            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                    )
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-            .padding(.horizontal, 20)
+            
+            headerButtons
             
             // Add tap hint when not listening
             Text(isListening ? "Listening…" : "🎙 Tap anywhere to start")
@@ -150,6 +73,88 @@ struct TunerView: View {
         .sheet(isPresented: $showingA4FrequencyPicker) {
             A4FrequencyPickerView(noteConverter: noteConverter)
         }
+    }
+    
+    var headerButtons: some View {
+        // Settings Row with modern card design
+        HStack(spacing: 16) {
+            // Temperament Selector
+            Button(action: {
+                showingTemperamentPicker = true
+            }) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Temperament")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.secondary)
+                        
+                        Text(noteConverter.currentTemperament.rawValue)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.primary)
+                    }
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity)
+                .frame(height: 80)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.systemBackground))
+                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                )
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            // A4 Frequency Selector
+            Button(action: {
+                showingA4FrequencyPicker = true
+            }) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("A4 Reference")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.secondary)
+                        
+                        Text("\(Int(noteConverter.getA4Frequency())) Hz")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.primary)
+                    }
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity)
+                .frame(height: 80)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.systemBackground))
+                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                )
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
+        .padding(.horizontal, 20)
     }
     
     @ViewBuilder
@@ -208,12 +213,27 @@ struct TunerView: View {
 }
 
 #Preview {
-    TunerView(
-        pitchManager: AudioInputManager(),
-        noteConverter: NoteConverter(),
-        isListening: .constant(false),
-        errorMessage: .constant(nil),
-        currentPitch: .constant(nil),
-        currentSpectrum: .constant([])
-    )
+    Group {
+        TunerView(
+            pitchManager: AudioInputManager(),
+            noteConverter: NoteConverter(),
+            isListening: .constant(false),
+            errorMessage: .constant(nil),
+            currentPitch: .constant(nil),
+            currentSpectrum: .constant([])
+        )
+        .preferredColorScheme(.light)
+        .previewDisplayName("Light Mode")
+        
+        TunerView(
+            pitchManager: AudioInputManager(),
+            noteConverter: NoteConverter(),
+            isListening: .constant(true),
+            errorMessage: .constant("Test error message"),
+            currentPitch: .constant(440.0),
+            currentSpectrum: .constant([])
+        )
+        .preferredColorScheme(.dark)
+        .previewDisplayName("Dark Mode")
+    }
 }

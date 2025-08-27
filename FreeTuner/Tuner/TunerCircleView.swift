@@ -21,8 +21,6 @@ struct TunerCircleView: View {
             let radius = size * 0.4
             
             ZStack {
-                // Modern background with subtle gradient
-                backgroundLayer(size: size)
                 
                 // Main tuning ring
                 tuningRing(size: size, center: center, radius: radius)
@@ -42,40 +40,10 @@ struct TunerCircleView: View {
         }
     }
     
-    // MARK: - Background Layer
-    @ViewBuilder
-    private func backgroundLayer(size: CGFloat) -> some View {
-        // Subtle radial gradient background
-        RadialGradient(
-            gradient: Gradient(colors: [
-                Color(.systemBackground),
-                Color(.systemGray6).opacity(0.3)
-            ]),
-            center: .center,
-            startRadius: 0,
-            endRadius: size * 0.5
-        )
-        .ignoresSafeArea()
-    }
-    
     // MARK: - Tuning Ring
     @ViewBuilder
     private func tuningRing(size: CGFloat, center: CGPoint, radius: CGFloat) -> some View {
         ZStack {
-            // Outer ring with tuning accuracy gradient
-            Circle()
-                .stroke(
-                    AngularGradient(
-                        gradient: Gradient(colors: [
-                            .green, .green.opacity(0.8), .orange, .red, .red.opacity(0.8), .orange, .green, .green
-                        ]),
-                        center: .center
-                    ),
-                    lineWidth: 8
-                )
-                .frame(width: size * 0.8, height: size * 0.8)
-                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-            
             // Inner ring for visual depth
             Circle()
                 .stroke(
@@ -105,7 +73,7 @@ struct TunerCircleView: View {
                     )
                 )
                 .frame(width: size * 0.5, height: size * 0.5)
-                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 8, x: 0, y: 4)
         }
     }
     
@@ -118,7 +86,7 @@ struct TunerCircleView: View {
             let x = center.x + cos(angle * .pi / 180) * (radius * 0.9)
             let y = center.y + sin(angle * .pi / 180) * (radius * 0.9)
             
-            VStack(spacing: 6) {
+            ZStack {
                 // Prominent note marker dot
                 Circle()
                     .fill(noteColor(for: noteName))
@@ -136,7 +104,7 @@ struct TunerCircleView: View {
                     .background(
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color(.systemBackground).opacity(0.9))
-                            .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                            .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
                     )
                     .scaleEffect(noteColor(for: noteName) != .secondary.opacity(0.4) ? 1.1 : 1.0)
                     .animation(.easeInOut(duration: 0.3), value: detectedNote?.name)
@@ -155,7 +123,7 @@ struct TunerCircleView: View {
                     Text(note.name)
                         .font(.system(size: 72, weight: .bold, design: .rounded))
                         .foregroundColor(.primary)
-                        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
                     
                     // Tuning accuracy indicator
                     HStack(spacing: 12) {
@@ -195,7 +163,7 @@ struct TunerCircleView: View {
                         .background(
                             Capsule()
                                 .fill(Color(.systemBackground))
-                                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 2, x: 0, y: 1)
                         )
                 }
             } else {
@@ -305,18 +273,39 @@ struct TunerCircleView: View {
 }
 
 #Preview {
-    VStack(spacing: 20) {
-        TunerCircleView(
-            detectedNote: Note(name: "A", octave: 4, frequency: 440.0, cents: 5),
-            isListening: .constant(true)
-        )
-        .frame(width: 300, height: 300)
+    Group {
+        VStack(spacing: 20) {
+            TunerCircleView(
+                detectedNote: Note(name: "A", octave: 4, frequency: 440.0, cents: 5),
+                isListening: .constant(true)
+            )
+            .frame(width: 300, height: 300)
+            
+            TunerCircleView(
+                detectedNote: nil,
+                isListening: .constant(false)
+            )
+            .frame(width: 300, height: 300)
+        }
+        .padding()
+        .preferredColorScheme(.light)
+        .previewDisplayName("Light Mode")
         
-        TunerCircleView(
-            detectedNote: nil,
-            isListening: .constant(false)
-        )
-        .frame(width: 300, height: 300)
+        VStack(spacing: 20) {
+            TunerCircleView(
+                detectedNote: Note(name: "A", octave: 4, frequency: 440.0, cents: 5),
+                isListening: .constant(true)
+            )
+            .frame(width: 300, height: 300)
+            
+            TunerCircleView(
+                detectedNote: nil,
+                isListening: .constant(false)
+            )
+            .frame(width: 300, height: 300)
+        }
+        .padding()
+        .preferredColorScheme(.dark)
+        .previewDisplayName("Dark Mode")
     }
-    .padding()
 }

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     let pitchManager = AudioInputManager()
-    @StateObject private var noteConverter = NoteConverter()
+    @State private var noteConverter = NoteConverter()
     
     @State private var isListening = false
     @State private var errorMessage: String?
@@ -42,5 +42,13 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    Group {
+        ContentView()
+            .preferredColorScheme(.light)
+            .previewDisplayName("Light Mode")
+        
+        ContentView()
+            .preferredColorScheme(.dark)
+            .previewDisplayName("Dark Mode")
+    }
 }
