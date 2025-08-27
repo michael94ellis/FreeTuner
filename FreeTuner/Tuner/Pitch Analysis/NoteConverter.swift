@@ -10,15 +10,17 @@ import Foundation
 class NoteConverter: ObservableObject {
     private let temperamentConverter = TemperamentConverter()
     @Published private var currentTemperament: Temperament = .equal
+    @Published private var currentKey: String = "C" // For just intonation
     
-    /// Set the current temperament
-    func setTemperament(_ temperament: Temperament) {
-        currentTemperament = temperament
+    /// Set the current musical key (important for just intonation)
+    func setKey(_ key: String) {
+        currentKey = key
+        objectWillChange.send()
     }
     
-    /// Get the current temperament
-    func getTemperament() -> Temperament {
-        return currentTemperament
+    /// Get the current musical key
+    func getKey() -> String {
+        return currentKey
     }
     
     /// Convert frequency to the closest musical note using current temperament

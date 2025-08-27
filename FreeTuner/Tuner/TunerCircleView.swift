@@ -14,230 +14,271 @@ struct TunerCircleView: View {
     // Note names in order (like a clock face)
     private let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
     
-    // Octave range to display (typically guitar uses octaves 2-6)
-    private let octaveRange = 2...6
-    
     var body: some View {
         GeometryReader { geometry in
             let size = min(geometry.size.width, geometry.size.height)
             let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
-            let radius = size * 0.35
+            let radius = size * 0.4
             
             ZStack {
-                // Background circle with gradient
+                // Modern background with subtle gradient
+                backgroundLayer(size: size)
+                
+                // Main tuning ring
+                tuningRing(size: size, center: center, radius: radius)
+                
+                // Note markers around the ring
+                noteMarkers(size: size, center: center, radius: radius)
+                
+                // Center display
+                centerDisplay(size: size)
+                
+                // Tuning indicator
+                tuningIndicator(size: size, center: center, radius: radius)
+                
+                // Listening animation
+                listeningAnimation(size: size)
+            }
+        }
+    }
+    
+    // MARK: - Background Layer
+    @ViewBuilder
+    private func backgroundLayer(size: CGFloat) -> some View {
+        // Subtle radial gradient background
+        RadialGradient(
+            gradient: Gradient(colors: [
+                Color(.systemBackground),
+                Color(.systemGray6).opacity(0.3)
+            ]),
+            center: .center,
+            startRadius: 0,
+            endRadius: size * 0.5
+        )
+        .ignoresSafeArea()
+    }
+    
+    // MARK: - Tuning Ring
+    @ViewBuilder
+    private func tuningRing(size: CGFloat, center: CGPoint, radius: CGFloat) -> some View {
+        ZStack {
+            // Outer ring with tuning accuracy gradient
+            Circle()
+                .stroke(
+                    AngularGradient(
+                        gradient: Gradient(colors: [
+                            .green, .green.opacity(0.8), .orange, .red, .red.opacity(0.8), .orange, .green, .green
+                        ]),
+                        center: .center
+                    ),
+                    lineWidth: 8
+                )
+                .frame(width: size * 0.8, height: size * 0.8)
+                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+            
+            // Inner ring for visual depth
+            Circle()
+                .stroke(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color(.systemGray5),
+                            Color(.systemGray6)
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 2
+                )
+                .frame(width: size * 0.7, height: size * 0.7)
+            
+            // Center circle for note display
+            Circle()
+                .fill(
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            Color(.systemBackground),
+                            Color(.systemGray6).opacity(0.5)
+                        ]),
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: size * 0.25
+                    )
+                )
+                .frame(width: size * 0.5, height: size * 0.5)
+                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+        }
+    }
+    
+    // MARK: - Note Markers
+    @ViewBuilder
+    private func noteMarkers(size: CGFloat, center: CGPoint, radius: CGFloat) -> some View {
+        ForEach(0..<12, id: \.self) { noteIndex in
+            let angle = Double(noteIndex) * 30 - 90 // Start from top
+            let noteName = noteNames[noteIndex]
+            let x = center.x + cos(angle * .pi / 180) * (radius * 0.9)
+            let y = center.y + sin(angle * .pi / 180) * (radius * 0.9)
+            
+            VStack(spacing: 6) {
+                // Prominent note marker dot
                 Circle()
-                    .fill(
-                        RadialGradient(
-                            gradient: Gradient(colors: [
-                                Color(.systemBackground),
-                                Color(.systemGray6).opacity(0.3)
-                            ]),
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: size * 0.4
-                        )
-                    )
-                    .frame(width: size * 0.8, height: size * 0.8)
-                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+                    .fill(noteColor(for: noteName))
+                    .frame(width: 16, height: 16)
+                    .scaleEffect(noteColor(for: noteName) != .secondary.opacity(0.4) ? 1.3 : 1.0)
+                    .shadow(color: noteColor(for: noteName).opacity(0.5), radius: 3, x: 0, y: 1)
+                    .animation(.easeInOut(duration: 0.3), value: detectedNote?.name)
                 
-                // Outer ring with tuning gradient
-                Circle()
-                    .stroke(
-                        AngularGradient(
-                            gradient: Gradient(colors: [
-                                .green, .green.opacity(0.8), .orange, .red, .red.opacity(0.8), .orange, .green, .green
-                            ]),
-                            center: .center
-                        ),
-                        lineWidth: 6
-                    )
-                    .frame(width: size * 0.75, height: size * 0.75)
-                    .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
-                
-                // Beat segments with enhanced styling
-                ForEach(0..<12, id: \.self) { i in
-                    let startAngle = Angle(degrees: Double(i) * 30 - 105)
-                    let endAngle = Angle(degrees: Double(i) * 30 - 75)
-                    
-                    Path { path in
-                        path.addArc(
-                            center: center,
-                            radius: radius * 0.85,
-                            startAngle: startAngle,
-                            endAngle: endAngle,
-                            clockwise: false
-                        )
-                    }
-                    .stroke(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color.gray.opacity(0.1),
-                                Color.gray.opacity(0.05)
-                            ]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 24
-                    )
-                }
-                
-                // Note labels around the circle with enhanced styling
-                ForEach(0..<12, id: \.self) { noteIndex in
-                    let angle = Double(noteIndex) * 30 - 90 // Start from top (12 o'clock)
-                    let noteName = noteNames[noteIndex]
-                    let x = center.x + cos(angle * .pi / 180) * (radius * 0.95)
-                    let y = center.y + sin(angle * .pi / 180) * (radius * 0.95)
-                    
-                    Text("\(noteName)")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(noteColor(for: noteName))
-                        .shadow(color: .black.opacity(0.1), radius: 1, x: 0, y: 1)
-                        .position(x: x, y: y)
-                        .scaleEffect(noteColor(for: noteName) != .secondary.opacity(0.6) ? 1.1 : 1.0)
-                        .animation(.easeInOut(duration: 0.2), value: detectedNote?.name)
-                }
-                
-                // Center indicator
-                VStack(spacing: 8) {
-                    if let note = detectedNote {
-                        Text(note.name)
-                            .font(.system(size: 56, weight: .bold, design: .rounded))
-                            .foregroundColor(.primary)
+                // Note name with background
+                Text(noteName)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(noteColor(for: noteName))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(.systemBackground).opacity(0.9))
                             .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-                        
-                        HStack(spacing: 16) {
-                            VStack(spacing: 2) {
-                                Text("Octave")
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.secondary)
-                                Text("\(note.octave)")
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.primary)
-                            }
-                            
-                            VStack(spacing: 2) {
-                                Text("Cents")
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.secondary)
-                                Text(formatCents(note.cents))
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(centsColor(note.cents))
-                            }
+                    )
+                    .scaleEffect(noteColor(for: noteName) != .secondary.opacity(0.4) ? 1.1 : 1.0)
+                    .animation(.easeInOut(duration: 0.3), value: detectedNote?.name)
+            }
+            .position(x: x, y: y)
+        }
+    }
+    
+    // MARK: - Center Display
+    @ViewBuilder
+    private func centerDisplay(size: CGFloat) -> some View {
+        VStack(spacing: 16) {
+            if let note = detectedNote {
+                // Main note display
+                VStack(spacing: 8) {
+                    Text(note.name)
+                        .font(.system(size: 72, weight: .bold, design: .rounded))
+                        .foregroundColor(.primary)
+                        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                    
+                    // Tuning accuracy indicator
+                    HStack(spacing: 12) {
+                        // Cents display
+                        VStack(spacing: 2) {
+                            Text("Cents")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Text(formatCents(note.cents))
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(centsColor(note.cents))
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(.systemGray6).opacity(0.5))
-                        )
                         
-                        Text("\(Int(note.frequency)) Hz")
-                            .font(.system(size: 16, weight: .medium, design: .monospaced))
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 4)
-                            .background(
-                                Capsule()
-                                    .fill(Color(.systemBackground))
-                                    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
-                            )
-                    } else {
-                        VStack(spacing: 8) {
-                            Text("?")
-                                .font(.system(size: 56, weight: .bold, design: .rounded))
+                        // Octave display
+                        VStack(spacing: 2) {
+                            Text("Octave")
+                                .font(.system(size: 10, weight: .medium))
                                 .foregroundColor(.secondary)
-                                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-                            
-                            Text("No Note Detected")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.secondary)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color(.systemGray6).opacity(0.5))
-                                )
+                            Text("\(note.octave)")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
                         }
                     }
-                }
-                
-                // Enhanced tuning indicator (needle)
-                if let note = detectedNote {
-                    let baseAngle = noteAngle(for: note.name)
-                    let centsOffset = Double(note.cents) * 0.6 // 0.6 degrees per cent for fine tuning
-                    let angle = baseAngle + centsOffset + 90
-                    let needleLength: CGFloat = radius * 0.90
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(.systemGray6).opacity(0.5))
+                    )
                     
-                    Rectangle()
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    centsColor(note.cents),
-                                    centsColor(note.cents).opacity(0.8)
-                                ]),
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
+                    // Frequency display
+                    Text("\(Int(note.frequency)) Hz")
+                        .font(.system(size: 14, weight: .medium, design: .monospaced))
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule()
+                                .fill(Color(.systemBackground))
+                                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
                         )
-                        .frame(width: 4, height: needleLength)
-                        .offset(y: -needleLength / 2)
-                        .rotationEffect(.degrees(angle))
-                        .shadow(color: centsColor(note.cents).opacity(0.5), radius: 3, x: 0, y: 1)
-                        .animation(.easeInOut(duration: 0.2), value: note.cents)
                 }
-                
-                // Enhanced pulse animation when listening
-                if isListening {
-                    Circle()
-                        .stroke(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color.blue.opacity(0.4),
-                                    Color.purple.opacity(0.2)
-                                ]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 3
-                        )
-                        .frame(width: size * 0.7, height: size * 0.7)
-                        .scaleEffect(isListening ? 1.3 : 1.0)
-                        .opacity(isListening ? 0.0 : 1.0)
-                        .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: false), value: isListening)
+            } else {
+                // No note detected state
+                VStack(spacing: 12) {
+                    Image(systemName: "music.note")
+                        .font(.system(size: 48, weight: .light))
+                        .foregroundColor(.secondary)
                     
-                    Circle()
-                        .stroke(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color.blue.opacity(0.2),
-                                    Color.purple.opacity(0.1)
-                                ]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 2
-                        )
-                        .frame(width: size * 0.6, height: size * 0.6)
-                        .scaleEffect(isListening ? 1.5 : 1.0)
-                        .opacity(isListening ? 0.0 : 1.0)
-                        .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: false).delay(0.5), value: isListening)
+                    Text("No Note Detected")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.secondary)
                 }
             }
         }
     }
     
-    private func noteAngle(for noteName: String) -> Double {
-        guard let index = noteNames.firstIndex(of: noteName) else { return 0 }
-        return Double(index) * 30 - 90 // Convert to degrees, starting from top
+    // MARK: - Tuning Indicator
+    @ViewBuilder
+    private func tuningIndicator(size: CGFloat, center: CGPoint, radius: CGFloat) -> some View {
+        if let note = detectedNote {
+            let baseAngle = noteAngle(for: note.name)
+            let centsOffset = Double(note.cents) * 0.6 // 0.6 degrees per cent
+            let angle = baseAngle + centsOffset + 90
+            let needleLength: CGFloat = radius * 0.85
+            
+            // Tuning needle
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            centsColor(note.cents),
+                            centsColor(note.cents).opacity(0.8)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .frame(width: 6, height: needleLength)
+                .offset(y: -needleLength / 2)
+                .rotationEffect(.degrees(angle))
+                .shadow(color: centsColor(note.cents).opacity(0.3), radius: 4, x: 0, y: 2)
+                .animation(.easeInOut(duration: 0.3), value: note.cents)
+        }
     }
     
-    private func noteColor(for noteName: String, octave: Int = 0) -> Color {
-        guard let detectedNote = detectedNote else { return .secondary.opacity(0.6) }
+    // MARK: - Listening Animation
+    @ViewBuilder
+    private func listeningAnimation(size: CGFloat) -> some View {
+        if isListening {
+            // Subtle pulse animation
+            Circle()
+                .stroke(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.blue.opacity(0.3),
+                            Color.blue.opacity(0.1)
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 2
+                )
+                .frame(width: size * 0.85, height: size * 0.85)
+                .scaleEffect(isListening ? 1.1 : 1.0)
+                .opacity(isListening ? 0.0 : 1.0)
+                .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: false), value: isListening)
+        }
+    }
+    
+    // MARK: - Helper Methods
+    private func noteAngle(for noteName: String) -> Double {
+        guard let index = noteNames.firstIndex(of: noteName) else { return 0 }
+        return Double(index) * 30 - 90
+    }
+    
+    private func noteColor(for noteName: String) -> Color {
+        guard let detectedNote = detectedNote else { return .secondary.opacity(0.4) }
         
-        if detectedNote.name == noteName && detectedNote.octave == octave {
+        if detectedNote.name == noteName {
             return centsColor(detectedNote.cents)
         } else {
-            return .secondary.opacity(0.6)
+            return .secondary.opacity(0.4)
         }
     }
     
@@ -264,7 +305,7 @@ struct TunerCircleView: View {
 }
 
 #Preview {
-    VStack {
+    VStack(spacing: 20) {
         TunerCircleView(
             detectedNote: Note(name: "A", octave: 4, frequency: 440.0, cents: 5),
             isListening: .constant(true)

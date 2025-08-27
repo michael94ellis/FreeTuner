@@ -46,29 +46,9 @@ FreeTuner is an iOS tuner application that detects pitch in real-time using micr
 - Microphone access permission request
 - Privacy description for microphone usage
 
-### Performance
-- Sub-100ms latency for pitch detection
-- Smooth UI updates (60fps)
-- Efficient battery usage during continuous audio processing
-
 ## Development Phases
-
-### Phase 1: Core Audio & Pitch Detection
-- Implement microphone input handling
-- Basic pitch detection algorithm
-- Frequency to note mapping
-
-### Phase 2: UI Implementation
-- Main tuning display interface
-- Settings panel
-- Dark mode support
 
 ### Phase 3: Advanced Features
 - Customization options
-- Temperament system support
 - Transposition functionality
-
-### Phase 4: Polish & Testing
-- Performance optimization
-- UI/UX refinements
 - Comprehensive testing across devices
