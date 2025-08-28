@@ -19,6 +19,7 @@ struct TunerView: View {
     @State private var showingTemperamentPicker = false
     @State private var showingA4FrequencyPicker = false
     @State var pitchDetectionTask: Task<Void, Never>?
+    @State private var pitchData: [PitchDataPoint] = []
     
     var body: some View {
         VStack(spacing: 24) {
@@ -48,6 +49,9 @@ struct TunerView: View {
             },
                             isListening: $isListening)
             .padding(.horizontal, 20)
+            
+            // Pitch Graph
+            PitchGraphView(pitchData: pitchData, isListening: isListening)
             
             errorMessageView
 
@@ -192,6 +196,20 @@ struct TunerView: View {
                 await MainActor.run {
                     self.currentPitch = pitch > 0 ? pitch : nil
                     self.currentSpectrum = spectrum
+                    
+                    // Update pitch data for graph
+                    if pitch > 0 {
+                        let dataPoint = PitchDataPoint(
+                            timestamp: Date(),
+                            frequency: pitch
+                        )
+                        
+                        // Add new data point and maintain max data points
+                        pitchData.append(dataPoint)
+                        if pitchData.count > 100 {
+                            pitchData.removeFirst()
+                        }
+                    }
                 }
             }
         }
@@ -201,6 +219,7 @@ struct TunerView: View {
         errorMessage = nil
         currentPitch = nil
         currentSpectrum = []
+        pitchData = [] // Clear pitch data when starting
         setupPitchDetection()
         do {
             try pitchManager.start()
