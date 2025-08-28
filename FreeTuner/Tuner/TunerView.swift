@@ -21,17 +21,23 @@ struct TunerView: View {
     @State var pitchDetectionTask: Task<Void, Never>?
     @State private var pitchData: [PitchDataPoint] = []
     
+    // Device-specific sizing
+    private var isPad: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+    }
+    
     var body: some View {
         VStack(spacing: 24) {
             
             headerButtons
+                .padding(.top, isPad ? 16 : 8)
             
             // Add tap hint when not listening
             Text(isListening ? "Listening…" : "🎙 Tap anywhere to start")
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .font(.system(size: isPad ? 24 : 15, weight: .semibold, design: .rounded))
                 .foregroundColor(isListening ? .white : .blue)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .padding(.horizontal, isPad ? 32 : 16)
+                .padding(.vertical, isPad ? 16 : 8)
                 .background(
                     Capsule()
                         .fill(isListening ? Color.blue : Color.blue.opacity(0.1))
@@ -47,11 +53,12 @@ struct TunerView: View {
             TunerCircleView(detectedNote: currentPitch.flatMap {
                 noteConverter.frequencyToNote($0)
             },
-                            isListening: $isListening)
-            .padding(.horizontal, 20)
+                            isListening: $isListening,
+                            isPad: isPad)
+            .padding(.horizontal, isPad ? 32 : 20)
             
             // Pitch Graph
-            PitchGraphView(pitchData: pitchData, isListening: isListening)
+            PitchGraphView(pitchData: pitchData, isListening: isListening, isPad: isPad)
             
             errorMessageView
 
@@ -89,24 +96,24 @@ struct TunerView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Temperament")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.system(size: isPad ? 18 : 12, weight: .medium))
                             .foregroundColor(.secondary)
                         
                         Text(noteConverter.currentTemperament.rawValue)
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: isPad ? 24 : 16, weight: .semibold))
                             .foregroundColor(.primary)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: isPad ? 18 : 12, weight: .medium))
                         .foregroundColor(.secondary)
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
+                .padding(.horizontal, isPad ? 20 : 12)
+                .padding(.vertical, isPad ? 16 : 8)
                 .frame(maxWidth: .infinity)
-                .frame(height: 80)
+                .frame(height: isPad ? 110 : 80)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
                         .fill(Color(.systemBackground))
@@ -127,24 +134,24 @@ struct TunerView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("A4 Reference")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.system(size: isPad ? 18 : 12, weight: .medium))
                             .foregroundColor(.secondary)
                         
                         Text("\(Int(noteConverter.getA4Frequency())) Hz")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: isPad ? 24 : 16, weight: .semibold))
                             .foregroundColor(.primary)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: isPad ? 18 : 12, weight: .medium))
                         .foregroundColor(.secondary)
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
+                .padding(.horizontal, isPad ? 20 : 12)
+                .padding(.vertical, isPad ? 16 : 8)
                 .frame(maxWidth: .infinity)
-                .frame(height: 80)
+                .frame(height: isPad ? 110 : 80)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
                         .fill(Color(.systemBackground))
@@ -165,18 +172,18 @@ struct TunerView: View {
     var errorMessageView: some View {
         // Error message with better styling
         if let error = errorMessage {
-            HStack {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundColor(.orange)
-                    .font(.system(size: 16, weight: .medium))
-                
-                Text(error)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.leading)
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
+                    HStack {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundColor(.orange)
+                .font(.system(size: isPad ? 22 : 16, weight: .medium))
+            
+            Text(error)
+                .font(.system(size: isPad ? 20 : 14, weight: .medium))
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.leading)
+        }
+        .padding(.horizontal, isPad ? 32 : 20)
+        .padding(.vertical, isPad ? 20 : 12)
             .background(
                 RoundedRectangle(cornerRadius: 12)
                     .fill(Color.orange.opacity(0.1))

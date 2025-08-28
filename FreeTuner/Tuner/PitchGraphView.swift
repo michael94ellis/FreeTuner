@@ -17,6 +17,7 @@ struct PitchDataPoint: Identifiable {
 struct PitchGraphView: View {
     let pitchData: [PitchDataPoint]
     let isListening: Bool
+    let isPad: Bool
     let maxDataPoints: Int = 100 // Keep last 100 data points
     
     @State private var showingGraph = false
@@ -27,11 +28,11 @@ struct PitchGraphView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Pitch History")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: isPad ? 28 : 16, weight: .semibold))
                         .foregroundColor(.primary)
                     
                     Text("Real-time frequency tracking")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: isPad ? 22 : 12, weight: .medium))
                         .foregroundColor(.secondary)
                 }
                 
@@ -43,16 +44,16 @@ struct PitchGraphView: View {
                     }
                 }) {
                     Image(systemName: showingGraph ? "chart.line.downtrend.xyaxis" : "chart.line.uptrend.xyaxis")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.system(size: isPad ? 32 : 18, weight: .medium))
                         .foregroundColor(.blue)
-                        .frame(width: 32, height: 32)
+                        .frame(width: isPad ? 65 : 44, height: isPad ? 65 : 44)
                         .background(
                             Circle()
                                 .fill(Color.blue.opacity(0.1))
                         )
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, isPad ? 32 : 20)
             
             if showingGraph {
                 // Graph content
@@ -64,7 +65,7 @@ struct PitchGraphView: View {
                         statsView
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, isPad ? 32 : 20)
                 .transition(.asymmetric(
                     insertion: .move(edge: .top).combined(with: .opacity),
                     removal: .move(edge: .top).combined(with: .opacity)
@@ -75,20 +76,20 @@ struct PitchGraphView: View {
     
     @ViewBuilder
     private var emptyStateView: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: isPad ? 16 : 12) {
             Image(systemName: "chart.line.uptrend.xyaxis")
-                .font(.system(size: 32, weight: .light))
+                .font(.system(size: isPad ? 48 : 32, weight: .light))
                 .foregroundColor(.secondary)
             
             Text("No pitch data yet")
-                .font(.system(size: 14, weight: .medium))
+                .font(.system(size: isPad ? 24 : 14, weight: .medium))
                 .foregroundColor(.secondary)
             
             Text("Start listening to see pitch history")
-                .font(.system(size: 12, weight: .regular))
+                .font(.system(size: isPad ? 20 : 12, weight: .regular))
                 .foregroundColor(.secondary.opacity(0.8))
         }
-        .frame(height: 120)
+        .frame(height: isPad ? 160 : 120)
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 12)
@@ -98,9 +99,9 @@ struct PitchGraphView: View {
     
     @ViewBuilder
     private var chartView: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: isPad ? 12 : 8) {
             Text("Frequency over Time")
-                .font(.system(size: 12, weight: .medium))
+                .font(.system(size: isPad ? 20 : 14, weight: .medium))
                 .foregroundColor(.secondary)
             
             Chart {
@@ -125,7 +126,7 @@ struct PitchGraphView: View {
                     )
                 }
             }
-            .frame(height: 120)
+            .frame(height: isPad ? 180 : 120)
             .chartXAxis {
                 AxisMarks(position: .bottom) { _ in
                     AxisGridLine()
@@ -133,7 +134,7 @@ struct PitchGraphView: View {
                     AxisTick()
                         .foregroundStyle(.gray.opacity(0.5))
                     AxisValueLabel()
-                        .font(.system(size: 10, weight: .medium))
+                        .font(.system(size: isPad ? 18 : 13, weight: .medium))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -144,13 +145,13 @@ struct PitchGraphView: View {
                     AxisTick()
                         .foregroundStyle(.gray.opacity(0.5))
                     AxisValueLabel()
-                        .font(.system(size: 10, weight: .medium))
+                        .font(.system(size: isPad ? 18 : 13, weight: .medium))
                         .foregroundStyle(.secondary)
                 }
             }
             .chartYScale(domain: frequencyRange)
         }
-        .padding(16)
+        .padding(isPad ? 24 : 16)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.systemBackground))
@@ -168,46 +169,46 @@ struct PitchGraphView: View {
             // Current frequency
             VStack(spacing: 4) {
                 Text("Current")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: isPad ? 20 : 14, weight: .medium))
                     .foregroundColor(.secondary)
                 Text("\(Int(pitchData.last?.frequency ?? 0)) Hz")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: isPad ? 20 : 14, weight: .semibold))
                     .foregroundColor(.primary)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
+            .padding(.vertical, isPad ? 12 : 8)
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color(.systemGray6).opacity(0.5))
             )
             
             // Average frequency
-            VStack(spacing: 4) {
+            VStack(spacing: isPad ? 6 : 4) {
                 Text("Average")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: isPad ? 20 : 14, weight: .medium))
                     .foregroundColor(.secondary)
                 Text("\(Int(averageFrequency)) Hz")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: isPad ? 22 : 14, weight: .semibold))
                     .foregroundColor(.primary)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
+            .padding(.vertical, isPad ? 12 : 8)
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color(.systemGray6).opacity(0.5))
             )
             
             // Stability indicator
-            VStack(spacing: 4) {
+            VStack(spacing: isPad ? 6 : 4) {
                 Text("Stability")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: isPad ? 20 : 14, weight: .medium))
                     .foregroundColor(.secondary)
                 Text(stabilityText)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: isPad ? 20 : 14, weight: .semibold))
                     .foregroundColor(stabilityColor)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
+            .padding(.vertical, isPad ? 12 : 8)
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color(.systemGray6).opacity(0.5))
@@ -277,7 +278,7 @@ struct PitchGraphView: View {
 #Preview {
     VStack {
         // Empty state
-        PitchGraphView(pitchData: [], isListening: false)
+        PitchGraphView(pitchData: [], isListening: false, isPad: true)
         
         // With data
         let sampleData = [
@@ -289,7 +290,7 @@ struct PitchGraphView: View {
             PitchDataPoint(timestamp: Date(), frequency: 440)
         ]
         
-        PitchGraphView(pitchData: sampleData, isListening: true)
+        PitchGraphView(pitchData: sampleData, isListening: true, isPad: false)
     }
     .padding()
     .background(Color(.systemBackground))

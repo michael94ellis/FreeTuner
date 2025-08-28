@@ -10,6 +10,7 @@ import SwiftUI
 struct TunerCircleView: View {
     let detectedNote: Note?
     @Binding var isListening: Bool
+    let isPad: Bool
     
     // Note names in order (like a clock face)
     private let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
@@ -97,10 +98,10 @@ struct TunerCircleView: View {
                 
                 // Note name with background
                 Text(noteName)
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: isPad ? 32 : 18, weight: .bold))
                     .foregroundColor(noteColor(for: noteName))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, isPad ? 12 : 8)
+                    .padding(.vertical, isPad ? 6 : 4)
                     .background(
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color(.systemBackground).opacity(0.9))
@@ -121,7 +122,7 @@ struct TunerCircleView: View {
                 // Main note display
                 VStack(spacing: 8) {
                     Text(note.name)
-                        .font(.system(size: 72, weight: .bold, design: .rounded))
+                        .font(.system(size: isPad ? 128 : 72, weight: .bold, design: .rounded))
                         .foregroundColor(.primary)
                         .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
                     
@@ -130,20 +131,20 @@ struct TunerCircleView: View {
                         // Cents display
                         VStack(spacing: 2) {
                             Text("Cents")
-                                .font(.system(size: 10, weight: .medium))
+                                .font(.system(size: isPad ? 14 : 10, weight: .medium))
                                 .foregroundColor(.secondary)
                             Text(formatCents(note.cents))
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(.system(size: isPad ? 20 : 16, weight: .semibold))
                                 .foregroundColor(centsColor(note.cents))
                         }
                         
                         // Octave display
                         VStack(spacing: 2) {
                             Text("Octave")
-                                .font(.system(size: 10, weight: .medium))
+                                .font(.system(size: isPad ? 14 : 10, weight: .medium))
                                 .foregroundColor(.secondary)
                             Text("\(note.octave)")
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(.system(size: isPad ? 20 : 16, weight: .semibold))
                                 .foregroundColor(.primary)
                         }
                     }
@@ -156,10 +157,10 @@ struct TunerCircleView: View {
                     
                     // Frequency display
                     Text("\(Int(note.frequency)) Hz")
-                        .font(.system(size: 14, weight: .medium, design: .monospaced))
+                        .font(.system(size: isPad ? 18 : 14, weight: .medium, design: .monospaced))
                         .foregroundColor(.secondary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 4)
+                        .padding(.horizontal, isPad ? 16 : 12)
+                        .padding(.vertical, isPad ? 6 : 4)
                         .background(
                             Capsule()
                                 .fill(Color(.systemBackground))
@@ -170,11 +171,11 @@ struct TunerCircleView: View {
                 // No note detected state
                 VStack(spacing: 12) {
                     Image(systemName: "music.note")
-                        .font(.system(size: 48, weight: .light))
+                        .font(.system(size: isPad ? 64 : 48, weight: .light))
                         .foregroundColor(.secondary)
                     
                     Text("No Note Detected")
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.system(size: isPad ? 24 : 18, weight: .medium))
                         .foregroundColor(.secondary)
                 }
             }
@@ -277,13 +278,13 @@ struct TunerCircleView: View {
         VStack(spacing: 20) {
             TunerCircleView(
                 detectedNote: Note(name: "A", octave: 4, frequency: 440.0, cents: 5),
-                isListening: .constant(true)
+                isListening: .constant(true), isPad: true
             )
             .frame(width: 300, height: 300)
             
             TunerCircleView(
                 detectedNote: nil,
-                isListening: .constant(false)
+                isListening: .constant(false), isPad: true
             )
             .frame(width: 300, height: 300)
         }
@@ -293,13 +294,13 @@ struct TunerCircleView: View {
         VStack(spacing: 20) {
             TunerCircleView(
                 detectedNote: Note(name: "A", octave: 4, frequency: 440.0, cents: 5),
-                isListening: .constant(true)
+                isListening: .constant(false), isPad: false
             )
             .frame(width: 300, height: 300)
             
             TunerCircleView(
                 detectedNote: nil,
-                isListening: .constant(false)
+                isListening: .constant(false), isPad: false
             )
             .frame(width: 300, height: 300)
         }
