@@ -289,7 +289,6 @@ struct TunerCircleView: View {
         }
         .padding()
         .preferredColorScheme(.light)
-        .previewDisplayName("Light Mode")
         
         VStack(spacing: 20) {
             TunerCircleView(
@@ -306,6 +305,5 @@ struct TunerCircleView: View {
         }
         .padding()
         .preferredColorScheme(.dark)
-        .previewDisplayName("Dark Mode")
     }
 }

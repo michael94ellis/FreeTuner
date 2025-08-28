@@ -242,7 +242,6 @@ struct TunerView: View {
             currentSpectrum: .constant([])
         )
         .preferredColorScheme(.light)
-        .previewDisplayName("Light Mode")
         
         TunerView(
             pitchManager: AudioInputManager(),
@@ -253,6 +252,5 @@ struct TunerView: View {
             currentSpectrum: .constant([])
         )
         .preferredColorScheme(.dark)
-        .previewDisplayName("Dark Mode")
     }
 }

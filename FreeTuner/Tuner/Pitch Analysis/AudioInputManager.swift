@@ -55,7 +55,7 @@ class AudioInputManager {
         let audioSession = AVAudioSession.sharedInstance()
         
         // Request microphone permission
-        audioSession.requestRecordPermission { [weak self] granted in
+        AVAudioApplication.requestRecordPermission { granted in
             DispatchQueue.main.async {
                 if !granted {
                     print("Microphone permission denied")

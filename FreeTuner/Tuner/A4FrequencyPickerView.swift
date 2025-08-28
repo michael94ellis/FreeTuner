@@ -220,10 +220,8 @@ struct A4FrequencyPickerView: View {
     Group {
         A4FrequencyPickerView(noteConverter: NoteConverter())
             .preferredColorScheme(.light)
-            .previewDisplayName("Light Mode")
         
         A4FrequencyPickerView(noteConverter: NoteConverter())
             .preferredColorScheme(.dark)
-            .previewDisplayName("Dark Mode")
     }
 }
