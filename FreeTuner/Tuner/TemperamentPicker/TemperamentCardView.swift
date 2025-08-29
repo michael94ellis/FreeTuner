@@ -37,11 +37,11 @@ struct TemperamentCardView: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(temperament.rawValue)
-                    .font(.system(size: 18, weight: .semibold))
+                    .subheadingFont(isPad: false)
                     .foregroundColor(.primary)
                 
                 Text(temperament.description)
-                    .font(.system(size: 14, weight: .medium))
+                    .captionFont(isPad: false)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.leading)
             }
@@ -57,13 +57,13 @@ struct TemperamentCardView: View {
             if isSelected {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(.blue)
-                    .font(.system(size: 24, weight: .medium))
+                    .iconSmallFont(isPad: false)
                     .scaleEffect(1.1)
                     .animation(.easeInOut(duration: 0.2), value: isSelected)
             } else {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(.blue)
-                    .font(.system(size: 24, weight: .medium))
+                    .iconSmallFont(isPad: false)
                     .scaleEffect(1.1)
                     .animation(.easeInOut(duration: 0.2), value: isSelected)
                     .hidden()
@@ -75,7 +75,7 @@ struct TemperamentCardView: View {
     private var deviationSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Deviations from Equal Temperament")
-                .font(.system(size: 12, weight: .medium))
+                .smallFont(isPad: false)
                 .foregroundColor(.secondary)
             
             HStack(spacing: 12) {

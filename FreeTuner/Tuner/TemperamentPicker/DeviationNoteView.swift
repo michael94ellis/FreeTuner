@@ -15,11 +15,11 @@ struct DeviationNoteView: View {
     var body: some View {
         VStack(spacing: 4) {
             Text(note)
-                .font(.system(size: 12, weight: .medium))
+                .smallFont(isPad: isPad)
                 .foregroundColor(.secondary)
             
             Text("\(deviation)")
-                .font(.system(size: 14, weight: .semibold))
+                .captionFont(isPad: isPad)
                 .foregroundColor(deviation == 0 ? .green : .orange)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)

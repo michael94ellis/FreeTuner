@@ -95,7 +95,7 @@ struct TunerCircleView: View {
                 
                 // Note name with background
                 Text(noteName)
-                    .font(.system(size: isPad ? 32 : 18, weight: .bold))
+                    .noteMarkerFont(isPad: isPad)
                     .foregroundColor(noteColor(for: noteName))
                     .padding(.horizontal, isPad ? 12 : 8)
                     .padding(.vertical, isPad ? 6 : 4)
@@ -118,30 +118,30 @@ struct TunerCircleView: View {
             if let note = detectedNote {
                 // Main note display
                 VStack(spacing: 8) {
-                    Text(note.name)
-                        .font(.system(size: isPad ? 128 : 72, weight: .bold, design: .rounded))
-                        .foregroundColor(.primary)
-                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
+                                    Text(note.name)
+                    .mainNoteFont(isPad: isPad)
+                    .foregroundColor(.primary)
+                    .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
                     
                     // Tuning accuracy indicator
                     HStack(spacing: 12) {
                         // Cents display
                         VStack(spacing: 2) {
                             Text("Cents")
-                                .font(.system(size: isPad ? 14 : 10, weight: .medium))
+                                .labelFont(isPad: isPad)
                                 .foregroundColor(.secondary)
                             Text(formatCents(note.cents))
-                                .font(.system(size: isPad ? 20 : 16, weight: .semibold))
+                                .centsFont(isPad: isPad)
                                 .foregroundColor(centsColor(note.cents))
                         }
                         
                         // Octave display
                         VStack(spacing: 2) {
                             Text("Octave")
-                                .font(.system(size: isPad ? 14 : 10, weight: .medium))
+                                .labelFont(isPad: isPad)
                                 .foregroundColor(.secondary)
                             Text("\(note.octave)")
-                                .font(.system(size: isPad ? 20 : 16, weight: .semibold))
+                                .octaveFont(isPad: isPad)
                                 .foregroundColor(.primary)
                         }
                     }
@@ -154,7 +154,7 @@ struct TunerCircleView: View {
                     
                     // Frequency display
                     Text("\(Int(note.frequency)) Hz")
-                        .font(.system(size: isPad ? 18 : 14, weight: .medium, design: .monospaced))
+                        .frequencyFont(isPad: isPad)
                         .foregroundColor(.secondary)
                         .padding(.horizontal, isPad ? 16 : 12)
                         .padding(.vertical, isPad ? 6 : 4)
@@ -168,11 +168,11 @@ struct TunerCircleView: View {
                 // No note detected state
                 VStack(spacing: 12) {
                     Image(systemName: "music.note")
-                        .font(.system(size: isPad ? 64 : 48, weight: .light))
+                        .iconFont(isPad: isPad)
                         .foregroundColor(.secondary)
                     
                     Text("No Note Detected")
-                        .font(.system(size: isPad ? 24 : 18, weight: .medium))
+                        .subheadingFont(isPad: isPad)
                         .foregroundColor(.secondary)
                 }
             }
@@ -270,14 +270,12 @@ struct TunerCircleView: View {
                 isListening: .constant(false)
             )
             .frame(width: 300, height: 300)
-            .isPad(false)
             
             TunerCircleView(
                 detectedNote: nil,
                 isListening: .constant(false)
             )
             .frame(width: 300, height: 300)
-            .isPad(false)
         }
         .padding()
         .preferredColorScheme(.dark)

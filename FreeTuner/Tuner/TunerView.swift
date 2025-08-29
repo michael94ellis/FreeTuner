@@ -80,6 +80,13 @@ struct TunerView: View {
         }
         .sheet(isPresented: $showingA4FrequencyPicker) {
             A4FrequencyPickerView(noteConverter: noteConverter)
+        }.task {
+            for family: String in UIFont.familyNames {
+                print(family)
+                for names: String in UIFont.fontNames(forFamilyName: family) {
+                    print("===> \(names)")
+                }
+            }
         }
     }
     
