@@ -42,11 +42,6 @@ class NoteConverter {
         }
     }
     
-    /// Get the frequency of a specific note using current temperament
-    func noteToFrequency(_ noteName: String, octave: Int) -> Float? {
-        return temperamentConverter.noteToFrequency(noteName, octave: octave, temperament: currentTemperament)
-    }
-    
     /// Get cents deviation for a note in current temperament compared to equal temperament
     func getCentsDeviation(_ noteName: String) -> Int {
         return temperamentConverter.getCentsDeviation(noteName, temperament: currentTemperament)
