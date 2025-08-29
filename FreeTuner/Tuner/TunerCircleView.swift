@@ -10,7 +10,7 @@ import SwiftUI
 struct TunerCircleView: View {
     let detectedNote: Note?
     @Binding var isListening: Bool
-    let isPad: Bool
+    @Environment(\.isPad) private var isPad
     
     // Note names in order (like a clock face)
     private let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
@@ -34,9 +34,6 @@ struct TunerCircleView: View {
                 
                 // Tuning indicator
                 tuningIndicator(size: size, center: center, radius: radius)
-                
-                // Listening animation
-                listeningAnimation(size: size)
             }
         }
     }
@@ -211,30 +208,6 @@ struct TunerCircleView: View {
         }
     }
     
-    // MARK: - Listening Animation
-    @ViewBuilder
-    private func listeningAnimation(size: CGFloat) -> some View {
-        if isListening {
-            // Subtle pulse animation
-            Circle()
-                .stroke(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color.blue.opacity(0.3),
-                            Color.blue.opacity(0.1)
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 2
-                )
-                .frame(width: size * 0.85, height: size * 0.85)
-                .scaleEffect(isListening ? 1.1 : 1.0)
-                .opacity(isListening ? 0.0 : 1.0)
-                .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: false), value: isListening)
-        }
-    }
-    
     // MARK: - Helper Methods
     private func noteAngle(for noteName: String) -> Double {
         guard let index = noteNames.firstIndex(of: noteName) else { return 0 }
@@ -278,13 +251,13 @@ struct TunerCircleView: View {
         VStack(spacing: 20) {
             TunerCircleView(
                 detectedNote: Note(name: "A", octave: 4, frequency: 440.0, cents: 5),
-                isListening: .constant(true), isPad: true
+                isListening: .constant(true)
             )
             .frame(width: 300, height: 300)
             
             TunerCircleView(
                 detectedNote: nil,
-                isListening: .constant(false), isPad: true
+                isListening: .constant(false)
             )
             .frame(width: 300, height: 300)
         }
@@ -294,15 +267,17 @@ struct TunerCircleView: View {
         VStack(spacing: 20) {
             TunerCircleView(
                 detectedNote: Note(name: "A", octave: 4, frequency: 440.0, cents: 5),
-                isListening: .constant(false), isPad: false
+                isListening: .constant(false)
             )
             .frame(width: 300, height: 300)
+            .isPad(false)
             
             TunerCircleView(
                 detectedNote: nil,
-                isListening: .constant(false), isPad: false
+                isListening: .constant(false)
             )
             .frame(width: 300, height: 300)
+            .isPad(false)
         }
         .padding()
         .preferredColorScheme(.dark)

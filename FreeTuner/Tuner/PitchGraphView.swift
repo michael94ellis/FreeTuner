@@ -17,7 +17,7 @@ struct PitchDataPoint: Identifiable {
 struct PitchGraphView: View {
     let pitchData: [PitchDataPoint]
     let isListening: Bool
-    let isPad: Bool
+    @Environment(\.isPad) private var isPad
     let maxDataPoints: Int = 100 // Keep last 100 data points
     
     @State private var showingGraph = false
@@ -278,7 +278,7 @@ struct PitchGraphView: View {
 #Preview {
     VStack {
         // Empty state
-        PitchGraphView(pitchData: [], isListening: false, isPad: true)
+        PitchGraphView(pitchData: [], isListening: false)
         
         // With data
         let sampleData = [
@@ -290,7 +290,7 @@ struct PitchGraphView: View {
             PitchDataPoint(timestamp: Date(), frequency: 440)
         ]
         
-        PitchGraphView(pitchData: sampleData, isListening: true, isPad: false)
+        PitchGraphView(pitchData: sampleData, isListening: true)
     }
     .padding()
     .background(Color(.systemBackground))

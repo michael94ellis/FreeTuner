@@ -22,9 +22,7 @@ struct TunerView: View {
     @State private var pitchData: [PitchDataPoint] = []
     
     // Device-specific sizing
-    private var isPad: Bool {
-        UIDevice.current.userInterfaceIdiom == .pad
-    }
+    @Environment(\.isPad) private var isPad
     
     var body: some View {
         VStack(spacing: 24) {
@@ -53,12 +51,11 @@ struct TunerView: View {
             TunerCircleView(detectedNote: currentPitch.flatMap {
                 noteConverter.frequencyToNote($0)
             },
-                            isListening: $isListening,
-                            isPad: isPad)
+                            isListening: $isListening)
             .padding(.horizontal, isPad ? 32 : 20)
             
             // Pitch Graph
-            PitchGraphView(pitchData: pitchData, isListening: isListening, isPad: isPad)
+            PitchGraphView(pitchData: pitchData, isListening: isListening)
             
             errorMessageView
 
