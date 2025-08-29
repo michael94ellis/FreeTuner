@@ -15,3 +15,9 @@ FreeTuner is an iOS tuner application that detects pitch in real-time using micr
 - Display current detected note prominently
 - Show frequency value in Hz
 - Visual indicator for tuning accuracy (sharp/flat/in-tune)
+
+### Volume Monitoring
+- Real-time decibel meter with visual needle indicator
+- Color-coded volume levels (green/yellow/orange/red)
+- Peak level tracking with decay
+- Responsive volume feedback for optimal input levels

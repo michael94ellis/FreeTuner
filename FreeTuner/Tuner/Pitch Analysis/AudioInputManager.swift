@@ -6,18 +6,20 @@
 //
 
 import AVFoundation
+import Accelerate
 
 class AudioInputManager {
     private let engine = AVAudioEngine()
     private var analyzer: PitchAnalyzer?
+    private let meter = AudioLevelMeter()
     private var fftSize: Int = 2048
     private var inputFormat: AVAudioFormat?
     private let queue = DispatchQueue(label: "PitchTapQueue")
 
-    private var pitchStream: AsyncStream<(Float, [(frequency: Float, magnitude: Float)])>?
-    private var pitchContinuation: AsyncStream<(Float, [(frequency: Float, magnitude: Float)])>.Continuation?
+    private var pitchStream: AsyncStream<(Float, [(frequency: Float, magnitude: Float)], (rms: Float, peak: Float))>?
+    private var pitchContinuation: AsyncStream<(Float, [(frequency: Float, magnitude: Float)], (rms: Float, peak: Float))>.Continuation?
     
-    var stream: AsyncStream<(Float, [(frequency: Float, magnitude: Float)])>? {
+    var stream: AsyncStream<(Float, [(frequency: Float, magnitude: Float)], (rms: Float, peak: Float))>? {
         return pitchStream
     }
 
@@ -67,7 +69,7 @@ class AudioInputManager {
         try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
         try audioSession.setActive(true)
     }
-
+    
     private func installTap() {
         guard let format = inputFormat else {
             assertionFailure("Audio format not initialized")
@@ -78,7 +80,7 @@ class AudioInputManager {
         // Request a buffer size that matches our FFT size for consistency
         let requestedBufferSize = AVAudioFrameCount(fftSize)
         
-        pitchStream = AsyncStream<(Float, [(frequency: Float, magnitude: Float)])> { continuation in
+        pitchStream = AsyncStream<(Float, [(frequency: Float, magnitude: Float)], (rms: Float, peak: Float))> { continuation in
             self.pitchContinuation = continuation
         }
         
@@ -115,15 +117,18 @@ class AudioInputManager {
                         }
 
                         let result = analyzer.analyze(buffer: chunkSamples)
+                        let decibels: (rms: Float, peak: Float) = self.meter.calculateDecibelLevels(from: chunkSamples)
+                        
                         // Call the callback with the first chunk that has a valid pitch
                         if let pitch = result.dominantFrequency {
-                            self.pitchContinuation?.yield((pitch, result.spectrum))
+                            self.pitchContinuation?.yield((pitch, result.spectrum, decibels))
                             return // Use the first valid pitch found
                         }
                     }
                     
                     // If no valid pitch found in any chunk, call with 0
-                    self.pitchContinuation?.yield((0, []))
+                    let decibels = self.meter.calculateDecibelLevels(from: Array(UnsafeBufferPointer(start: channelData, count: frameLength)))
+                    self.pitchContinuation?.yield((0, [], decibels))
                     return
                 }
 
@@ -136,13 +141,14 @@ class AudioInputManager {
                 }
 
                 let result = analyzer.analyze(buffer: samples)
+                let decibels = self.meter.calculateDecibelLevels(from: samples)
                 
                 // Always call the callback with spectrum data, even if no dominant pitch
                 if let pitch = result.dominantFrequency {
-                    self.pitchContinuation?.yield((pitch, result.spectrum))
+                    self.pitchContinuation?.yield((pitch, result.spectrum, decibels))
                 } else {
                     // Call with 0 pitch but still provide spectrum for visualization
-                    self.pitchContinuation?.yield((0, result.spectrum))
+                    self.pitchContinuation?.yield((0, result.spectrum, decibels))
                 }
             }
         }

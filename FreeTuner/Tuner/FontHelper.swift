@@ -30,11 +30,11 @@ struct FontHelper {
         static let tiny = FontSize(phone: 10, pad: 14, weight: .medium)
         
         // Specialized sizes
-        static let noteMarker = FontSize(phone: 18, pad: 32, weight: .bold)
-        static let frequency = FontSize(phone: 14, pad: 18, weight: .medium)
-        static let cents = FontSize(phone: 16, pad: 20, weight: .semibold)
-        static let octave = FontSize(phone: 16, pad: 20, weight: .semibold)
-        static let label = FontSize(phone: 10, pad: 14, weight: .medium)
+        static let noteMarker = FontSize(phone: 18, pad: 36, weight: .bold)
+        static let frequency = FontSize(phone: 14, pad: 36, weight: .medium)
+        static let cents = FontSize(phone: 16, pad: 24, weight: .semibold)
+        static let octave = FontSize(phone: 16, pad: 24, weight: .semibold)
+        static let label = FontSize(phone: 10, pad: 20, weight: .medium)
         static let icon = FontSize(phone: 48, pad: 64, weight: .light)
         static let iconSmall = FontSize(phone: 24, pad: 32, weight: .medium)
     }

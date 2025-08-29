@@ -9,8 +9,8 @@ import Foundation
 
 @Observable
 class TemperamentConverter {
-    var a4Frequency: Float = 440.0
-    private let a4MidiNote: Int = 69
+    private(set) var a4Frequency: Float = 440.0
+    private(set) var a4MidiNote: Int = 69
     
     // Note names in order
     private let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
@@ -67,6 +67,7 @@ class TemperamentConverter {
     
     // Meantone temperament (1/4 comma meantone)
     private func meantoneRatio(_ semitones: Int) -> Float {
+        // Quarter-comma meantone ratios - corrected values
         let ratios: [Float] = [
             1.0,           // C (unison)
             1.0449,        // C# (tempered minor second)
@@ -185,46 +186,72 @@ class TemperamentConverter {
         return ratios[index]
     }
     
-    /// Get the frequency ratio for a given semitone in the specified temperament
-    func getRatio(for semitones: Int, temperament: Temperament) -> Float {
+    
+    /// Get the frequency ratios array for the specified temperament
+    func getRatio(temperament: Temperament) -> [Float] {
         switch temperament {
         case .equal:
-            return equalTemperamentRatio(semitones)
+            return (0..<12).map { equalTemperamentRatio($0) }
         case .just:
-            return justIntonationRatio(semitones)
+            return (0..<12).map { justIntonationRatio($0) }
         case .pythagorean:
-            return pythagoreanRatio(semitones)
+            return (0..<12).map { pythagoreanRatio($0) }
         case .meantone:
-            return meantoneRatio(semitones)
+            return (0..<12).map { meantoneRatio($0) }
         case .well:
-            return wellTemperamentRatio(semitones)
+            return (0..<12).map { wellTemperamentRatio($0) }
         case .kirnberger:
-            return kirnbergerRatio(semitones)
+            return (0..<12).map { kirnbergerRatio($0) }
         case .werckmeister:
-            return werckmeisterRatio(semitones)
+            return (0..<12).map { werckmeisterRatio($0) }
         case .young:
-            return youngRatio(semitones)
+            return (0..<12).map { youngRatio($0) }
         case .quarterComma:
-            return quarterCommaRatio(semitones)
+            return (0..<12).map { quarterCommaRatio($0) }
         }
     }
     
+    /// Get the frequency ratio for a given semitone in the specified temperament
+    func getRatio(for semitones: Int, temperament: Temperament) -> Float {
+        let ratio: Float
+        switch temperament {
+        case .equal:
+            ratio = equalTemperamentRatio(semitones)
+        case .just:
+            ratio = justIntonationRatio(semitones)
+        case .pythagorean:
+            ratio = pythagoreanRatio(semitones)
+        case .meantone:
+            ratio = meantoneRatio(semitones)
+        case .well:
+            ratio = wellTemperamentRatio(semitones)
+        case .kirnberger:
+            ratio = kirnbergerRatio(semitones)
+        case .werckmeister:
+            ratio = werckmeisterRatio(semitones)
+        case .young:
+            ratio = youngRatio(semitones)
+        case .quarterComma:
+            ratio = quarterCommaRatio(semitones)
+        }
+        
+        return ratio
+    }
+    
     /// Convert frequency to the closest musical note using the specified temperament
+    /// Equal Temperament only
     func frequencyToNote(_ frequency: Float, temperament: Temperament) -> Note? {
+        if temperament != .equal {
+            return noteFromFrequencyNonEqual(frequency, temperamentRatios: getRatio(temperament: temperament))
+        }
         guard frequency > 0 else { return nil }
-        
-        // Handle extremely low or high frequencies that are outside musical range
-        // Musical range is roughly 20 Hz to 20,000 Hz
         guard frequency >= 20.0 && frequency <= 20000.0 else { return nil }
-        
-        // Calculate MIDI note number using equal temperament as reference
+
+        // Step 1: Estimate MIDI note from frequency
         let midiNote = 12 * log2(frequency / a4Frequency) + Float(a4MidiNote)
         let roundedMidiNote = round(midiNote)
-        
-        // Ensure MIDI note is within valid range (0-127)
         guard roundedMidiNote >= 0 && roundedMidiNote <= 127 else { return nil }
-        
-        // Calculate the expected frequency for this note in the chosen temperament
+
         let semitonesFromA4 = Int(roundedMidiNote) - a4MidiNote
         let expectedRatio = getRatio(for: semitonesFromA4, temperament: temperament)
         
@@ -238,13 +265,11 @@ class TemperamentConverter {
         
         // Extract note name and octave
         let noteIndex = Int(roundedMidiNote) % 12
-        let octave = Int(roundedMidiNote) / 12 - 1 // C0 is MIDI note 12
-        
-        // Ensure note index is valid
+        let octave = Int(roundedMidiNote) / 12 - 1
         guard noteIndex >= 0 && noteIndex < noteNames.count else { return nil }
-        
+
         let noteName = noteNames[noteIndex]
-        
+
         return Note(
             name: noteName,
             octave: octave,
@@ -253,29 +278,48 @@ class TemperamentConverter {
         )
     }
     
-    /// Get the frequency of a specific note in the specified temperament
-    func noteToFrequency(_ noteName: String, octave: Int, temperament: Temperament) -> Float? {
-        guard let noteIndex = noteNames.firstIndex(of: noteName.uppercased()) else {
-            return nil
+    /// For non-equal temperaments
+    func noteFromFrequencyNonEqual(_ frequency: Float,
+                                   temperamentRatios: [Float],
+                                   referenceNote: Int = 60,
+                                   referenceFreq: Float = 261.63) -> Note? {
+        guard frequency > 0 else { return nil }
+        
+        // Calculate the octave of the detected frequency relative to the reference
+        let semitoneOffset = 12 * log2(frequency / referenceFreq)
+        let baseOctave = Int(floor((Float(referenceNote) + semitoneOffset) / 12.0))
+        
+        // Scale temperament ratios to the correct octave
+        var closestNoteIndex: Int?
+        var minDistance: Float = .greatestFiniteMagnitude
+        var matchedFrequency: Float = 0.0
+
+        for i in 0..<temperamentRatios.count {
+            let ratio = temperamentRatios[i]
+            let scaledFreq = referenceFreq * ratio * pow(2.0, Float(baseOctave - 5)) // C4 = MIDI 60 = octave 5
+
+            let distance = abs(frequency - scaledFreq)
+            if distance < minDistance {
+                minDistance = distance
+                closestNoteIndex = i
+                matchedFrequency = scaledFreq
+            }
         }
-        
-        let midiNote = noteIndex + (octave + 1) * 12
-        
-        // Ensure MIDI note is within valid range (0-127)
-        guard midiNote >= 0 && midiNote <= 127 else {
-            return nil
-        }
-        
-        let semitonesFromA4 = midiNote - a4MidiNote
-        let ratio = getRatio(for: semitonesFromA4, temperament: temperament)
-        
-        // Ensure we have a valid ratio
-        guard ratio > 0 else {
-            return nil
-        }
-        
-        return a4Frequency * ratio
+
+        guard let index = closestNoteIndex else { return nil }
+
+        let noteName = noteNames[index]
+        let cents = Int(round(1200 * log2(frequency / matchedFrequency)))
+
+        return Note(
+            name: noteName,
+            octave: baseOctave,
+            frequency: frequency,
+            cents: cents
+        )
     }
+
+
     
     /// Get cents deviation for a note in the specified temperament compared to equal temperament
     func getCentsDeviation(_ noteName: String, temperament: Temperament) -> Int {
