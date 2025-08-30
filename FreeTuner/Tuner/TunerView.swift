@@ -15,6 +15,7 @@ struct TunerView: View {
     @Binding var errorMessage: String?
     @Binding var currentPitch: Float?
     @Binding var currentSpectrum: [(frequency: Float, magnitude: Float)]
+    @Binding var currentDecibels: (rms: CGFloat, peak: CGFloat)
     
     @State private var showingTemperamentPicker = false
     @State private var showingA4FrequencyPicker = false
@@ -54,8 +55,13 @@ struct TunerView: View {
                             isListening: $isListening)
             .padding(.horizontal, isPad ? 32 : 20)
             
-            // Pitch Graph
-            PitchGraphView(pitchData: pitchData, isListening: isListening)
+            // Decibel Meter and Pitch Graph - stack vertically on smaller screens
+            VStack(spacing: 16) {
+                DecibelMeterView(decibels: currentDecibels, isListening: isListening)
+                
+                // Pitch Graph
+                PitchGraphView(pitchData: pitchData, isListening: isListening)
+            }
             
             errorMessageView
 
@@ -196,10 +202,11 @@ struct TunerView: View {
         pitchDetectionTask = Task {
             guard let pitchStream = pitchManager.stream else { return }
             
-            for await (pitch, spectrum) in pitchStream {
+            for await (pitch, spectrum, decibels) in pitchStream {
                 await MainActor.run {
                     self.currentPitch = pitch > 0 ? pitch : nil
                     self.currentSpectrum = spectrum
+                    self.currentDecibels = (rms: CGFloat(decibels.rms), peak: CGFloat(decibels.peak))
                     
                     // Update pitch data for graph
                     if pitch > 0 {
@@ -223,6 +230,7 @@ struct TunerView: View {
         errorMessage = nil
         currentPitch = nil
         currentSpectrum = []
+        currentDecibels = (-60.0, -60.0) // Reset decibel level
         pitchData = [] // Clear pitch data when starting
         setupPitchDetection()
         do {
@@ -243,7 +251,8 @@ struct TunerView: View {
             isListening: .constant(false),
             errorMessage: .constant(nil),
             currentPitch: .constant(nil),
-            currentSpectrum: .constant([])
+            currentSpectrum: .constant([]),
+            currentDecibels: .constant((-60.0, -60.0))
         )
         .preferredColorScheme(.light)
         
@@ -253,7 +262,8 @@ struct TunerView: View {
             isListening: .constant(true),
             errorMessage: .constant("Test error message"),
             currentPitch: .constant(440.0),
-            currentSpectrum: .constant([])
+            currentSpectrum: .constant([]),
+            currentDecibels: .constant((-25, -25))
         )
         .preferredColorScheme(.dark)
     }

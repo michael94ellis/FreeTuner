@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var errorMessage: String?
     @State private var currentPitch: Float?
     @State private var currentSpectrum: [(frequency: Float, magnitude: Float)] = []
+    @State private var currentDecibels: (rms: CGFloat, peak: CGFloat) = (rms: -60.0, peak: -60.0)
     
     var body: some View {
         ZStack {
@@ -35,7 +36,8 @@ struct ContentView: View {
                 isListening: $isListening,
                 errorMessage: $errorMessage,
                 currentPitch: $currentPitch,
-                currentSpectrum: $currentSpectrum
+                currentSpectrum: $currentSpectrum,
+                currentDecibels: $currentDecibels
             )
         }
     }
