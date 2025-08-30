@@ -51,7 +51,7 @@ struct TunerView: View {
                                 isListening: $isListening)
                 .padding(.horizontal, isPad ? 32 : 20)
                 .frame(maxHeight: isPad ? .infinity : 500)
-                .frame(minHeight: 300)
+                .frame(minHeight: isPad ? 500 : 300)
                 
                 // Settings Summary
                 settingsSummaryView
