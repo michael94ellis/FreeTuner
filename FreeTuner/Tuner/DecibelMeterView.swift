@@ -17,6 +17,9 @@ struct DecibelMeterView: View {
     // Peak tracking
     @State private var peakDecibels: CGFloat = -60.0
     
+    // Tooltip state
+    @State private var showingTooltip = false
+    
     // Decibel range for the meter
     private let minDb: CGFloat = -60.0
     private let maxDb: CGFloat = 0.0
@@ -50,42 +53,98 @@ struct DecibelMeterView: View {
         }
     }
     
-    // Animated color for the needle
-    private var needleColor: Color {
-        if decibels.rms < -40 {
-            return .green
-        } else if decibels.rms < -20 {
-            return .yellow
-        } else if decibels.rms < -10 {
-            return .orange
-        } else {
-            return .red
-        }
-    }
-    
     var body: some View {
         VStack(spacing: isPad ? 16 : 12) {
-            // Title
-            Text("Volume Level")
-                .font(.system(size: isPad ? 20 : 14, weight: .semibold, design: .rounded))
-                .foregroundColor(.secondary)
-            
-            // Main meter display
-            ZStack {
-                meterContent
-            }
-            
-            // Level indicator bars
-            HStack(spacing: isPad ? 8 : 4) {
-                ForEach(0..<10, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(barColor(for: index))
-                        .frame(width: isPad ? 8 : 6, height: isPad ? 40 : 30)
-                        .scaleEffect(y: barScale(for: index), anchor: .bottom)
-                        .animation(.easeInOut(duration: 0.1), value: normalizedLevel)
+            // Title with info button
+            HStack {
+                Text("Volume Level")
+                    .font(.largeTitle)
+                    .foregroundColor(.secondary)
+                
+                Button(action: {
+                    showingTooltip.toggle()
+                }) {
+                    Image(systemName: "info.circle")
+                        .font(.largeTitle)
+                        .foregroundColor(.blue)
                 }
+                .popover(isPresented: $showingTooltip) {
+                    toolTipContent
+                }
+                
+                Spacer()
             }
-            .padding(.top, isPad ? 8 : 4)
+            
+            // Main horizontal bar meter
+            VStack(spacing: isPad ? 12 : 8) {
+                // Horizontal bar meter
+                ZStack(alignment: .leading) {
+                    // Background bar
+                    RoundedRectangle(cornerRadius: isPad ? 12 : 8)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: isPad ? 24 : 18)
+                    
+                    // Progress bar
+                    RoundedRectangle(cornerRadius: isPad ? 12 : 8)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [.green, .yellow, .orange, .red]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: max(0, normalizedLevel * (isPad ? 300 : 220)), height: isPad ? 24 : 18)
+                        .animation(.easeInOut(duration: 0.1), value: normalizedLevel)
+                    
+                    // Peak indicator
+                    if peakDecibels > decibels.peak + 2 {
+                        let peakNormalized = (max(minDb, min(maxDb, peakDecibels)) - minDb) / (maxDb - minDb)
+                        Rectangle()
+                            .fill(Color.red)
+                            .frame(width: 3, height: isPad ? 28 : 22)
+                            .offset(x: max(0, peakNormalized * (isPad ? 300 : 220) - 1.5))
+                            .opacity(0.8)
+                    }
+                }
+                
+                // Decibel scale markers
+                HStack {
+                    Text("-60")
+                        .font(.system(size: isPad ? 12 : 10, weight: .medium))
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                    
+                    Text("-40")
+                        .font(.system(size: isPad ? 12 : 10, weight: .medium))
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                    
+                    Text("-20")
+                        .font(.system(size: isPad ? 12 : 10, weight: .medium))
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                    
+                    Text("0")
+                        .font(.system(size: isPad ? 12 : 10, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
+                .frame(width: isPad ? 300 : 220)
+            }
+            
+            // Current decibel value
+            HStack {
+                Text("\(Int(decibels.rms))")
+                    .font(.system(size: isPad ? 32 : 24, weight: .bold, design: .rounded))
+                    .foregroundColor(meterColor)
+                    .contentTransition(.numericText())
+                
+                Text("dB")
+                    .font(.system(size: isPad ? 16 : 12, weight: .medium))
+                    .foregroundColor(.secondary)
+            }
         }
         .padding(.horizontal, isPad ? 24 : 16)
         .padding(.vertical, isPad ? 20 : 12)
@@ -110,83 +169,48 @@ struct DecibelMeterView: View {
         }
     }
     
-    @ViewBuilder
-    var meterContent: some View {
-        // Background circle
-        Circle()
-            .stroke(Color.gray.opacity(0.2), lineWidth: isPad ? 8 : 6)
-            .frame(width: isPad ? 200 : 140, height: isPad ? 200 : 140)
-        
-        // Meter arc
-        Circle()
-            .trim(from: 0, to: 0.75) // 270 degrees
-            .stroke(
-                AngularGradient(
-                    gradient: Gradient(colors: [.green, .yellow, .orange, .red]),
-                    center: .center,
-                    startAngle: .degrees(-135),
-                    endAngle: .degrees(135)
-                ),
-                style: StrokeStyle(lineWidth: isPad ? 8 : 6, lineCap: .round)
-            )
-            .frame(width: isPad ? 200 : 140, height: isPad ? 200 : 140)
-            .rotationEffect(.degrees(-135))
-        
-        // Needle
-        Rectangle()
-            .fill(needleColor)
-            .frame(width: isPad ? 4 : 3, height: isPad ? 80 : 60)
-            .offset(y: isPad ? -40 : -30)
-            .rotationEffect(.degrees(Double(normalizedLevel) * 270 - 135))
-            .animation(.easeInOut(duration: 0.1), value: normalizedLevel)
-            .shadow(color: needleColor.opacity(0.5), radius: 2, x: 0, y: 1)
-        
-        // Center dot
-        Circle()
-            .fill(needleColor)
-            .frame(width: isPad ? 12 : 8, height: isPad ? 12 : 8)
-            .shadow(color: needleColor.opacity(0.3), radius: 1, x: 0, y: 1)
-        
-        // Peak indicator
-        if peakDecibels > decibels.peak + 2 {
-            let peakNormalized = (max(minDb, min(maxDb, peakDecibels)) - minDb) / (maxDb - minDb)
-            Rectangle()
-                .fill(Color.red)
-                .frame(width: isPad ? 6 : 4, height: isPad ? 4 : 3)
-                .offset(y: isPad ? -40 : -30)
-                .rotationEffect(.degrees(Double(peakNormalized) * 270 - 135))
-                .opacity(0.8)
-        }
-        
-        // Decibel value
-        VStack(spacing: 4) {
-            Text("\(Int(decibels.rms))")
-                .font(.system(size: isPad ? 32 : 24, weight: .bold, design: .rounded))
-                .foregroundColor(needleColor)
-                .contentTransition(.numericText())
-            
-            Text("dB")
-                .font(.system(size: isPad ? 16 : 12, weight: .medium))
-                .foregroundColor(.secondary)
-        }
-        .offset(y: isPad ? 60 : 45)
-    }
-    
-    private func barColor(for index: Int) -> Color {
-        let threshold = CGFloat(index) / 10.0
-        if normalizedLevel >= threshold {
-            return meterColor
-        } else {
-            return Color.gray.opacity(0.3)
-        }
-    }
-    
-    private func barScale(for index: Int) -> CGFloat {
-        let threshold = CGFloat(index) / 10.0
-        if normalizedLevel >= threshold {
-            return 1.0
-        } else {
-            return 0.3
+    var toolTipContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Decibel Range Explained")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                Text("This tuner uses a digital audio scale called dBFS (decibels relative to full scale).")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                
+                Text("The color shows how loud the sound is overall, like an average, while the red line indicates the loudest detected frequency in the signal.")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .top, spacing: 8) {
+                        Text("•")
+                            .foregroundColor(.blue)
+                        Text("0 dB is the loudest possible signal (clipping point)")
+                    }
+                    .font(.body)
+                    
+                    HStack(alignment: .top, spacing: 8) {
+                        Text("•")
+                            .foregroundColor(.blue)
+                        Text("−60 dB is very quiet (near silence)")
+                    }
+                    .font(.body)
+                }
+                
+                Text("Unlike sound pressure levels (SPL), which range from 0 to 140 dB in the physical world, digital audio works in a scale from −∞ to 0, where 0 is the maximum.")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                
+                Text("So if you see values like −45 dB or −30 dB, that's normal—it means your signal is active but not overpowering.")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+            }
+            .padding(20)
+            .frame(maxWidth: isPad ? 500 : 300)
+            .frame(height: isPad ? 400 : 400)
         }
     }
 }
