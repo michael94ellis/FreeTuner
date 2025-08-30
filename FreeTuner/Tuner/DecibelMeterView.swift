@@ -78,7 +78,7 @@ struct DecibelMeterView: View {
                     showingTooltip.toggle()
                 }) {
                     Image(systemName: "info.circle")
-                        .font(.system(size: isPad ? 18 : 14))
+                        .font(.system(size: isPad ? 32 : 22))
                         .foregroundColor(.blue)
                 }
                 .popover(isPresented: $showingTooltip) {
@@ -88,25 +88,23 @@ struct DecibelMeterView: View {
                 Spacer()
                 
                 
-                if showingMeter {
-                    // Current decibel value
-                    HStack {
-                        Text("\(Int(decibels.rms))")
-                            .fixedSize()
-                            .font(.system(size: isPad ? 32 : 24, weight: .bold, design: .rounded))
-                            .foregroundColor(meterColor)
-                            .contentTransition(.numericText())
-                        
-                        Text("dB")
-                            .font(.system(size: isPad ? 16 : 12, weight: .medium))
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.horizontal, isPad ? 32 : 20)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .top).combined(with: .opacity),
-                        removal: .move(edge: .top).combined(with: .opacity)
-                    ))
+                // Current decibel value
+                HStack {
+                    Text(showingMeter ? "\(Int(decibels.rms))" : "  ")
+                        .fixedSize()
+                        .font(.system(size: isPad ? 32 : 24, weight: .bold, design: .rounded))
+                        .foregroundColor(meterColor)
+                        .contentTransition(.numericText())
+                    
+                    Text(showingMeter ? "dB" : "  ")
+                        .font(.system(size: isPad ? 16 : 12, weight: .medium))
+                        .foregroundColor(.secondary)
                 }
+                .padding(.horizontal, isPad ? 32 : 20)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .top).combined(with: .opacity),
+                    removal: .move(edge: .top).combined(with: .opacity)
+                ))
                 
                 Spacer()
                 
@@ -126,8 +124,13 @@ struct DecibelMeterView: View {
                         )
                 }
             }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    showingMeter.toggle()
+                }
+            }
             .padding(.horizontal, isPad ? 32 : 20)
-            
             
             if showingMeter {
                 decibelMeter
@@ -261,9 +264,7 @@ struct DecibelMeterView: View {
                     .font(.body)
                     .foregroundColor(.secondary)
             }
-            .padding(isPad ? 20 : 8)
-            .frame(maxWidth: isPad ? 500 : 300)
-            .frame(height: isPad ? 400 : 400)
+            .padding(20)
         }
     }
 }

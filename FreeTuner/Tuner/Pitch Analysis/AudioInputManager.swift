@@ -16,11 +16,15 @@ class AudioInputManager {
     private var inputFormat: AVAudioFormat?
     private let queue = DispatchQueue(label: "PitchTapQueue")
 
-    private var pitchStream: AsyncStream<(Float, [(frequency: Float, magnitude: Float)], (rms: Float, peak: Float))>?
-    private var pitchContinuation: AsyncStream<(Float, [(frequency: Float, magnitude: Float)], (rms: Float, peak: Float))>.Continuation?
+    private var pitchStream: AsyncStream<(Float, [FrequencyMagnitude], (rms: Float, peak: Float))>?
+    private var pitchContinuation: AsyncStream<(Float, [FrequencyMagnitude], (rms: Float, peak: Float))>.Continuation?
     
-    var stream: AsyncStream<(Float, [(frequency: Float, magnitude: Float)], (rms: Float, peak: Float))>? {
-        return pitchStream
+    var stream: AsyncStream<(Float, [FrequencyMagnitude], (rms: Float, peak: Float))>? {
+        pitchStream
+    }
+    
+    var sampleRate: Float {
+        Float(inputFormat?.sampleRate ?? 44100)
     }
 
     func start() throws {
@@ -80,7 +84,7 @@ class AudioInputManager {
         // Request a buffer size that matches our FFT size for consistency
         let requestedBufferSize = AVAudioFrameCount(fftSize)
         
-        pitchStream = AsyncStream<(Float, [(frequency: Float, magnitude: Float)], (rms: Float, peak: Float))> { continuation in
+        pitchStream = AsyncStream<(Float, [FrequencyMagnitude], (rms: Float, peak: Float))> { continuation in
             self.pitchContinuation = continuation
         }
         

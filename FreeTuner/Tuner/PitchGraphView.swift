@@ -53,6 +53,12 @@ struct PitchGraphView: View {
                         )
                 }
             }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    showingGraph.toggle()
+                }
+            }
             .padding(.horizontal, isPad ? 32 : 20)
             
             if showingGraph {

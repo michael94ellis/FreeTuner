@@ -12,7 +12,6 @@ class NoteConverter {
     @ObservationIgnored
     private let temperamentConverter = TemperamentConverter()
     var currentTemperament: Temperament = .equal
-    var currentKey: String = "C" // For just intonation
     
     /// Convert frequency to the closest musical note using current temperament
     func frequencyToNote(_ frequency: Float) -> Note? {

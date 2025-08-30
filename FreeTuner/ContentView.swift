@@ -14,7 +14,7 @@ struct ContentView: View {
     @State private var isListening = false
     @State private var errorMessage: String?
     @State private var currentPitch: Float?
-    @State private var currentSpectrum: [(frequency: Float, magnitude: Float)] = []
+    @State private var currentSpectrum: [FrequencyMagnitude] = []
     @State private var currentDecibels: (rms: CGFloat, peak: CGFloat) = (rms: -60.0, peak: -60.0)
     @State private var showingSettings = false
     

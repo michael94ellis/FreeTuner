@@ -14,7 +14,7 @@ struct TunerView: View {
     @Binding var isListening: Bool
     @Binding var errorMessage: String?
     @Binding var currentPitch: Float?
-    @Binding var currentSpectrum: [(frequency: Float, magnitude: Float)]
+    @Binding var currentSpectrum: [FrequencyMagnitude]
     @Binding var currentDecibels: (rms: CGFloat, peak: CGFloat)
     
     @State var pitchDetectionTask: Task<Void, Never>?
@@ -56,7 +56,7 @@ struct TunerView: View {
                 // Settings Summary
                 settingsSummaryView
                 
-                // Decibel Meter and Pitch Graph - stack vertically on smaller screens
+                // Decibel Meter, Pitch Graph, Mel Spectrogram, and 3D Graph - stack vertically on smaller screens
                 VStack(spacing: 16) {
                     DecibelMeterView(decibels: currentDecibels, isListening: isListening)
                     
@@ -200,6 +200,8 @@ struct TunerView: View {
                             pitchData.removeFirst()
                         }
                     }
+                    
+
                 }
             }
         }
@@ -247,3 +249,5 @@ struct TunerView: View {
         .preferredColorScheme(.dark)
     }
 }
+
+

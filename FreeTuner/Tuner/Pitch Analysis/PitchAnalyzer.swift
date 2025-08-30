@@ -79,7 +79,7 @@ class PitchAnalyzer {
     }
 
     /// Analyze a PCM buffer and return dominant frequency + full spectrum
-    func analyze(buffer: [Float]) -> (dominantFrequency: Float?, spectrum: [(frequency: Float, magnitude: Float)]) {
+    func analyze(buffer: [Float]) -> (dominantFrequency: Float?, spectrum: [FrequencyMagnitude]) {
         guard buffer.count == fftSize else {
             assertionFailure("Buffer size must match fftSize")
             return (nil, [])
@@ -134,6 +134,8 @@ class PitchAnalyzer {
               let maxIndex = relevantMagnitudes.firstIndex(of: maxMagnitude) else {
 //            print("No valid magnitude found in relevant range")
             let spectrum = zip(binFrequencies, magnitudes).map { ($0, $1) }
+                .compactMap { FrequencyMagnitude(frequency: $0.0, magnitude: $0.1) }
+            
             return (nil, spectrum)
         }
         
@@ -161,10 +163,12 @@ class PitchAnalyzer {
         if maxMagnitude > noiseThreshold {
 //            print("✅ Pitch detected: \(interpolatedFrequency) Hz (magnitude: \(maxMagnitude) dB)")
             let spectrum = zip(binFrequencies, magnitudes).map { ($0, $1) }
+                .compactMap { FrequencyMagnitude(frequency: $0.0, magnitude: $0.1) }
             return (interpolatedFrequency, spectrum)
         } else {
 //            print("❌ Below noise threshold: \(maxMagnitude) dB < \(noiseThreshold) dB")
             let spectrum = zip(binFrequencies, magnitudes).map { ($0, $1) }
+                .compactMap { FrequencyMagnitude(frequency: $0.0, magnitude: $0.1) }
             return (nil, spectrum)
         }
     }
