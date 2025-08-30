@@ -20,6 +20,11 @@ class TemperamentConverter {
         a4Frequency = max(400.0, min(480.0, frequency)) // Limit to reasonable range
     }
     
+    /// Set the A4 MIDI reference note
+    func setA4MidiNote(_ midiNote: Int) {
+        a4MidiNote = max(0, min(127, midiNote)) // Limit to valid MIDI range
+    }
+    
     // Equal temperament ratios (current implementation)
     private func equalTemperamentRatio(_ semitones: Int) -> Float {
         return pow(2.0, Float(semitones) / 12.0)
@@ -281,13 +286,15 @@ class TemperamentConverter {
     /// For non-equal temperaments
     func noteFromFrequencyNonEqual(_ frequency: Float,
                                    temperamentRatios: [Float],
-                                   referenceNote: Int = 60,
-                                   referenceFreq: Float = 261.63) -> Note? {
+                                   referenceNote: Int? = nil,
+                                   referenceFreq: Float? = nil) -> Note? {
+        let refNote = referenceNote ?? a4MidiNote
+        let refFreq = referenceFreq ?? a4Frequency
         guard frequency > 0 else { return nil }
         
         // Calculate the octave of the detected frequency relative to the reference
-        let semitoneOffset = 12 * log2(frequency / referenceFreq)
-        let baseOctave = Int(floor((Float(referenceNote) + semitoneOffset) / 12.0))
+        let semitoneOffset = 12 * log2(frequency / refFreq)
+        let baseOctave = Int(floor((Float(refNote) + semitoneOffset) / 12.0))
         
         // Scale temperament ratios to the correct octave
         var closestNoteIndex: Int?
@@ -296,7 +303,7 @@ class TemperamentConverter {
 
         for i in 0..<temperamentRatios.count {
             let ratio = temperamentRatios[i]
-            let scaledFreq = referenceFreq * ratio * pow(2.0, Float(baseOctave - 5)) // C4 = MIDI 60 = octave 5
+            let scaledFreq = refFreq * ratio * pow(2.0, Float(baseOctave - 5)) // C4 = MIDI 60 = octave 5
 
             let distance = abs(frequency - scaledFreq)
             if distance < minDistance {

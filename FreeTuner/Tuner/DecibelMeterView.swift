@@ -92,6 +92,7 @@ struct DecibelMeterView: View {
                     // Current decibel value
                     HStack {
                         Text("\(Int(decibels.rms))")
+                            .fixedSize()
                             .font(.system(size: isPad ? 32 : 24, weight: .bold, design: .rounded))
                             .foregroundColor(meterColor)
                             .contentTransition(.numericText())
@@ -157,14 +158,14 @@ struct DecibelMeterView: View {
                     .animation(.easeInOut(duration: 0.1), value: normalizedLevel)
                 
                 // Peak indicator
-                if peakDecibels > decibels.peak + 2 {
+//                if peakDecibels > decibels.peak + 2 {
                     let peakNormalized = (max(minDb, min(maxDb, peakDecibels)) - minDb) / (maxDb - minDb)
                     Rectangle()
                         .fill(Color.red)
                         .frame(width: 3, height: isPad ? 28 : 22)
                         .offset(x: max(0, peakNormalized * (isPad ? 300 : 220) - 1.5))
                         .opacity(0.8)
-                }
+//                }
             }
             
             // Decibel scale markers

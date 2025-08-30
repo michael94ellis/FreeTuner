@@ -56,4 +56,14 @@ class NoteConverter {
     func getA4Frequency() -> Float {
         return temperamentConverter.a4Frequency
     }
+    
+    /// Set the A4 MIDI reference note
+    func setA4MidiNote(_ midiNote: Int) {
+        temperamentConverter.setA4MidiNote(midiNote)
+    }
+    
+    /// Get the current A4 MIDI reference note
+    func getA4MidiNote() -> Int {
+        return temperamentConverter.a4MidiNote
+    }
 }

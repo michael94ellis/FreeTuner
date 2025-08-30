@@ -17,8 +17,6 @@ struct TunerView: View {
     @Binding var currentSpectrum: [(frequency: Float, magnitude: Float)]
     @Binding var currentDecibels: (rms: CGFloat, peak: CGFloat)
     
-    @State private var showingTemperamentPicker = false
-    @State private var showingA4FrequencyPicker = false
     @State var pitchDetectionTask: Task<Void, Never>?
     @State private var pitchData: [PitchDataPoint] = []
     
@@ -26,149 +24,130 @@ struct TunerView: View {
     @Environment(\.isPad) private var isPad
     
     var body: some View {
-        VStack(spacing: 24) {
-            
-            headerButtons
-                .padding(.top, isPad ? 16 : 8)
-            
-            // Add tap hint when not listening
-            Text(isListening ? "Listening…" : "🎙 Tap anywhere to start")
-                .font(.system(size: isPad ? 24 : 15, weight: .semibold, design: .rounded))
-                .foregroundColor(isListening ? .white : .blue)
-                .padding(.horizontal, isPad ? 32 : 16)
-                .padding(.vertical, isPad ? 16 : 8)
-                .background(
-                    Capsule()
-                        .fill(isListening ? Color.blue : Color.blue.opacity(0.1))
-                        .overlay(
-                            Capsule()
-                                .stroke(Color.blue.opacity(isListening ? 0.5 : 0.3), lineWidth: 1)
-                        )
-                )
-                .animation(.easeInOut(duration: 0.2), value: isListening)
-                .accessibilityLabel(isListening ? "Voice recognition active" : "Tap to start listening")
-
-            
-            TunerCircleView(detectedNote: currentPitch.flatMap {
-                noteConverter.frequencyToNote($0)
-            },
-                            isListening: $isListening)
-            .padding(.horizontal, isPad ? 32 : 20)
-            
-            // Decibel Meter and Pitch Graph - stack vertically on smaller screens
-            VStack(spacing: 16) {
-                DecibelMeterView(decibels: currentDecibels, isListening: isListening)
+        ScrollView {
+            VStack(spacing: 24) {
                 
-                // Pitch Graph
-                PitchGraphView(pitchData: pitchData, isListening: isListening)
+                // Add tap hint when not listening
+                Text(isListening ? "Listening…" : "🎙 Tap anywhere to start")
+                    .font(.system(size: isPad ? 24 : 15, weight: .semibold, design: .rounded))
+                    .foregroundColor(isListening ? .white : .blue)
+                    .padding(.horizontal, isPad ? 32 : 16)
+                    .padding(.vertical, isPad ? 16 : 8)
+                    .background(
+                        Capsule()
+                            .fill(isListening ? Color.blue : Color.blue.opacity(0.1))
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.blue.opacity(isListening ? 0.5 : 0.3), lineWidth: 1)
+                            )
+                    )
+                    .animation(.easeInOut(duration: 0.2), value: isListening)
+                    .accessibilityLabel(isListening ? "Voice recognition active" : "Tap to start listening")
+                
+                
+                TunerCircleView(detectedNote: currentPitch.flatMap {
+                    noteConverter.frequencyToNote($0)
+                },
+                                isListening: $isListening)
+                .padding(.horizontal, isPad ? 32 : 20)
+                .frame(maxHeight: isPad ? .infinity : 500)
+                .frame(minHeight: 300)
+                
+                // Settings Summary
+                settingsSummaryView
+                
+                // Decibel Meter and Pitch Graph - stack vertically on smaller screens
+                VStack(spacing: 16) {
+                    DecibelMeterView(decibels: currentDecibels, isListening: isListening)
+                    
+                    // Pitch Graph
+                    PitchGraphView(pitchData: pitchData, isListening: isListening)
+                }
+                
+                errorMessageView
+                
+                Spacer()
             }
-            
-            errorMessageView
-
-            Spacer()
-        }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                if isListening {
-                    pitchManager.stop()
-                    isListening = false
-                    currentSpectrum = []
-                    pitchDetectionTask?.cancel()
-                    pitchDetectionTask = nil
-                } else {
-                    startListening()
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    if isListening {
+                        pitchManager.stop()
+                        isListening = false
+                        currentSpectrum = []
+                        pitchDetectionTask?.cancel()
+                        pitchDetectionTask = nil
+                    } else {
+                        startListening()
+                    }
                 }
             }
-        }
-        .sheet(isPresented: $showingTemperamentPicker) {
-            TemperamentPickerView(noteConverter: noteConverter)
-        }
-        .sheet(isPresented: $showingA4FrequencyPicker) {
-            A4FrequencyPickerView(noteConverter: noteConverter)
         }
     }
     
-    var headerButtons: some View {
-        // Settings Row with modern card design
-        HStack(spacing: 16) {
-            // Temperament Selector
-            Button(action: {
-                showingTemperamentPicker = true
-            }) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Temperament")
-                            .font(.system(size: isPad ? 18 : 12, weight: .medium))
-                            .foregroundColor(.secondary)
-                        
-                        Text(noteConverter.currentTemperament.rawValue)
-                            .font(.system(size: isPad ? 24 : 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                    }
-                    
-                    Spacer()
-                    
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: isPad ? 18 : 12, weight: .medium))
+    // MARK: - Settings Summary View
+    @ViewBuilder
+    var settingsSummaryView: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 16) {
+                // Temperament
+                VStack(spacing: 4) {
+                    Text("Temperament")
+                        .captionFont(isPad: isPad)
                         .foregroundColor(.secondary)
+                    
+                    Text(noteConverter.currentTemperament.rawValue)
+                        .subheadingFont(isPad: isPad)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
                 }
-                .padding(.horizontal, isPad ? 20 : 12)
-                .padding(.vertical, isPad ? 16 : 8)
                 .frame(maxWidth: .infinity)
-                .frame(height: isPad ? 110 : 80)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemBackground))
-                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                )
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(PlainButtonStyle())
-            
-            // A4 Frequency Selector
-            Button(action: {
-                showingA4FrequencyPicker = true
-            }) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("A4 Reference")
-                            .font(.system(size: isPad ? 18 : 12, weight: .medium))
-                            .foregroundColor(.secondary)
-                        
-                        Text("\(Int(noteConverter.getA4Frequency())) Hz")
-                            .font(.system(size: isPad ? 24 : 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                    }
-                    
-                    Spacer()
-                    
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: isPad ? 18 : 12, weight: .medium))
+                
+                // A4 Frequency
+                VStack(spacing: 4) {
+                    Text("A4 Frequency")
+                        .captionFont(isPad: isPad)
                         .foregroundColor(.secondary)
+                    
+                    Text("\(Int(noteConverter.getA4Frequency())) Hz")
+                        .subheadingFont(isPad: isPad)
+                        .foregroundColor(.primary)
                 }
-                .padding(.horizontal, isPad ? 20 : 12)
-                .padding(.vertical, isPad ? 16 : 8)
                 .frame(maxWidth: .infinity)
-                .frame(height: isPad ? 110 : 80)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemBackground))
-                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                )
-                .contentShape(Rectangle())
+                
+                // MIDI Reference
+                VStack(spacing: 4) {
+                    Text("MIDI Reference")
+                        .captionFont(isPad: isPad)
+                        .foregroundColor(.secondary)
+                    
+                    Text("\(midiNoteToName(noteConverter.getA4MidiNote()))")
+                        .subheadingFont(isPad: isPad)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity)
             }
-            .buttonStyle(PlainButtonStyle())
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, isPad ? 32 : 20)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 4, x: 0, y: 2)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+        )
+    }
+    
+    // MARK: - Helper Methods
+    private func midiNoteToName(_ midiNote: Int) -> String {
+        let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+        let noteIndex = midiNote % 12
+        let octave = (midiNote / 12) - 1
+        return "\(noteNames[noteIndex])\(octave)"
     }
     
     @ViewBuilder

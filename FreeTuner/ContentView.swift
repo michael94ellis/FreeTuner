@@ -16,29 +16,50 @@ struct ContentView: View {
     @State private var currentPitch: Float?
     @State private var currentSpectrum: [(frequency: Float, magnitude: Float)] = []
     @State private var currentDecibels: (rms: CGFloat, peak: CGFloat) = (rms: -60.0, peak: -60.0)
+    @State private var showingSettings = false
+    
+    @Environment(\.isPad) private var isPad
     
     var body: some View {
-        ZStack {
-            // Background gradient
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(.systemBackground),
-                    Color(.systemGray6).opacity(0.3)
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            
-            TunerView(
-                pitchManager: pitchManager,
-                noteConverter: noteConverter,
-                isListening: $isListening,
-                errorMessage: $errorMessage,
-                currentPitch: $currentPitch,
-                currentSpectrum: $currentSpectrum,
-                currentDecibels: $currentDecibels
-            )
+        NavigationStack {
+            ZStack {
+                // Background gradient
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(.systemBackground),
+                        Color(.systemGray6).opacity(0.3)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+                
+                TunerView(
+                    pitchManager: pitchManager,
+                    noteConverter: noteConverter,
+                    isListening: $isListening,
+                    errorMessage: $errorMessage,
+                    currentPitch: $currentPitch,
+                    currentSpectrum: $currentSpectrum,
+                    currentDecibels: $currentDecibels
+                )
+            }
+            .navigationTitle("FreeTuner")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showingSettings = true
+                    }) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: isPad ? 28 : 20, weight: .medium))
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showingSettings) {
+            SettingsView(noteConverter: noteConverter)
         }
     }
 }
