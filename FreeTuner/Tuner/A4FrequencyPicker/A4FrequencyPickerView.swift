@@ -12,6 +12,8 @@ struct A4FrequencyPickerView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isPad) private var isPad
     @State private var selectedA4Frequency: Float
+    @StateObject private var pitchPlayer = PitchPlayer()
+    @State private var debounceTimer: Timer?
     
     // Common A4 frequencies used throughout history
     let commonA4Frequencies: [(name: String, frequency: Float?)] = [
@@ -21,6 +23,8 @@ struct A4FrequencyPickerView: View {
         ("Verdi (A432)", 432.0),
         ("Historical (A409)", 409.0),
         ("Early Music (A392)", 392.0),
+        ("Low A4 (A400)", 400.0),
+        ("High A4 (A480)", 480.0),
     ]
     
     init(noteConverter: NoteConverter) {
@@ -48,6 +52,11 @@ struct A4FrequencyPickerView: View {
             .toolbar {
                 toolbarContent
             }
+            .onDisappear {
+                pitchPlayer.stop()
+                debounceTimer?.invalidate()
+                debounceTimer = nil
+            }
         }
     }
     
@@ -66,20 +75,74 @@ struct A4FrequencyPickerView: View {
     
     // MARK: - Current Frequency Display
     private var currentFrequencyDisplay: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             Text("Current A4 Frequency")
                 .captionFont(isPad: false)
                 .foregroundColor(.secondary)
             
-            Text("\(Int(selectedA4Frequency)) Hz")
-                .mainNoteFont(isPad: false)
-                .foregroundColor(.primary)
-                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
+            HStack(spacing: 20) {
+                Text("\(Int(selectedA4Frequency)) Hz")
+                    .titleFont(isPad: isPad)
+                    .frame(maxWidth: .infinity)
+                    .foregroundColor(.primary)
+                    .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
+                
+                Button(action: {
+                    if pitchPlayer.isCurrentlyPlaying {
+                        pitchPlayer.stop()
+                    } else {
+                        pitchPlayer.play(frequency: selectedA4Frequency)
+                    }
+                }) {
+                    Image(systemName: pitchPlayer.isCurrentlyPlaying ? "stop.circle.fill" : "play.circle.fill")
+                        .font(.system(size: 44, weight: .medium))
+                        .foregroundColor(pitchPlayer.isCurrentlyPlaying ? .red : .blue)
+                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            
+            waveformSelector
         }
-        .padding(24)
+        .padding(20)
         .background(currentFrequencyBackground)
         .overlay(currentFrequencyBorder)
     }
+    
+    private var waveformSelector: some View {
+            VStack(spacing: 8) {
+                Text("Waveform")
+                    .captionFont(isPad: false)
+                    .foregroundColor(.secondary)
+                
+                HStack(spacing: 8) {
+                    ForEach(WaveformType.allCases, id: \.self) { waveform in
+                        Button(action: {
+                            pitchPlayer.selectedWaveform = waveform
+                        }) {
+                            Text(waveform.rawValue)
+                                .smallFont(isPad: false)
+                                .foregroundColor(pitchPlayer.selectedWaveform == waveform ? .white : .primary)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(pitchPlayer.selectedWaveform == waveform ? Color.blue : Color(.systemGray5))
+                                )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .onChange(of: pitchPlayer.selectedWaveform, {
+                            guard pitchPlayer.isCurrentlyPlaying else {
+                                return
+                            }
+                            pitchPlayer.stop()
+                            pitchPlayer.play(frequency: selectedA4Frequency)
+                        })
+                    }
+                }
+            }
+        }
+        
     
     private var currentFrequencyBackground: some View {
         RoundedRectangle(cornerRadius: 16)
@@ -100,8 +163,6 @@ struct A4FrequencyPickerView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             sliderControls
-            
-            frequencyDisplay
         }
         .padding(20)
         .background(customSliderBackground)
@@ -110,30 +171,45 @@ struct A4FrequencyPickerView: View {
     
     private var sliderControls: some View {
         HStack {
-            Text("400 Hz")
+            Text("350 Hz")
                 .captionFont(isPad: false)
                 .foregroundColor(.secondary)
             
             Slider(
                 value: $selectedA4Frequency,
-                in: 400...480,
+                in: 350...500,
                 step: 1
             )
             .accentColor(.blue)
+            .onChange(of: selectedA4Frequency) {
+                guard pitchPlayer.isCurrentlyPlaying else {
+                    return
+                }
+                // Cancel any existing timer
+                debounceTimer?.invalidate()
+                
+                // Create a new timer with 0.3 second delay
+                debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+                    pitchPlayer.stop()
+                    pitchPlayer.play(frequency: selectedA4Frequency)
+                }
+            }
             
-            Text("480 Hz")
+            Text("500 Hz")
                 .captionFont(isPad: false)
                 .foregroundColor(.secondary)
         }
     }
     
     private var frequencyDisplay: some View {
-        Text("\(Int(selectedA4Frequency)) Hz")
-            .headingFont(isPad: false)
-            .foregroundColor(.blue)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(frequencyDisplayBackground)
+        HStack(spacing: 16) {
+            Text("\(Int(selectedA4Frequency)) Hz")
+                .headingFont(isPad: false)
+                .foregroundColor(.blue)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(frequencyDisplayBackground)
+        }
     }
     
     private var frequencyDisplayBackground: some View {

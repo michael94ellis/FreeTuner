@@ -13,23 +13,33 @@ struct FrequencyStandardButton: View {
     let onSelect: () -> Void
     
     var body: some View {
-        Button(action: onSelect) {
-            VStack(spacing: 8) {
-                Text(standard.name)
+        VStack(spacing: 8) {
+            Text(standard.name)
+                .smallFont(isPad: false)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+            
+            frequencyText
+            
+            Button(action: onSelect) {
+                Text("Select")
                     .smallFont(isPad: false)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                
-                frequencyText
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(isSelected ? Color.blue : Color.gray)
+                    )
             }
-            .padding(16)
-            .frame(maxWidth: .infinity)
-            .background(buttonBackground)
-            .overlay(buttonBorder)
-            .scaleEffect(isSelected ? 1.02 : 1.0)
-            .animation(.easeInOut(duration: 0.2), value: isSelected)
+            .buttonStyle(PlainButtonStyle())
         }
-        .buttonStyle(PlainButtonStyle())
+        .padding(16)
+        .frame(maxWidth: .infinity)
+        .background(buttonBackground)
+        .overlay(buttonBorder)
+        .scaleEffect(isSelected ? 1.02 : 1.0)
+        .animation(.easeInOut(duration: 0.2), value: isSelected)
     }
     
     private var frequencyText: some View {
