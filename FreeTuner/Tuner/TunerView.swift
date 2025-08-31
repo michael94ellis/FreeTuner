@@ -9,19 +9,18 @@ import SwiftUI
 
 struct TunerView: View {
     let pitchManager: AudioInputManager
-    @State var noteConverter: NoteConverter
-    
+    @Bindable var noteConverter: NoteConverter
     @Binding var isListening: Bool
     @Binding var errorMessage: String?
     @Binding var currentPitch: Float?
     @Binding var currentSpectrum: [FrequencyMagnitude]
     @Binding var currentDecibels: (rms: CGFloat, peak: CGFloat)
     
-    @State var pitchDetectionTask: Task<Void, Never>?
-    @State private var pitchData: [PitchDataPoint] = []
-    
-    // Device-specific sizing
     @Environment(\.isPad) private var isPad
+    @State private var userDefaults = UserDefaultsManager.shared
+    
+    @State private var pitchData: [PitchDataPoint] = []
+    @State private var pitchDetectionTask: Task<Void, Never>?
     
     var body: some View {
         ScrollView {
@@ -53,15 +52,22 @@ struct TunerView: View {
                 .frame(maxHeight: isPad ? .infinity : 500)
                 .frame(minHeight: isPad ? 500 : 300)
                 
-                // Settings Summary
-                settingsSummaryView
+                // Settings Summary (only show if reference labels are enabled)
+                if userDefaults.showReferenceLabels {
+                    settingsSummaryView
+                }
                 
-                // Decibel Meter, Pitch Graph, Mel Spectrogram, and 3D Graph - stack vertically on smaller screens
+                // Decibel Meter and Pitch Graph - stack vertically on smaller screens
                 VStack(spacing: 16) {
-                    DecibelMeterView(decibels: currentDecibels, isListening: isListening)
+                    // Signal Strength Meter (only show if enabled)
+                    if userDefaults.showSignalStrength {
+                        DecibelMeterView(decibels: currentDecibels, isListening: isListening)
+                    }
                     
-                    // Pitch Graph
-                    PitchGraphView(pitchData: pitchData, isListening: isListening)
+                    // Pitch Graph (only show if enabled)
+                    if userDefaults.showPitchGraph {
+                        PitchGraphView(pitchData: pitchData, isListening: isListening)
+                    }
                 }
                 
                 errorMessageView
@@ -90,19 +96,6 @@ struct TunerView: View {
     var settingsSummaryView: some View {
         VStack(spacing: 8) {
             HStack(spacing: 16) {
-                // Temperament
-                VStack(spacing: 4) {
-                    Text("Temperament")
-                        .captionFont(isPad: isPad)
-                        .foregroundColor(.secondary)
-                    
-                    Text(noteConverter.currentTemperament.rawValue)
-                        .subheadingFont(isPad: isPad)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                }
-                .frame(maxWidth: .infinity)
-                
                 // A4 Frequency
                 VStack(spacing: 4) {
                     Text("A4 Frequency")

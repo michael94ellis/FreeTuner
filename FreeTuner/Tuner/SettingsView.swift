@@ -12,9 +12,9 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isPad) private var isPad
     
-    @State private var showingTemperamentPicker = false
     @State private var showingA4FrequencyPicker = false
     @State private var showingMidiReferencePicker = false
+    @State private var userDefaults = UserDefaultsManager.shared
     
     var body: some View {
         NavigationView {
@@ -23,7 +23,7 @@ struct SettingsView: View {
                 
                 ScrollView {
                     VStack(spacing: 24) {
-                        temperamentSection
+                        displayOptionsSection
                         a4FrequencySection
                         midiReferenceSection
                     }
@@ -41,9 +41,6 @@ struct SettingsView: View {
                     .bodyFont(isPad: isPad)
                 }
             }
-        }
-        .sheet(isPresented: $showingTemperamentPicker) {
-            TemperamentPickerView(noteConverter: noteConverter)
         }
         .sheet(isPresented: $showingA4FrequencyPicker) {
             A4FrequencyPickerView(noteConverter: noteConverter)
@@ -66,40 +63,96 @@ struct SettingsView: View {
         .ignoresSafeArea()
     }
     
-    // MARK: - Temperament Section
-    private var temperamentSection: some View {
+    // MARK: - Display Options Section
+    private var displayOptionsSection: some View {
         VStack(spacing: 16) {
             HStack {
-                Image(systemName: "music.note.list")
+                Image(systemName: "eye")
                     .iconSmallFont(isPad: isPad)
                     .foregroundColor(.blue)
                 
-                Text("Temperament")
+                Text("Display Options")
                     .headingFont(isPad: isPad)
                     .foregroundColor(.primary)
                 
                 Spacer()
             }
             
-            Button(action: {
-                showingTemperamentPicker = true
-            }) {
+            VStack(spacing: 12) {
+                // Pitch Graph Toggle
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Current Temperament")
-                            .captionFont(isPad: isPad)
-                            .foregroundColor(.secondary)
-                        
-                        Text(noteConverter.currentTemperament.rawValue)
+                        Text("Pitch Graph")
                             .subheadingFont(isPad: isPad)
                             .foregroundColor(.primary)
+                        
+                        Text("Show real-time frequency tracking")
+                            .captionFont(isPad: isPad)
+                            .foregroundColor(.secondary)
                     }
                     
                     Spacer()
                     
-                    Image(systemName: "chevron.right")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundColor(.secondary)
+                    Toggle("", isOn: $userDefaults.showPitchGraph)
+                        .labelsHidden()
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.systemBackground))
+                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                )
+                
+                // Signal Strength Toggle
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Signal Strength")
+                            .subheadingFont(isPad: isPad)
+                            .foregroundColor(.primary)
+                        
+                        Text("Show audio level meter")
+                            .captionFont(isPad: isPad)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Spacer()
+                    
+                    Toggle("", isOn: $userDefaults.showSignalStrength)
+                        .labelsHidden()
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.systemBackground))
+                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                )
+                
+                // Reference Labels Toggle
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Reference Labels")
+                            .subheadingFont(isPad: isPad)
+                            .foregroundColor(.primary)
+                        
+                        Text("Show A4 frequency and MIDI reference")
+                            .captionFont(isPad: isPad)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Spacer()
+                    
+                    Toggle("", isOn: $userDefaults.showReferenceLabels)
+                        .labelsHidden()
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
@@ -113,7 +166,6 @@ struct SettingsView: View {
                         .stroke(Color.gray.opacity(0.1), lineWidth: 1)
                 )
             }
-            .buttonStyle(PlainButtonStyle())
         }
         .padding(20)
         .background(sectionBackground)
