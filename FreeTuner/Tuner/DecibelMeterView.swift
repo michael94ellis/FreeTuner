@@ -62,13 +62,9 @@ struct DecibelMeterView: View {
             // Header with collapsible button
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Audio Level")
-                        .font(.system(size: isPad ? 28 : 16, weight: .semibold))
+                    Text("Signal Strength")
+                        .font(.title2.weight(.semibold))
                         .foregroundColor(.primary)
-                    
-                    Text("Real-time volume monitoring")
-                        .font(.system(size: isPad ? 22 : 12, weight: .medium))
-                        .foregroundColor(.secondary)
                 }
                 
                 Spacer()
@@ -78,7 +74,7 @@ struct DecibelMeterView: View {
                     showingTooltip.toggle()
                 }) {
                     Image(systemName: "info.circle")
-                        .font(.system(size: isPad ? 32 : 22))
+                        .font(.title2)
                         .foregroundColor(.blue)
                 }
                 .popover(isPresented: $showingTooltip) {
@@ -92,12 +88,12 @@ struct DecibelMeterView: View {
                 HStack {
                     Text(showingMeter ? "\(Int(decibels.rms))" : "  ")
                         .fixedSize()
-                        .font(.system(size: isPad ? 32 : 24, weight: .bold, design: .rounded))
+                        .font(.title.weight(.bold))
                         .foregroundColor(meterColor)
                         .contentTransition(.numericText())
                     
                     Text(showingMeter ? "dB" : "  ")
-                        .font(.system(size: isPad ? 16 : 12, weight: .medium))
+                        .font(.caption.weight(.medium))
                         .foregroundColor(.secondary)
                 }
                 .padding(.horizontal, isPad ? 32 : 20)
@@ -115,7 +111,7 @@ struct DecibelMeterView: View {
                     }
                 }) {
                     Image(systemName: showingMeter ? "thermometer.high" : "thermometer.medium.slash")
-                        .font(.system(size: isPad ? 32 : 18, weight: .medium))
+                        .font(.title2.weight(.medium))
                         .foregroundColor(.blue)
                         .frame(width: isPad ? 65 : 44, height: isPad ? 65 : 44)
                         .background(
@@ -174,25 +170,25 @@ struct DecibelMeterView: View {
             // Decibel scale markers
             HStack {
                 Text("-60")
-                    .font(.system(size: isPad ? 12 : 10, weight: .medium))
+                    .font(.caption2.weight(.medium))
                     .foregroundColor(.secondary)
                 
                 Spacer()
                 
                 Text("-40")
-                    .font(.system(size: isPad ? 12 : 10, weight: .medium))
+                    .font(.caption2.weight(.medium))
                     .foregroundColor(.secondary)
                 
                 Spacer()
                 
                 Text("-20")
-                    .font(.system(size: isPad ? 12 : 10, weight: .medium))
+                    .font(.caption2.weight(.medium))
                     .foregroundColor(.secondary)
                 
                 Spacer()
                 
                 Text("0")
-                    .font(.system(size: isPad ? 12 : 10, weight: .medium))
+                    .font(.caption2.weight(.medium))
                     .foregroundColor(.secondary)
             }
             .frame(width: isPad ? 300 : 220)

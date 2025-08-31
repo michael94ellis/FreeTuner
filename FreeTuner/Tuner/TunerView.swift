@@ -29,7 +29,7 @@ struct TunerView: View {
                 
                 // Add tap hint when not listening
                 Text(isListening ? "Listening…" : "🎙 Tap anywhere to start")
-                    .font(.system(size: isPad ? 24 : 15, weight: .semibold, design: .rounded))
+                    .font(.headline.weight(.semibold))
                     .foregroundColor(isListening ? .white : .blue)
                     .padding(.horizontal, isPad ? 32 : 16)
                     .padding(.vertical, isPad ? 16 : 8)
@@ -157,10 +157,10 @@ struct TunerView: View {
                     HStack {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundColor(.orange)
-                .font(.system(size: isPad ? 22 : 16, weight: .medium))
+                .font(.subheadline.weight(.medium))
             
             Text(error)
-                .font(.system(size: isPad ? 20 : 14, weight: .medium))
+                .font(.subheadline.weight(.medium))
                 .foregroundColor(.primary)
                 .multilineTextAlignment(.leading)
         }

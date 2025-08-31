@@ -52,7 +52,7 @@ struct ContentView: View {
                         showingSettings = true
                     }) {
                         Image(systemName: "gearshape.fill")
-                            .font(.system(size: isPad ? 28 : 20, weight: .medium))
+                            .font(.title2.weight(.medium))
                             .foregroundColor(.blue)
                     }
                 }

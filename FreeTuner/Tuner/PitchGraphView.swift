@@ -28,11 +28,11 @@ struct PitchGraphView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Pitch History")
-                        .font(.system(size: isPad ? 28 : 16, weight: .semibold))
+                        .font(.title2.weight(.semibold))
                         .foregroundColor(.primary)
                     
                     Text("Real-time frequency tracking")
-                        .font(.system(size: isPad ? 22 : 12, weight: .medium))
+                        .font(.caption.weight(.medium))
                         .foregroundColor(.secondary)
                 }
                 
@@ -44,7 +44,7 @@ struct PitchGraphView: View {
                     }
                 }) {
                     Image(systemName: showingGraph ? "chart.line.downtrend.xyaxis" : "chart.line.uptrend.xyaxis")
-                        .font(.system(size: isPad ? 32 : 18, weight: .medium))
+                        .font(.title2.weight(.medium))
                         .foregroundColor(.blue)
                         .frame(width: isPad ? 65 : 44, height: isPad ? 65 : 44)
                         .background(
@@ -84,15 +84,15 @@ struct PitchGraphView: View {
     private var emptyStateView: some View {
         VStack(spacing: isPad ? 16 : 12) {
             Image(systemName: "chart.line.uptrend.xyaxis")
-                .font(.system(size: isPad ? 48 : 32, weight: .light))
+                .font(.title.weight(.light))
                 .foregroundColor(.secondary)
             
             Text("No pitch data yet")
-                .font(.system(size: isPad ? 24 : 14, weight: .medium))
+                .font(.subheadline.weight(.medium))
                 .foregroundColor(.secondary)
             
             Text("Start listening to see pitch history")
-                .font(.system(size: isPad ? 20 : 12, weight: .regular))
+                .font(.caption.weight(.regular))
                 .foregroundColor(.secondary.opacity(0.8))
         }
         .frame(height: isPad ? 160 : 120)
@@ -107,7 +107,7 @@ struct PitchGraphView: View {
     private var chartView: some View {
         VStack(alignment: .leading, spacing: isPad ? 12 : 8) {
             Text("Frequency over Time")
-                .font(.system(size: isPad ? 20 : 14, weight: .medium))
+                .font(.subheadline.weight(.medium))
                 .foregroundColor(.secondary)
             
             Chart {
@@ -140,7 +140,7 @@ struct PitchGraphView: View {
                     AxisTick()
                         .foregroundStyle(.gray.opacity(0.5))
                     AxisValueLabel()
-                        .font(.system(size: isPad ? 18 : 13, weight: .medium))
+                        .font(.caption.weight(.medium))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -151,7 +151,7 @@ struct PitchGraphView: View {
                     AxisTick()
                         .foregroundStyle(.gray.opacity(0.5))
                     AxisValueLabel()
-                        .font(.system(size: isPad ? 18 : 13, weight: .medium))
+                        .font(.caption.weight(.medium))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -175,10 +175,10 @@ struct PitchGraphView: View {
             // Current frequency
             VStack(spacing: 4) {
                 Text("Current")
-                    .font(.system(size: isPad ? 20 : 14, weight: .medium))
+                    .font(.subheadline.weight(.medium))
                     .foregroundColor(.secondary)
                 Text("\(Int(pitchData.last?.frequency ?? 0)) Hz")
-                    .font(.system(size: isPad ? 20 : 14, weight: .semibold))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundColor(.primary)
             }
             .frame(maxWidth: .infinity)
@@ -191,10 +191,10 @@ struct PitchGraphView: View {
             // Average frequency
             VStack(spacing: isPad ? 6 : 4) {
                 Text("Average")
-                    .font(.system(size: isPad ? 20 : 14, weight: .medium))
+                    .font(.subheadline.weight(.medium))
                     .foregroundColor(.secondary)
                 Text("\(Int(averageFrequency)) Hz")
-                    .font(.system(size: isPad ? 22 : 14, weight: .semibold))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundColor(.primary)
             }
             .frame(maxWidth: .infinity)
@@ -207,10 +207,10 @@ struct PitchGraphView: View {
             // Stability indicator
             VStack(spacing: isPad ? 6 : 4) {
                 Text("Stability")
-                    .font(.system(size: isPad ? 20 : 14, weight: .medium))
+                    .font(.subheadline.weight(.medium))
                     .foregroundColor(.secondary)
                 Text(stabilityText)
-                    .font(.system(size: isPad ? 20 : 14, weight: .semibold))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundColor(stabilityColor)
             }
             .frame(maxWidth: .infinity)

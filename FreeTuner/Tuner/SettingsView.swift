@@ -98,7 +98,7 @@ struct SettingsView: View {
                     Spacer()
                     
                     Image(systemName: "chevron.right")
-                        .font(.system(size: isPad ? 18 : 14, weight: .medium))
+                        .font(.subheadline.weight(.medium))
                         .foregroundColor(.secondary)
                 }
                 .padding(.horizontal, 20)
@@ -152,7 +152,7 @@ struct SettingsView: View {
                     Spacer()
                     
                     Image(systemName: "chevron.right")
-                        .font(.system(size: isPad ? 18 : 14, weight: .medium))
+                        .font(.subheadline.weight(.medium))
                         .foregroundColor(.secondary)
                 }
                 .padding(.horizontal, 20)
@@ -206,7 +206,7 @@ struct SettingsView: View {
                     Spacer()
                     
                     Image(systemName: "chevron.right")
-                        .font(.system(size: isPad ? 18 : 14, weight: .medium))
+                        .font(.subheadline.weight(.medium))
                         .foregroundColor(.secondary)
                 }
                 .padding(.horizontal, 20)

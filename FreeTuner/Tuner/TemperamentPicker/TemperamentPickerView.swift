@@ -79,7 +79,7 @@ struct TemperamentPickerView: View {
         Button("Cancel") {
             dismiss()
         }
-        .font(.system(size: 16, weight: .medium))
+        .font(.subheadline.weight(.medium))
     }
     
     private var applyButton: some View {
@@ -89,7 +89,7 @@ struct TemperamentPickerView: View {
                 dismiss()
             }
         }
-        .font(.system(size: 16, weight: .semibold))
+        .font(.subheadline.weight(.semibold))
         .foregroundColor(.blue)
     }
 }
