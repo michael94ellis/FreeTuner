@@ -68,11 +68,12 @@ struct MidiReferencePickerView: View {
     private var currentMidiNoteDisplay: some View {
         VStack(spacing: 12) {
             Text("Current MIDI Reference Note")
-                .captionFont(isPad: false)
+                .captionFont(isPad: isPad)
                 .foregroundColor(.secondary)
             
             Text("\(midiNoteToName(selectedMidiNote)) (MIDI \(selectedMidiNote))")
-                .mainNoteFont(isPad: false)
+                .titleFont(isPad: isPad)
+                .frame(maxWidth: .infinity)
                 .foregroundColor(.primary)
                 .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
         }
@@ -96,7 +97,7 @@ struct MidiReferencePickerView: View {
     private var customMidiNotePicker: some View {
         VStack(spacing: 16) {
             Text("Custom MIDI Note")
-                .subheadingFont(isPad: false)
+                .subheadingFont(isPad: isPad)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             Picker("MIDI Note", selection: $selectedMidiNote) {
@@ -128,7 +129,7 @@ struct MidiReferencePickerView: View {
     private var commonStandardsSection: some View {
         VStack(spacing: 16) {
             Text("Common Reference Notes")
-                .subheadingFont(isPad: false)
+                .subheadingFont(isPad: isPad)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             LazyVGrid(columns: gridColumns, spacing: 12) {
@@ -192,7 +193,7 @@ struct MidiReferencePickerView: View {
         Button("Cancel") {
             dismiss()
         }
-        .bodyFont(isPad: false)
+        .bodyFont(isPad: isPad)
     }
     
     private var applyButton: some View {
@@ -202,7 +203,7 @@ struct MidiReferencePickerView: View {
                 dismiss()
             }
         }
-        .subheadingFont(isPad: false)
+        .subheadingFont(isPad: isPad)
         .foregroundColor(.blue)
     }
 }

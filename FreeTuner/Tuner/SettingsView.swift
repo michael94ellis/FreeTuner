@@ -14,7 +14,12 @@ struct SettingsView: View {
     
     @State private var showingA4FrequencyPicker = false
     @State private var showingMidiReferencePicker = false
-    @State private var userDefaults = UserDefaultsManager.shared
+    
+    // MARK: - AppStorage Properties
+    @AppStorage("showPitchGraph") private var showPitchGraph: Bool = true
+    @AppStorage("showSignalStrength") private var showSignalStrength: Bool = true
+    @AppStorage("showReferenceLabels") private var showReferenceLabels: Bool = true
+    @AppStorage("displayOptionsCollapsed") private var displayOptionsCollapsed: Bool = false
     
     var body: some View {
         NavigationView {
@@ -35,8 +40,12 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(action: {
                         dismiss()
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.title2.weight(.medium))
+                            .foregroundColor(.blue)
                     }
                     .bodyFont(isPad: isPad)
                 }
@@ -76,100 +85,126 @@ struct SettingsView: View {
                     .foregroundColor(.primary)
                 
                 Spacer()
+                
+                Button(action: {
+                    withAnimation(.easeInOut) {
+                        displayOptionsCollapsed.toggle()
+                    }
+                }) {
+                    Image(systemName: displayOptionsCollapsed ? "chevron.down" : "chevron.up")
+                        .font(.title2.weight(.medium))
+                        .foregroundColor(.blue)
+                        .frame(width: isPad ? 44 : 32, height: isPad ? 44 : 32)
+                        .background(
+                            Circle()
+                                .fill(Color.blue.opacity(0.1))
+                        )
+                }
             }
-            
-            VStack(spacing: 12) {
-                // Pitch Graph Toggle
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Pitch Graph")
-                            .subheadingFont(isPad: isPad)
-                            .foregroundColor(.primary)
-                        
-                        Text("Show real-time frequency tracking")
-                            .captionFont(isPad: isPad)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Spacer()
-                    
-                    Toggle("", isOn: $userDefaults.showPitchGraph)
-                        .labelsHidden()
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemBackground))
-                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                )
-                
-                // Signal Strength Toggle
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Signal Strength")
-                            .subheadingFont(isPad: isPad)
-                            .foregroundColor(.primary)
-                        
-                        Text("Show audio level meter")
-                            .captionFont(isPad: isPad)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Spacer()
-                    
-                    Toggle("", isOn: $userDefaults.showSignalStrength)
-                        .labelsHidden()
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemBackground))
-                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                )
-                
-                // Reference Labels Toggle
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Reference Labels")
-                            .subheadingFont(isPad: isPad)
-                            .foregroundColor(.primary)
-                        
-                        Text("Show A4 frequency and MIDI reference")
-                            .captionFont(isPad: isPad)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Spacer()
-                    
-                    Toggle("", isOn: $userDefaults.showReferenceLabels)
-                        .labelsHidden()
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemBackground))
-                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                )
+            if displayOptionsCollapsed {
+                displayToggles
+                    .id("toggles")
+                    .frame(height: 0)
+                    .hidden()
+            } else {
+                displayToggles
+                    .id("toggles")
             }
         }
         .padding(20)
         .background(sectionBackground)
         .overlay(sectionBorder)
+    }
+        
+    private var displayToggles: some View {
+        VStack(spacing: 12) {
+            // Pitch Graph Toggle
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Pitch Graph")
+                        .subheadingFont(isPad: isPad)
+                        .foregroundColor(.primary)
+                    
+                    Text("Show real-time frequency tracking")
+                        .captionFont(isPad: isPad)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Toggle("", isOn: $showPitchGraph)
+                    .labelsHidden()
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+            )
+            
+            // Signal Strength Toggle
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Signal Strength")
+                        .subheadingFont(isPad: isPad)
+                        .foregroundColor(.primary)
+                    
+                    Text("Show audio level meter")
+                        .captionFont(isPad: isPad)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Toggle("", isOn: $showSignalStrength)
+                    .labelsHidden()
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+            )
+            
+            // Reference Labels Toggle
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Reference Labels")
+                        .subheadingFont(isPad: isPad)
+                        .foregroundColor(.primary)
+                    
+                    Text("Show A4 frequency and MIDI reference")
+                        .captionFont(isPad: isPad)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Toggle("", isOn: $showReferenceLabels)
+                    .labelsHidden()
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+            )
+        }
     }
     
     // MARK: - A4 Frequency Section

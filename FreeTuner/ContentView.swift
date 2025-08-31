@@ -51,7 +51,7 @@ struct ContentView: View {
                     Button(action: {
                         showingSettings = true
                     }) {
-                        Image(systemName: "gearshape.fill")
+                        Image(systemName: "slider.vertical.3")
                             .font(.title2.weight(.medium))
                             .foregroundColor(.blue)
                     }

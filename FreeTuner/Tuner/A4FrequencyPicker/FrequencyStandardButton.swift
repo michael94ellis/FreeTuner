@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct FrequencyStandardButton: View {
+    @Environment(\.isPad) private var isPad: Bool
     let standard: (name: String, frequency: Float?)
     let isSelected: Bool
     let onSelect: () -> Void
@@ -15,7 +16,7 @@ struct FrequencyStandardButton: View {
     var body: some View {
         VStack(spacing: 8) {
             Text(standard.name)
-                .smallFont(isPad: false)
+                .smallFont(isPad: isPad)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
             
@@ -23,7 +24,7 @@ struct FrequencyStandardButton: View {
             
             Button(action: onSelect) {
                 Text("Select")
-                    .smallFont(isPad: false)
+                    .smallFont(isPad: isPad)
                     .foregroundColor(.white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
@@ -46,11 +47,11 @@ struct FrequencyStandardButton: View {
         Group {
             if let frequency = standard.frequency {
                 Text("\(Int(frequency)) Hz")
-                    .subheadingFont(isPad: false)
+                    .subheadingFont(isPad: isPad)
                     .foregroundColor(.primary)
             } else {
                 Text("Custom")
-                    .subheadingFont(isPad: false)
+                    .subheadingFont(isPad: isPad)
                     .foregroundColor(.blue)
             }
         }

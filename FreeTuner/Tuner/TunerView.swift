@@ -17,7 +17,10 @@ struct TunerView: View {
     @Binding var currentDecibels: (rms: CGFloat, peak: CGFloat)
     
     @Environment(\.isPad) private var isPad
-    @State private var userDefaults = UserDefaultsManager.shared
+    
+    @AppStorage("showPitchGraph") private var showPitchGraph: Bool = true
+    @AppStorage("showSignalStrength") private var showSignalStrength: Bool = true
+    @AppStorage("showReferenceLabels") private var showReferenceLabels: Bool = true
     
     @State private var pitchData: [PitchDataPoint] = []
     @State private var pitchDetectionTask: Task<Void, Never>?
@@ -53,19 +56,19 @@ struct TunerView: View {
                 .frame(minHeight: isPad ? 500 : 300)
                 
                 // Settings Summary (only show if reference labels are enabled)
-                if userDefaults.showReferenceLabels {
+                if showReferenceLabels {
                     settingsSummaryView
                 }
                 
                 // Decibel Meter and Pitch Graph - stack vertically on smaller screens
                 VStack(spacing: 16) {
                     // Signal Strength Meter (only show if enabled)
-                    if userDefaults.showSignalStrength {
+                    if showSignalStrength {
                         DecibelMeterView(decibels: currentDecibels, isListening: isListening)
                     }
                     
                     // Pitch Graph (only show if enabled)
-                    if userDefaults.showPitchGraph {
+                    if showPitchGraph {
                         PitchGraphView(pitchData: pitchData, isListening: isListening)
                     }
                 }
