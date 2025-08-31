@@ -31,40 +31,42 @@ class TemperamentConverter {
     }
     
     // Just intonation ratios (pure intervals)
+    // Ratios relative to A4 (440 Hz)
     private func justIntonationRatio(_ semitones: Int) -> Float {
         let ratios: [Float] = [
-            1.0,      // C (unison)
-            16.0/15.0, // C# (minor second)
-            9.0/8.0,   // D (major second)
-            6.0/5.0,   // D# (minor third)
-            5.0/4.0,   // E (major third)
-            4.0/3.0,   // F (perfect fourth)
-            45.0/32.0, // F# (augmented fourth)
-            3.0/2.0,   // G (perfect fifth)
-            8.0/5.0,   // G# (minor sixth)
-            5.0/3.0,   // A (major sixth)
-            9.0/5.0,   // A# (minor seventh)
-            15.0/8.0   // B (major seventh)
+            3.0/5.0,      // C (major sixth below A)
+            16.0/25.0,    // C# (minor seventh below A)
+            27.0/40.0,    // D (major second below A)
+            18.0/25.0,    // D# (minor third below A)
+            3.0/4.0,      // E (major third below A)
+            4.0/5.0,      // F (perfect fourth below A)
+            32.0/45.0,    // F# (augmented fourth below A)
+            9.0/10.0,     // G (perfect fifth below A)
+            24.0/25.0,    // G# (minor sixth below A)
+            1.0,          // A (unison)
+            27.0/25.0,    // A# (minor second above A)
+            9.0/8.0       // B (major second above A)
         ]
         let index = ((semitones % 12) + 12) % 12 // Handle negative numbers properly
         return ratios[index]
     }
     
     // Pythagorean tuning ratios (based on perfect fifths)
+    // Ratios relative to A4 (440 Hz)
     private func pythagoreanRatio(_ semitones: Int) -> Float {
         let ratios: [Float] = [
-            1.0,           // C (unison)
-            256.0/243.0,   // C# (limma)
-            9.0/8.0,       // D (major second)
-            32.0/27.0,     // D# (minor third)
-            81.0/64.0,     // E (major third)
-            4.0/3.0,       // F (perfect fourth)
-            729.0/512.0,   // F# (augmented fourth)
-            3.0/2.0,       // G (perfect fifth)
-            128.0/81.0,    // G# (minor sixth)
-            27.0/16.0,     // A (major sixth)
-            16.0/9.0,      // A# (minor seventh)
-            243.0/128.0    // B (major seventh)
+            16.0/27.0,     // C (major sixth below A)
+            128.0/243.0,   // C# (minor seventh below A)
+            8.0/9.0,       // D (major second below A)
+            64.0/81.0,     // D# (minor third below A)
+            4.0/5.0,       // E (major third below A)
+            3.0/4.0,       // F (perfect fourth below A)
+            512.0/729.0,   // F# (augmented fourth below A)
+            2.0/3.0,       // G (perfect fifth below A)
+            256.0/243.0,   // G# (minor sixth below A)
+            1.0,           // A (unison)
+            16.0/15.0,     // A# (minor second above A)
+            9.0/8.0        // B (major second above A)
         ]
         let index = ((semitones % 12) + 12) % 12 // Handle negative numbers properly
         return ratios[index]
@@ -292,35 +294,43 @@ class TemperamentConverter {
         let refFreq = referenceFreq ?? a4Frequency
         guard frequency > 0 else { return nil }
         
-        // Calculate the octave of the detected frequency relative to the reference
-        let semitoneOffset = 12 * log2(frequency / refFreq)
-        let baseOctave = Int(floor((Float(refNote) + semitoneOffset) / 12.0))
-        
-        // Scale temperament ratios to the correct octave
+        // Find the closest note by comparing with all possible notes in multiple octaves
         var closestNoteIndex: Int?
+        var closestOctave: Int?
         var minDistance: Float = .greatestFiniteMagnitude
         var matchedFrequency: Float = 0.0
 
-        for i in 0..<temperamentRatios.count {
-            let ratio = temperamentRatios[i]
-            let scaledFreq = refFreq * ratio * pow(2.0, Float(baseOctave - 5)) // C4 = MIDI 60 = octave 5
+        // Check multiple octaves around the expected octave
+        let expectedOctave = Int(floor(12 * log2(frequency / refFreq) + Float(refNote)) / 12.0)
+        let octaveRange = (expectedOctave - 2)...(expectedOctave + 2)
 
-            let distance = abs(frequency - scaledFreq)
-            if distance < minDistance {
-                minDistance = distance
-                closestNoteIndex = i
-                matchedFrequency = scaledFreq
+        for octave in octaveRange {
+            for i in 0..<temperamentRatios.count {
+                let ratio = temperamentRatios[i]
+                
+                // Calculate the frequency for this note in this octave
+                // The ratios are already relative to the reference note (A4)
+                let octaveOffset = octave - 4 // A4 is in octave 4
+                let scaledFreq = refFreq * ratio * pow(2.0, Float(octaveOffset))
+
+                let distance = abs(frequency - scaledFreq)
+                if distance < minDistance {
+                    minDistance = distance
+                    closestNoteIndex = i
+                    closestOctave = octave
+                    matchedFrequency = scaledFreq
+                }
             }
         }
 
-        guard let index = closestNoteIndex else { return nil }
+        guard let index = closestNoteIndex, let octave = closestOctave else { return nil }
 
         let noteName = noteNames[index]
         let cents = Int(round(1200 * log2(frequency / matchedFrequency)))
 
         return Note(
             name: noteName,
-            octave: baseOctave,
+            octave: octave,
             frequency: frequency,
             cents: cents
         )

@@ -148,7 +148,7 @@ struct DecibelMeterView: View {
                 RoundedRectangle(cornerRadius: isPad ? 12 : 8)
                     .fill(
                         LinearGradient(
-                            gradient: Gradient(colors: [.green, .yellow, .orange, .red]),
+                            gradient: Gradient(colors: [.green, meterColor]),
                             startPoint: .leading,
                             endPoint: .trailing
                         )
