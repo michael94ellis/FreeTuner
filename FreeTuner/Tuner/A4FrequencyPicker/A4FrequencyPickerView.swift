@@ -173,7 +173,7 @@ struct A4FrequencyPickerView: View {
                                         .fill(pitchPlayer.selectedWaveform == waveform ? Color.blue : Color(.systemGray5))
                                 )
                         }
-                        .buttonStyle(PlainButtonStyle())
+                        .buttonStyle(.plain)
                         .onChange(of: pitchPlayer.selectedWaveform, {
                             guard pitchPlayer.isCurrentlyPlaying else {
                                 return

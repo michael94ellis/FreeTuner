@@ -33,7 +33,7 @@ struct FrequencyStandardButton: View {
                             .fill(isSelected ? Color.blue : Color.gray)
                     )
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
         }
         .padding(16)
         .frame(maxWidth: .infinity)

@@ -111,6 +111,29 @@ struct TunerView: View {
                 }
                 .frame(maxWidth: .infinity)
                 
+                VStack(spacing: 4) {
+                    Text("Current Frequency")
+                        .captionFont(isPad: isPad)
+                        .foregroundColor(.secondary)
+                    
+                    Text(String(format: "%4d Hz", Int(currentPitch ?? 0)))
+                        .subheadingFont(isPad: isPad)
+                        .foregroundColor(.primary)
+                }
+                .frame(maxWidth: .infinity)
+//                // Frequency display
+//                Text
+//                    .font(.system(size: isPad ? 28 : 22, weight: .medium, design: .monospaced))
+//                    .frame(width: isPad ? 120 : 100, alignment: .trailing)
+//                    .foregroundColor(.secondary)
+//                    .padding(.horizontal, isPad ? 16 : 12)
+//                    .padding(.vertical, isPad ? 6 : 4)
+//                    .background(
+//                        Capsule()
+//                            .fill(Color(.systemBackground))
+//                            .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 2, x: 0, y: 1)
+//                    )
+                
                 // MIDI Reference
                 VStack(spacing: 4) {
                     Text("MIDI Reference")

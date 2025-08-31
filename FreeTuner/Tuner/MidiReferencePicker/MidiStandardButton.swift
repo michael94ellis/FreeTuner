@@ -40,7 +40,7 @@ struct MidiStandardButton: View {
                     .stroke(isSelected ? Color.blue : Color.gray.opacity(0.1), lineWidth: 1)
             )
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
     }
 }
 

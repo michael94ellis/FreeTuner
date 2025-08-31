@@ -254,7 +254,7 @@ struct SettingsView: View {
                         .stroke(Color.gray.opacity(0.1), lineWidth: 1)
                 )
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
         }
         .padding(20)
         .background(sectionBackground)
@@ -308,7 +308,7 @@ struct SettingsView: View {
                         .stroke(Color.gray.opacity(0.1), lineWidth: 1)
                 )
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
         }
         .padding(20)
         .background(sectionBackground)

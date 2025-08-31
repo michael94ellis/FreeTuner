@@ -151,18 +151,6 @@ struct TunerCircleView: View {
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color(.systemGray6).opacity(0.5))
                     )
-                    
-                    // Frequency display
-                    Text("\(Int(note.frequency)) Hz")
-                        .frequencyFont(isPad: isPad)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, isPad ? 16 : 12)
-                        .padding(.vertical, isPad ? 6 : 4)
-                        .background(
-                            Capsule()
-                                .fill(Color(.systemBackground))
-                                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 2, x: 0, y: 1)
-                        )
                 }
             } else {
                 // No note detected state

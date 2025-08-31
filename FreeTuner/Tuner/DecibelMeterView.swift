@@ -61,13 +61,9 @@ struct DecibelMeterView: View {
         VStack(spacing: 16) {
             // Header with collapsible button
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Signal Strength")
-                        .font(.title2.weight(.semibold))
-                        .foregroundColor(.primary)
-                }
-                
-                Spacer()
+                Text("Signal Strength")
+                    .font(.title2.weight(.semibold))
+                    .foregroundColor(.primary)
                 
                 // Info button
                 Button(action: {
@@ -145,17 +141,18 @@ struct DecibelMeterView: View {
                     .frame(height: isPad ? 24 : 18)
                 
                 // Progress bar
-                RoundedRectangle(cornerRadius: isPad ? 12 : 8)
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(colors: [.green, meterColor]),
-                            startPoint: .leading,
-                            endPoint: .trailing
+                GeometryReader { geo in
+                    RoundedRectangle(cornerRadius: isPad ? 12 : 8)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [.green, meterColor]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                         )
-                    )
-                    .frame(width: max(0, normalizedLevel * (isPad ? 300 : 220)), height: isPad ? 24 : 18)
-                    .animation(.easeInOut(duration: 0.1), value: normalizedLevel)
-                
+                        .frame(width: max(0, normalizedLevel * geo.size.width), height: isPad ? 24 : 18)
+                        .animation(.easeInOut(duration: 0.1), value: normalizedLevel)
+                }
                 // Peak indicator
                 let peakNormalized = (max(minDb, min(maxDb, peakDecibels)) - minDb) / (maxDb - minDb)
                 Rectangle()
@@ -189,7 +186,7 @@ struct DecibelMeterView: View {
                     .font(.caption2.weight(.medium))
                     .foregroundColor(.secondary)
             }
-            .frame(width: isPad ? 300 : 220)
+            .frame(maxWidth: .infinity)
         }
         .padding(.horizontal, isPad ? 32 : 20)
         .transition(.asymmetric(
