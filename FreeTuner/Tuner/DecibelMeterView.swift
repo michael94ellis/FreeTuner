@@ -157,14 +157,12 @@ struct DecibelMeterView: View {
                     .animation(.easeInOut(duration: 0.1), value: normalizedLevel)
                 
                 // Peak indicator
-//                if peakDecibels > decibels.peak + 2 {
-                    let peakNormalized = (max(minDb, min(maxDb, peakDecibels)) - minDb) / (maxDb - minDb)
-                    Rectangle()
-                        .fill(Color.red)
-                        .frame(width: 3, height: isPad ? 28 : 22)
-                        .offset(x: max(0, peakNormalized * (isPad ? 300 : 220) - 1.5))
-                        .opacity(0.8)
-//                }
+                let peakNormalized = (max(minDb, min(maxDb, peakDecibels)) - minDb) / (maxDb - minDb)
+                Rectangle()
+                    .fill(Color.red)
+                    .frame(width: 3, height: isPad ? 28 : 22)
+                    .offset(x: max(0, peakNormalized * (isPad ? 300 : 220) - 1.5))
+                    .opacity(0.8)
             }
             
             // Decibel scale markers
@@ -228,11 +226,11 @@ struct DecibelMeterView: View {
                     .font(.headline)
                     .foregroundColor(.primary)
                 
-                Text("This tuner uses a digital audio scale called dBFS (decibels relative to full scale).")
+                Text("This tuner uses a digital audio scale called dBFS—decibels relative to full scale.")
                     .font(.body)
                     .foregroundColor(.secondary)
                 
-                Text("The color shows how loud the sound is overall, like an average, while the red line indicates the loudest detected frequency in the signal.")
+                Text("The colored bar shows the average loudness of the sound (RMS), while the thin red line marks the loudest moment detected (peak).")
                     .font(.body)
                     .foregroundColor(.secondary)
                 
@@ -240,23 +238,23 @@ struct DecibelMeterView: View {
                     HStack(alignment: .top, spacing: 8) {
                         Text("•")
                             .foregroundColor(.blue)
-                        Text("0 dB is the loudest possible signal (clipping point)")
+                        Text("0 dB means the signal is at its maximum possible level (clipping)")
                     }
                     .font(.body)
                     
                     HStack(alignment: .top, spacing: 8) {
                         Text("•")
                             .foregroundColor(.blue)
-                        Text("−60 dB is very quiet (near silence)")
+                        Text("−60 dB is very quiet, nearly no ambient noise")
                     }
                     .font(.body)
                 }
                 
-                Text("Unlike sound pressure levels (SPL), which range from 0 to 140 dB in the physical world, digital audio works in a scale from −∞ to 0, where 0 is the maximum.")
+                Text("Unlike the typically expected physical sound pressure levels (SPL), which range from 0 to 140 dB, digital audio uses a scale from −∞ to 0 dBFS, where 0 is the loudest possible value.")
                     .font(.body)
                     .foregroundColor(.secondary)
                 
-                Text("So if you see values like −45 dB or −30 dB, that's normal—it means your signal is active but not overpowering.")
+                Text("So if you see values like −45 dB or −30 dB, that’s normal—it means your signal is active but not overpowering.")
                     .font(.body)
                     .foregroundColor(.secondary)
             }

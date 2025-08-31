@@ -72,7 +72,7 @@ class NoteConverter {
     
     /// Set the A4 reference frequency
     func setA4Frequency(_ frequency: Float) {
-        a4Frequency = max(400.0, min(480.0, frequency)) // Limit to reasonable range
+        a4Frequency = frequency // Limit to reasonable range
     }
     
     /// Get the current A4 reference frequency

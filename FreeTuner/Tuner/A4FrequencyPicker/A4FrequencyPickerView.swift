@@ -14,6 +14,8 @@ struct A4FrequencyPickerView: View {
     @State private var selectedA4Frequency: Float
     @StateObject private var pitchPlayer = PitchPlayer()
     @State private var debounceTimer: Timer?
+    @State private var isEditingFrequency = false
+    @State private var manualFrequencyText = ""
     
     // Common A4 frequencies used throughout history
     let commonA4Frequencies: [(name: String, frequency: Float?)] = [
@@ -81,11 +83,51 @@ struct A4FrequencyPickerView: View {
                 .foregroundColor(.secondary)
             
             HStack(spacing: 20) {
-                Text("\(Int(selectedA4Frequency)) Hz")
-                    .titleFont(isPad: isPad)
+                if isEditingFrequency {
+                    HStack {
+                        TextField("Enter frequency", text: $manualFrequencyText)
+                            .keyboardType(.numberPad)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .font(.title2.weight(.medium))
+                            .multilineTextAlignment(.center)
+                            .onSubmit {
+                                if let frequency = Float(manualFrequencyText) {
+                                    selectedA4Frequency = frequency
+                                }
+                                isEditingFrequency = false
+                            }
+                        
+                        Button("Done") {
+                            if let frequency = Float(manualFrequencyText) {
+                                selectedA4Frequency = frequency
+                            }
+                            isEditingFrequency = false
+                        }
+                        .font(.headline.weight(.medium))
+                        .foregroundColor(.blue)
+                    }
                     .frame(maxWidth: .infinity)
-                    .foregroundColor(.primary)
-                    .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .top).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)
+                    ))
+                } else {
+                    Button(action: {
+                        manualFrequencyText = "\(Int(selectedA4Frequency))"
+                        isEditingFrequency = true
+                    }) {
+                        Text("\(Int(selectedA4Frequency)) Hz")
+                            .titleFont(isPad: isPad)
+                            .frame(maxWidth: .infinity)
+                            .foregroundColor(.primary)
+                            .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .top).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)
+                    ))
+                }
                 
                 Button(action: {
                     if pitchPlayer.isCurrentlyPlaying {
@@ -99,8 +141,9 @@ struct A4FrequencyPickerView: View {
                         .foregroundColor(pitchPlayer.isCurrentlyPlaying ? .red : .blue)
                         .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
                 }
-                .buttonStyle(PlainButtonStyle())
+                .buttonStyle(.plain)
             }
+            .animation(.easeInOut(duration: 0.3), value: isEditingFrequency)
             
             waveformSelector
         }
@@ -177,7 +220,7 @@ struct A4FrequencyPickerView: View {
             
             Slider(
                 value: $selectedA4Frequency,
-                in: 350...500,
+                in: 220...990,
                 step: 1
             )
             .accentColor(.blue)

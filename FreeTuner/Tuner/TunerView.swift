@@ -18,12 +18,12 @@ struct TunerView: View {
     
     @Environment(\.isPad) private var isPad
     
+    @State private var pitchData: [PitchDataPoint] = []
+    @State private var pitchDetectionTask: Task<Void, Never>?
+    
     @AppStorage("showPitchGraph") private var showPitchGraph: Bool = true
     @AppStorage("showSignalStrength") private var showSignalStrength: Bool = true
     @AppStorage("showReferenceLabels") private var showReferenceLabels: Bool = true
-    
-    @State private var pitchData: [PitchDataPoint] = []
-    @State private var pitchDetectionTask: Task<Void, Never>?
     
     var body: some View {
         ScrollView {
