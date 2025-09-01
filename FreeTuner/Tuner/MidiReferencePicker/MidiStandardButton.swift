@@ -18,12 +18,12 @@ struct MidiStandardButton: View {
         Button(action: onSelect) {
             VStack(spacing: 8) {
                 Text(standard.name)
-                    .font(isPad ? .title2 : .title3)
+                    .font(isPad ? .title : .title3)
                     .foregroundColor(isSelected ? .white : .primary)
                     .multilineTextAlignment(.center)
                 
                 Text(standard.description)
-                    .font(isPad ? .callout : .subheadline)
+                    .font(isPad ? .body : .subheadline)
                     .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
                     .multilineTextAlignment(.center)
             }

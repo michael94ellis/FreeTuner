@@ -84,7 +84,7 @@ struct SettingsView: View {
                     .foregroundColor(.blue)
                 
                 Text("Display Options")
-                    .font(isPad ? .title : .title2)
+                    .font(isPad ? .largeTitle : .title2)
                     .foregroundColor(.primary)
                 
                 Spacer()
@@ -124,12 +124,12 @@ struct SettingsView: View {
             // Pitch Graph Toggle
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Pitch Graph")
-                        .font(isPad ? .title2 : .title3)
-                        .foregroundColor(.primary)
+                                    Text("Pitch Graph")
+                    .font(isPad ? .title : .title3)
+                    .foregroundColor(.primary)
                     
                     Text("Show real-time frequency tracking")
-                        .font(isPad ? .callout : .subheadline)
+                        .font(isPad ? .body : .subheadline)
                         .foregroundColor(.secondary)
                 }
                 
@@ -144,11 +144,11 @@ struct SettingsView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Signal Strength")
-                        .font(isPad ? .title2 : .title3)
+                        .font(isPad ? .title : .title3)
                         .foregroundColor(.primary)
                     
                     Text("Show audio level meter")
-                        .font(isPad ? .callout : .subheadline)
+                        .font(isPad ? .body : .subheadline)
                         .foregroundColor(.secondary)
                 }
                 
@@ -163,11 +163,11 @@ struct SettingsView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Reference Labels")
-                        .font(isPad ? .title2 : .title3)
+                        .font(isPad ? .title : .title3)
                         .foregroundColor(.primary)
                     
                     Text("Display current frequency, cents, and octave")
-                        .font(isPad ? .callout : .subheadline)
+                        .font(isPad ? .body : .subheadline)
                         .foregroundColor(.secondary)
                 }
                 
@@ -189,7 +189,7 @@ struct SettingsView: View {
                     .foregroundColor(.blue)
                 
                 Text("Pitch History")
-                    .font(isPad ? .title : .title2)
+                    .font(isPad ? .largeTitle : .title2)
                     .foregroundColor(.primary)
                 
                 Spacer()
@@ -232,18 +232,18 @@ struct SettingsView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Max History Size")
-                            .font(isPad ? .title2 : .title3)
+                            .font(isPad ? .title : .title3)
                             .foregroundColor(.primary)
                         
                         Text("Number of data points to keep in memory")
-                            .font(isPad ? .callout : .subheadline)
+                            .font(isPad ? .body : .subheadline)
                             .foregroundColor(.secondary)
                     }
                     
                     Spacer()
                     
                     Text("\(maxPitchHistorySize)")
-                        .font(isPad ? .title2 : .title3)
+                        .font(isPad ? .title : .title3)
                         .foregroundColor(.blue)
                         .fontWeight(.semibold)
                 }
@@ -251,7 +251,7 @@ struct SettingsView: View {
                 HStack {
                     let maxValue: Double = isPad ? 1000 : 250
                     Text("50")
-                        .font(isPad ? .callout : .subheadline)
+                        .font(isPad ? .body : .subheadline)
                         .foregroundColor(.secondary)
                     
                     Slider(
@@ -265,7 +265,7 @@ struct SettingsView: View {
                     .accentColor(.blue)
                     
                     Text("\(Int(maxValue))")
-                        .font(isPad ? .callout : .subheadline)
+                        .font(isPad ? .body : .subheadline)
                         .foregroundColor(.secondary)
                 }
             }
@@ -292,7 +292,7 @@ struct SettingsView: View {
                     .foregroundColor(.blue)
                 
                 Text("A4 Reference Frequency")
-                    .font(isPad ? .title : .title2)
+                    .font(isPad ? .largeTitle : .title2)
                     .foregroundColor(.primary)
                 
                 Spacer()
@@ -304,11 +304,11 @@ struct SettingsView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Current A4 Frequency")
-                            .font(isPad ? .callout : .subheadline)
+                            .font(isPad ? .body : .subheadline)
                             .foregroundColor(.secondary)
                         
                         Text("\(Int(noteConverter.getA4Frequency())) Hz")
-                            .font(isPad ? .title2 : .title3)
+                            .font(isPad ? .title : .title3)
                             .foregroundColor(.primary)
                     }
                     
@@ -319,6 +319,7 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
                 .standardCardStyle()
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
         }
@@ -336,7 +337,7 @@ struct SettingsView: View {
                     .foregroundColor(.blue)
                 
                 Text("MIDI Reference Note")
-                    .font(isPad ? .title : .title2)
+                    .font(isPad ? .largeTitle : .title2)
                     .foregroundColor(.primary)
                 
                 Spacer()
@@ -348,11 +349,11 @@ struct SettingsView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Current MIDI Reference")
-                            .font(isPad ? .callout : .subheadline)
+                            .font(isPad ? .body : .subheadline)
                             .foregroundColor(.secondary)
                         
                         Text("\(midiNoteToName(noteConverter.getA4MidiNote())) (MIDI \(noteConverter.getA4MidiNote()))")
-                            .font(isPad ? .title2 : .title3)
+                            .font(isPad ? .title : .title3)
                             .foregroundColor(.primary)
                     }
                     
@@ -363,6 +364,7 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
                 .standardCardStyle()
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
         }

@@ -81,22 +81,39 @@ struct DecibelMeterView: View {
                 
                 
                 // Current decibel value
-                HStack {
-                    Text(showingMeter ? "\(Int(decibels.rms))" : "  ")
-                        .fixedSize()
-                        .font(isPad ? .title : .title2)
-                        .foregroundColor(meterColor)
-                        .contentTransition(.numericText())
-                    
-                    Text(showingMeter ? "dB" : "  ")
-                        .font(isPad ? .caption : .caption2)
-                        .foregroundColor(.secondary)
+                if showingMeter {
+                    HStack {
+                        Text(showingMeter ? "\(Int(decibels.rms))" : "  ")
+                            .fixedSize()
+                            .font(isPad ? .title : .title2)
+                            .foregroundColor(meterColor)
+                            .contentTransition(.numericText())
+                        
+                        Text(showingMeter ? "dB" : "  ")
+                            .font(isPad ? .caption : .caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, isPad ? 16 : 8)
+                    .padding(.horizontal, isPad ? 12 : 8)
+                    .frame(minWidth: 80, alignment: .trailing)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(.systemGray6).opacity(0.5))
+                    )
+                    .frame(maxWidth: .infinity)
+                    .id("decibelmeteravg")
+                } else {
+                    HStack {
+                        Text("  ")
+                            .fixedSize()
+                            .font(isPad ? .title : .title2)
+                            .contentTransition(.numericText())
+                        Text("  ")
+                            .font(isPad ? .caption : .caption2)
+                    }
+                    .id("decibelmeteravg")
                 }
-                .padding(.horizontal, isPad ? 32 : 0)
-                .transition(.asymmetric(
-                    insertion: .move(edge: .top).combined(with: .opacity),
-                    removal: .move(edge: .top).combined(with: .opacity)
-                ))
+                
                 
                 Spacer()
                 

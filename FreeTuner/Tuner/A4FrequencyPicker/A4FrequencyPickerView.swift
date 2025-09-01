@@ -79,7 +79,7 @@ struct A4FrequencyPickerView: View {
     private var currentFrequencyDisplay: some View {
         VStack(spacing: 16) {
             Text("Current A4 Frequency")
-                .font(isPad ? .callout : .subheadline)
+                .font(isPad ? .body : .subheadline)
                 .foregroundColor(.secondary)
             
             HStack(spacing: 20) {
@@ -88,7 +88,7 @@ struct A4FrequencyPickerView: View {
                         TextField("Enter frequency", text: $manualFrequencyText)
                             .keyboardType(.numberPad)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .font(isPad ? .title2 : .title3)
+                            .font(isPad ? .title : .title3)
                             .multilineTextAlignment(.center)
                             .onSubmit {
                                 if let frequency = Float(manualFrequencyText) {
@@ -103,7 +103,7 @@ struct A4FrequencyPickerView: View {
                             }
                             isEditingFrequency = false
                         }
-                        .font(isPad ? .headline : .subheadline)
+                        .font(isPad ? .title : .subheadline)
                         .foregroundColor(.blue)
                     }
                     .frame(maxWidth: .infinity)
@@ -117,7 +117,7 @@ struct A4FrequencyPickerView: View {
                         isEditingFrequency = true
                     }) {
                         Text("\(Int(selectedA4Frequency)) Hz")
-                            .font(isPad ? .largeTitle : .title)
+                            .font(isPad ? .system(size: 48) : .title)
                             .frame(maxWidth: .infinity)
                             .foregroundColor(.primary)
                             .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
@@ -137,7 +137,7 @@ struct A4FrequencyPickerView: View {
                     }
                 }) {
                     Image(systemName: pitchPlayer.isCurrentlyPlaying ? "stop.circle.fill" : "play.circle.fill")
-                        .font(isPad ? .largeTitle : .title)
+                        .font(isPad ? .system(size: 48) : .title)
                         .foregroundColor(pitchPlayer.isCurrentlyPlaying ? .red : .blue)
                         .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
                 }
@@ -154,7 +154,7 @@ struct A4FrequencyPickerView: View {
     private var waveformSelector: some View {
         VStack(spacing: 8) {
             Text("Waveform")
-                .font(isPad ? .callout : .subheadline)
+                .font(isPad ? .body : .subheadline)
                 .foregroundColor(.secondary)
             
             HStack(spacing: 8) {
@@ -163,7 +163,7 @@ struct A4FrequencyPickerView: View {
                         pitchPlayer.selectedWaveform = waveform
                     }) {
                         Text(waveform.rawValue)
-                            .font(isPad ? .caption : .caption2)
+                            .font(isPad ? .body : .caption2)
                             .foregroundColor(pitchPlayer.selectedWaveform == waveform ? .white : .primary)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
@@ -195,7 +195,7 @@ struct A4FrequencyPickerView: View {
     private var customFrequencySlider: some View {
         VStack(spacing: 16) {
             Text("Custom Frequency")
-                .font(isPad ? .title2 : .title3)
+                .font(isPad ? .title : .title3)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             sliderControls
@@ -207,7 +207,7 @@ struct A4FrequencyPickerView: View {
     private var sliderControls: some View {
         HStack {
             Text("1 Hz")
-                .font(isPad ? .callout : .subheadline)
+                .font(isPad ? .body : .subheadline)
                 .foregroundColor(.secondary)
             
             Slider(
@@ -231,7 +231,7 @@ struct A4FrequencyPickerView: View {
             }
             
             Text("990 Hz")
-                .font(isPad ? .callout : .subheadline)
+                .font(isPad ? .body : .subheadline)
                 .foregroundColor(.secondary)
         }
     }
@@ -262,7 +262,7 @@ struct A4FrequencyPickerView: View {
     private var commonStandardsSection: some View {
         VStack(spacing: 16) {
             Text("Common Standards")
-                .font(isPad ? .title2 : .title3)
+                .font(isPad ? .title : .title3)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             LazyVGrid(columns: gridColumns, spacing: 12) {
@@ -318,7 +318,7 @@ struct A4FrequencyPickerView: View {
                 dismiss()
             }
         }
-        .font(isPad ? .title2 : .title3)
+        .font(isPad ? .title : .title3)
         .foregroundColor(.blue)
     }
 }

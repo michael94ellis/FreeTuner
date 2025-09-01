@@ -16,7 +16,7 @@ struct FrequencyStandardButton: View {
     var body: some View {
         VStack(spacing: 8) {
             Text(standard.name)
-                .font(isPad ? .caption : .caption2)
+                .font(isPad ? .body : .caption2)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
             
@@ -24,7 +24,7 @@ struct FrequencyStandardButton: View {
             
             Button(action: onSelect) {
                 Text("Select")
-                    .font(isPad ? .caption : .caption2)
+                    .font(isPad ? .body : .caption2)
                     .foregroundColor(.white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
@@ -47,11 +47,11 @@ struct FrequencyStandardButton: View {
         Group {
             if let frequency = standard.frequency {
                 Text("\(Int(frequency)) Hz")
-                    .font(isPad ? .title2 : .title3)
+                    .font(isPad ? .title : .title3)
                     .foregroundColor(.primary)
             } else {
                 Text("Custom")
-                    .font(isPad ? .title2 : .title3)
+                    .font(isPad ? .title : .title3)
                     .foregroundColor(.blue)
             }
         }

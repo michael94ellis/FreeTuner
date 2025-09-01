@@ -92,69 +92,80 @@ struct TunerView: View {
     
     var listeningHeader: some View {
         // Add tap hint when not listening
-        Text(isListening ? "Listening…" : "🎙 Tap anywhere to start")
-            .font(isPad ? .headline : .subheadline)
+        Text(isListening ? "Listening ..." : "🎙 Tap anywhere to start")
+            .font(isPad ? .title3 : .subheadline)
             .foregroundColor(isListening ? .white : .blue)
             .padding(.horizontal, isPad ? 32 : 16)
             .padding(.vertical, isPad ? 16 : 8)
-            .background(
+            .background {
+                let color = isListening ? Color.orange : .blue
                 Capsule()
-                    .fill(isListening ? Color.blue : Color.blue.opacity(0.1))
+                    .fill(isListening ? color : color.opacity(0.1))
                     .overlay(
                         Capsule()
-                            .stroke(Color.blue.opacity(isListening ? 0.5 : 0.3), lineWidth: 1)
+                            .stroke(color.opacity(isListening ? 0.5 : 0.3), lineWidth: 1)
                     )
-            )
+            }
             .animation(.easeInOut(duration: 0.2), value: isListening)
             .accessibilityLabel(isListening ? "Voice recognition active" : "Tap to start listening")
     }
     
     @ViewBuilder
     func pitchSummaryView(detectedNote: Note?) -> some View {
-        HStack(spacing: isPad ? 24 : 16) {
+        HStack(spacing: isPad ? 48 : 16) {
+            let minWidth: CGFloat = isPad ? 120 : 0
             // Current Frequency Display
-            VStack(spacing: isPad ? 8 : 6) {
+            VStack(alignment: .trailing, spacing: isPad ? 6 : 4) {
                 Text("Frequency")
                     .font(isPad ? .headline : .subheadline)
+                    .frame(minWidth: 80, alignment: .trailing)
                     .foregroundColor(.secondary)
                     .textCase(.uppercase)
                     .tracking(0.5)
                 
                 Text(String(format: "%4d Hz", Int(currentPitch ?? 0)))
                     .font(isPad ? .largeTitle : .headline)
+                    .frame(minWidth: 80, alignment: .trailing)
                     .foregroundColor(.primary)
                     .monospacedDigit()
             }
+            .frame(minWidth: minWidth, alignment: .trailing)
             
             // Cents Display
-            VStack(spacing: isPad ? 6 : 4) {
+            VStack(alignment: .trailing, spacing: isPad ? 6 : 4) {
                 Text("Cents")
-                    .font(isPad ? .caption : .caption2)
+                    .font(isPad ? .headline : .subheadline)
+                    .frame(minWidth: 80, alignment: .trailing)
                     .foregroundColor(.secondary)
                     .textCase(.uppercase)
                     .tracking(0.5)
                 
                 Text(detectedNote?.cents.formatCents ?? "0")
-                    .font(isPad ? .subheadline : .caption)
+                    .font(isPad ? .largeTitle : .headline)
+                    .frame(minWidth: 80, alignment: .trailing)
                     .foregroundColor(detectedNote?.cents.centsColor)
                     .fontWeight(.bold)
                     .scaleEffect(detectedNote?.cents.centsColor == .green ? 1.1 : 1.0)
                     .animation(.easeInOut(duration: 0.2), value: detectedNote?.cents.centsColor)
             }
+            .frame(minWidth: minWidth, alignment: .trailing)
             
             // Octave Display
-            VStack(spacing: isPad ? 6 : 4) {
+            VStack(alignment: .trailing, spacing: isPad ? 6 : 4) {
                 Text("Octave")
-                    .font(isPad ? .caption : .caption2)
+                    .font(isPad ? .headline : .subheadline)
+                    .frame(minWidth: 80, alignment: .trailing)
                     .foregroundColor(.secondary)
                     .textCase(.uppercase)
                     .tracking(0.5)
                 
                 Text("\(detectedNote?.octave ?? 0)")
-                    .font(isPad ? .subheadline : .caption)
+                    .font(isPad ? .largeTitle : .headline)
+                    .frame(minWidth: 80, alignment: .trailing)
                     .foregroundColor(.primary)
                     .fontWeight(.semibold)
             }
+            .frame(minWidth: minWidth, alignment: .trailing)
         }
         .frame(maxWidth: .infinity)
     }

@@ -176,18 +176,21 @@ struct PitchGraphView: View {
             // Average frequency
             VStack(spacing: isPad ? 6 : 4) {
                 Text("Average")
-                    .font(isPad ? .subheadline : .caption)
+                    .font(isPad ? .title3 : .subheadline)
                     .foregroundColor(.secondary)
+                    .frame(minWidth: 80, alignment: .trailing)
                 Text("\(Int(averageFrequency)) Hz")
-                    .font(isPad ? .subheadline : .caption)
+                    .font(isPad ? .title3 : .subheadline)
                     .foregroundColor(.primary)
+                    .frame(minWidth: 80, alignment: .trailing)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, isPad ? 12 : 8)
+            .padding(.vertical, isPad ? 16 : 8)
+            .padding(.horizontal, isPad ? 12 : 8)
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color(.systemGray6).opacity(0.5))
             )
+            .frame(maxWidth: .infinity)
         }
     }
     
