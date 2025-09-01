@@ -159,7 +159,7 @@ class PitchAnalyzer {
 //        }
         
         // Apply noise threshold (only detect if magnitude is above a certain threshold)
-        let noiseThreshold: Float = -60.0 // dB threshold
+        let noiseThreshold: Float = -80.0 // dB threshold
         if maxMagnitude > noiseThreshold {
 //            print("✅ Pitch detected: \(interpolatedFrequency) Hz (magnitude: \(maxMagnitude) dB)")
             let spectrum = zip(binFrequencies, magnitudes).map { ($0, $1) }

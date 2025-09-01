@@ -20,6 +20,8 @@ struct SettingsView: View {
     @AppStorage("showSignalStrength") private var showSignalStrength: Bool = true
     @AppStorage("showReferenceLabels") private var showReferenceLabels: Bool = true
     @AppStorage("displayOptionsCollapsed") private var displayOptionsCollapsed: Bool = false
+    @AppStorage("maxPitchHistorySize") private var maxPitchHistorySize: Int = 100
+    @AppStorage("pitchHistoryOptionsCollapsed") private var pitchHistoryOptionsCollapsed: Bool = false
     
     var body: some View {
         NavigationView {
@@ -29,6 +31,7 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(spacing: 24) {
                         displayOptionsSection
+                        pitchHistorySection
                         a4FrequencySection
                         midiReferenceSection
                     }
@@ -92,7 +95,7 @@ struct SettingsView: View {
                     }
                 }) {
                     Image(systemName: displayOptionsCollapsed ? "chevron.down" : "chevron.up")
-                        .font(.title2.weight(.medium))
+                        .font(.title3.weight(.medium))
                         .foregroundColor(.blue)
                         .frame(width: isPad ? 44 : 32, height: isPad ? 44 : 32)
                         .background(
@@ -135,17 +138,7 @@ struct SettingsView: View {
                 Toggle("", isOn: $showPitchGraph)
                     .labelsHidden()
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-            )
+            .standardCardStyle()
             
             // Signal Strength Toggle
             HStack {
@@ -164,17 +157,7 @@ struct SettingsView: View {
                 Toggle("", isOn: $showSignalStrength)
                     .labelsHidden()
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-            )
+            .standardCardStyle()
             
             // Reference Labels Toggle
             HStack {
@@ -183,7 +166,7 @@ struct SettingsView: View {
                         .subheadingFont(isPad: isPad)
                         .foregroundColor(.primary)
                     
-                    Text("Show A4 frequency and MIDI reference")
+                    Text("Display current frequency, cents, and octave")
                         .captionFont(isPad: isPad)
                         .foregroundColor(.secondary)
                 }
@@ -192,6 +175,99 @@ struct SettingsView: View {
                 
                 Toggle("", isOn: $showReferenceLabels)
                     .labelsHidden()
+            }
+            .standardCardStyle()
+        }
+    }
+    
+    // MARK: - Pitch History Section
+    private var pitchHistorySection: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .iconSmallFont(isPad: isPad)
+                    .foregroundColor(.blue)
+                
+                Text("Pitch History")
+                    .headingFont(isPad: isPad)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Button(action: {
+                    withAnimation(.easeInOut) {
+                        pitchHistoryOptionsCollapsed.toggle()
+                    }
+                }) {
+                    Image(systemName: pitchHistoryOptionsCollapsed ? "chevron.down" : "chevron.up")
+                        .font(.title3.weight(.medium))
+                        .foregroundColor(.blue)
+                        .frame(width: isPad ? 44 : 32, height: isPad ? 44 : 32)
+                        .background(
+                            Circle()
+                                .fill(Color.blue.opacity(0.1))
+                        )
+                }
+            }
+            
+            if pitchHistoryOptionsCollapsed {
+                pitchHistoryControls
+                    .id("pitchHistory")
+                    .frame(height: 0)
+                    .hidden()
+            } else {
+                pitchHistoryControls
+                    .id("pitchHistory")
+            }
+        }
+        .padding(20)
+        .background(sectionBackground)
+        .overlay(sectionBorder)
+    }
+    
+    private var pitchHistoryControls: some View {
+        VStack(spacing: 12) {
+            // Max History Size Slider
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Max History Size")
+                            .subheadingFont(isPad: isPad)
+                            .foregroundColor(.primary)
+                        
+                        Text("Number of data points to keep in memory")
+                            .captionFont(isPad: isPad)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Spacer()
+                    
+                    Text("\(maxPitchHistorySize)")
+                        .subheadingFont(isPad: isPad)
+                        .foregroundColor(.blue)
+                        .fontWeight(.semibold)
+                }
+                
+                HStack {
+                    let maxValue: Double = isPad ? 1000 : 250
+                    Text("50")
+                        .captionFont(isPad: isPad)
+                        .foregroundColor(.secondary)
+                    
+                    Slider(
+                        value: Binding(
+                            get: { Double(maxPitchHistorySize) },
+                            set: { maxPitchHistorySize = Int($0) }
+                        ),
+                        in: 25...maxValue,
+                        step: 25
+                    )
+                    .accentColor(.blue)
+                    
+                    Text("\(Int(maxValue))")
+                        .captionFont(isPad: isPad)
+                        .foregroundColor(.secondary)
+                }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
@@ -242,17 +318,7 @@ struct SettingsView: View {
                         .font(.subheadline.weight(.medium))
                         .foregroundColor(.secondary)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemBackground))
-                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                )
+                .standardCardStyle()
             }
             .buttonStyle(.plain)
         }
@@ -296,17 +362,7 @@ struct SettingsView: View {
                         .font(.subheadline.weight(.medium))
                         .foregroundColor(.secondary)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemBackground))
-                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                )
+                .standardCardStyle()
             }
             .buttonStyle(.plain)
         }

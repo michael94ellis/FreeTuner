@@ -122,35 +122,6 @@ struct TunerCircleView: View {
                     .mainNoteFont(isPad: isPad)
                     .foregroundColor(.primary)
                     .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
-                    
-                    // Tuning accuracy indicator
-                    HStack(spacing: 12) {
-                        // Cents display
-                        VStack(spacing: 2) {
-                            Text("Cents")
-                                .labelFont(isPad: isPad)
-                                .foregroundColor(.secondary)
-                            Text(formatCents(note.cents))
-                                .centsFont(isPad: isPad)
-                                .foregroundColor(centsColor(note.cents))
-                        }
-                        
-                        // Octave display
-                        VStack(spacing: 2) {
-                            Text("Octave")
-                                .labelFont(isPad: isPad)
-                                .foregroundColor(.secondary)
-                            Text("\(note.octave)")
-                                .octaveFont(isPad: isPad)
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemGray6).opacity(0.5))
-                    )
                 }
             } else {
                 // No note detected state
@@ -181,8 +152,8 @@ struct TunerCircleView: View {
                 .fill(
                     LinearGradient(
                         gradient: Gradient(colors: [
-                            centsColor(note.cents),
-                            centsColor(note.cents).opacity(0.8)
+                            note.cents.centsColor,
+                            note.cents.centsColor.opacity(0.8)
                         ]),
                         startPoint: .top,
                         endPoint: .bottom
@@ -191,8 +162,9 @@ struct TunerCircleView: View {
                 .frame(width: 6, height: needleLength)
                 .offset(y: -needleLength / 2)
                 .rotationEffect(.degrees(angle))
-                .shadow(color: centsColor(note.cents).opacity(0.3), radius: 4, x: 0, y: 2)
+                .shadow(color: note.cents.centsColor.opacity(0.3), radius: 4, x: 0, y: 2)
                 .animation(.easeInOut(duration: 0.3), value: note.cents)
+                .zIndex(-1)
         }
     }
     
@@ -206,30 +178,9 @@ struct TunerCircleView: View {
         guard let detectedNote = detectedNote else { return .secondary.opacity(0.4) }
         
         if detectedNote.name == noteName {
-            return centsColor(detectedNote.cents)
+            return detectedNote.cents.centsColor
         } else {
             return .secondary.opacity(0.4)
-        }
-    }
-    
-    private func centsColor(_ cents: Int) -> Color {
-        let absCents = abs(cents)
-        if absCents <= 5 {
-            return .green
-        } else if absCents <= 15 {
-            return .orange
-        } else {
-            return .red
-        }
-    }
-    
-    private func formatCents(_ cents: Int) -> String {
-        if cents == 0 {
-            return "✓"
-        } else if cents > 0 {
-            return "+\(cents)¢"
-        } else {
-            return "\(cents)¢"
         }
     }
 }

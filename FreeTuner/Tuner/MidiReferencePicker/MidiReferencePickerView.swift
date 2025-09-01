@@ -77,20 +77,7 @@ struct MidiReferencePickerView: View {
                 .foregroundColor(.primary)
                 .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
         }
-        .padding(24)
-        .background(currentMidiNoteBackground)
-        .overlay(currentMidiNoteBorder)
-    }
-    
-    private var currentMidiNoteBackground: some View {
-        RoundedRectangle(cornerRadius: 16)
-            .fill(Color(.systemBackground))
-            .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-    }
-    
-    private var currentMidiNoteBorder: some View {
-        RoundedRectangle(cornerRadius: 16)
-            .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+        .largeCardStyle()
     }
     
     // MARK: - Custom MIDI Note Picker
@@ -109,20 +96,7 @@ struct MidiReferencePickerView: View {
             .pickerStyle(WheelPickerStyle())
             .frame(height: 120)
         }
-        .padding(20)
-        .background(customPickerBackground)
-        .overlay(customPickerBorder)
-    }
-    
-    private var customPickerBackground: some View {
-        RoundedRectangle(cornerRadius: 16)
-            .fill(Color(.systemBackground))
-            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
-    }
-    
-    private var customPickerBorder: some View {
-        RoundedRectangle(cornerRadius: 16)
-            .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+        .largeCardStyle()
     }
     
     // MARK: - Common Standards Section
@@ -146,9 +120,7 @@ struct MidiReferencePickerView: View {
                 }
             }
         }
-        .padding(20)
-        .background(commonStandardsBackground)
-        .overlay(commonStandardsBorder)
+        .largeCardStyle()
     }
     
     private var gridColumns: [GridItem] {
@@ -156,17 +128,6 @@ struct MidiReferencePickerView: View {
             GridItem(.flexible()),
             GridItem(.flexible())
         ]
-    }
-    
-    private var commonStandardsBackground: some View {
-        RoundedRectangle(cornerRadius: 16)
-            .fill(Color(.systemBackground))
-            .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-    }
-    
-    private var commonStandardsBorder: some View {
-        RoundedRectangle(cornerRadius: 16)
-            .stroke(Color.gray.opacity(0.1), lineWidth: 1)
     }
     
     // MARK: - Helper Methods

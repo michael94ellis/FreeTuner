@@ -24,77 +24,49 @@ struct TunerView: View {
     @AppStorage("showPitchGraph") private var showPitchGraph: Bool = true
     @AppStorage("showSignalStrength") private var showSignalStrength: Bool = true
     @AppStorage("showReferenceLabels") private var showReferenceLabels: Bool = true
+    @AppStorage("maxPitchHistorySize") private var maxPitchHistorySize: Int = 100
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: isPad ? 24 : 8) {
                 
-                // Add tap hint when not listening
-                Text(isListening ? "Listening…" : "🎙 Tap anywhere to start")
-                    .font(.headline.weight(.semibold))
-                    .foregroundColor(isListening ? .white : .blue)
-                    .padding(.horizontal, isPad ? 32 : 16)
-                    .padding(.vertical, isPad ? 16 : 8)
-                    .background(
-                        Capsule()
-                            .fill(isListening ? Color.blue : Color.blue.opacity(0.1))
-                            .overlay(
-                                Capsule()
-                                    .stroke(Color.blue.opacity(isListening ? 0.5 : 0.3), lineWidth: 1)
-                            )
-                    )
-                    .animation(.easeInOut(duration: 0.2), value: isListening)
-                    .accessibilityLabel(isListening ? "Voice recognition active" : "Tap to start listening")
+                listeningHeader
                 
-                
-                TunerCircleView(detectedNote: currentPitch.flatMap {
+                let detectedNote = currentPitch.flatMap({
                     noteConverter.frequencyToNote($0)
-                },
-                                isListening: $isListening)
-                .padding(.horizontal, isPad ? 32 : 20)
-                .frame(maxHeight: isPad ? .infinity : 500)
-                .frame(minHeight: isPad ? 500 : 300)
+                })
                 
-                // Settings Summary (only show if reference labels are enabled)
                 if showReferenceLabels {
-                    settingsSummaryView
+                    pitchSummaryView(detectedNote: detectedNote)
+                        .standardCardStyle()
                 }
                 
-                // Decibel Meter and Pitch Graph - stack vertically on smaller screens
-                VStack(spacing: 16) {
-                    // Signal Strength Meter (only show if enabled)
-                    if showSignalStrength {
-                        VStack(spacing: 0) {
-                            DecibelMeterView(decibels: currentDecibels, isListening: isListening)
-                        }
-                        .padding(20)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color(.systemBackground))
-                                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                        )
+                let tunerView = TunerCircleView(detectedNote: detectedNote,
+                                                isListening: $isListening)
+                    .padding(.horizontal, isPad ? 32 : 20)
+                    .frame(maxHeight: isPad ? .infinity : 500)
+                    .frame(minHeight: isPad ? 500 : 300)
+                
+                let onlyShowTuner = !showReferenceLabels && !showPitchGraph && !showSignalStrength
+                if onlyShowTuner {
+                    tunerView
+                } else {
+                    tunerView
+                        .largeCardStyle()
+                }
+                
+                if showSignalStrength {
+                    VStack(spacing: 0) {
+                        DecibelMeterView(decibels: currentDecibels, isListening: isListening)
                     }
-                    
-                    // Pitch Graph (only show if enabled)
-                    if showPitchGraph {
-                        VStack(spacing: 0) {
-                            PitchGraphView(pitchData: pitchData, isListening: isListening)
-                        }
-                        .padding(20)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color(.systemBackground))
-                                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                        )
+                    .largeCardStyle()
+                }
+                
+                if showPitchGraph {
+                    VStack(spacing: 0) {
+                        PitchGraphView(pitchData: pitchData, isListening: isListening, maxDataPoints: maxPitchHistorySize)
                     }
+                    .largeCardStyle()
                 }
                 
                 errorMessageView
@@ -118,59 +90,73 @@ struct TunerView: View {
         }
     }
     
-    // MARK: - Settings Summary View
+    var listeningHeader: some View {
+        // Add tap hint when not listening
+        Text(isListening ? "Listening…" : "🎙 Tap anywhere to start")
+            .font(.headline.weight(.semibold))
+            .foregroundColor(isListening ? .white : .blue)
+            .padding(.horizontal, isPad ? 32 : 16)
+            .padding(.vertical, isPad ? 16 : 8)
+            .background(
+                Capsule()
+                    .fill(isListening ? Color.blue : Color.blue.opacity(0.1))
+                    .overlay(
+                        Capsule()
+                            .stroke(Color.blue.opacity(isListening ? 0.5 : 0.3), lineWidth: 1)
+                    )
+            )
+            .animation(.easeInOut(duration: 0.2), value: isListening)
+            .accessibilityLabel(isListening ? "Voice recognition active" : "Tap to start listening")
+    }
+    
     @ViewBuilder
-    var settingsSummaryView: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 16) {
-                // A4 Frequency
-                VStack(spacing: 4) {
-                    Text("A4 Frequency")
-                        .captionFont(isPad: isPad)
-                        .foregroundColor(.secondary)
-                    
-                    Text("\(Int(noteConverter.getA4Frequency())) Hz")
-                        .subheadingFont(isPad: isPad)
-                        .foregroundColor(.primary)
-                }
-                .frame(maxWidth: .infinity)
+    func pitchSummaryView(detectedNote: Note?) -> some View {
+        HStack(spacing: isPad ? 24 : 16) {
+            // Current Frequency Display
+            VStack(spacing: isPad ? 8 : 6) {
+                Text("Frequency")
+                    .captionFont(isPad: isPad)
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+                    .tracking(0.5)
                 
-                VStack(spacing: 4) {
-                    Text("Current Frequency")
-                        .captionFont(isPad: isPad)
-                        .foregroundColor(.secondary)
-                    
-                    Text(String(format: "%4d Hz", Int(currentPitch ?? 0)))
-                        .subheadingFont(isPad: isPad)
-                        .foregroundColor(.primary)
-                }
-                .frame(maxWidth: .infinity)
+                Text(String(format: "%4d Hz", Int(currentPitch ?? 0)))
+                    .frequencyFont(isPad: isPad)
+                    .foregroundColor(.primary)
+                    .monospacedDigit()
+            }
+            
+            // Cents Display
+            VStack(spacing: isPad ? 6 : 4) {
+                Text("Cents")
+                    .labelFont(isPad: isPad)
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+                    .tracking(0.5)
                 
-                // MIDI Reference
-                VStack(spacing: 4) {
-                    Text("MIDI Reference")
-                        .captionFont(isPad: isPad)
-                        .foregroundColor(.secondary)
-                    
-                    Text("\(midiNoteToName(noteConverter.getA4MidiNote()))")
-                        .subheadingFont(isPad: isPad)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                }
-                .frame(maxWidth: .infinity)
+                Text(detectedNote?.cents.formatCents ?? "0")
+                    .centsFont(isPad: isPad)
+                    .foregroundColor(detectedNote?.cents.centsColor)
+                    .fontWeight(.bold)
+                    .scaleEffect(detectedNote?.cents.centsColor == .green ? 1.1 : 1.0)
+                    .animation(.easeInOut(duration: 0.2), value: detectedNote?.cents.centsColor)
+            }
+            
+            // Octave Display
+            VStack(spacing: isPad ? 6 : 4) {
+                Text("Octave")
+                    .labelFont(isPad: isPad)
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+                    .tracking(0.5)
+                
+                Text("\(detectedNote?.octave ?? 0)")
+                    .octaveFont(isPad: isPad)
+                    .foregroundColor(.primary)
+                    .fontWeight(.semibold)
             }
         }
-        .padding(.horizontal, isPad ? 32 : 20)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 4, x: 0, y: 2)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-        )
+        .frame(maxWidth: .infinity)
     }
     
     // MARK: - Helper Methods
@@ -185,26 +171,17 @@ struct TunerView: View {
     var errorMessageView: some View {
         // Error message with better styling
         if let error = errorMessage {
-                    HStack {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(.orange)
-                .font(.subheadline.weight(.medium))
-            
-            Text(error)
-                .font(.subheadline.weight(.medium))
-                .foregroundColor(.primary)
-                .multilineTextAlignment(.leading)
-        }
-        .padding(.horizontal, isPad ? 32 : 20)
-        .padding(.vertical, isPad ? 20 : 12)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.orange.opacity(0.1))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.orange.opacity(0.3), lineWidth: 1)
-                    )
-            )
+            HStack {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+                    .font(.subheadline.weight(.medium))
+                
+                Text(error)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
+            }
+            .warningCardStyle()
         }
     }
     
@@ -227,12 +204,10 @@ struct TunerView: View {
                         
                         // Add new data point and maintain max data points
                         pitchData.append(dataPoint)
-                        if pitchData.count > 100 {
+                        if pitchData.count > maxPitchHistorySize {
                             pitchData.removeFirst()
                         }
                     }
-                    
-
                 }
             }
         }
@@ -280,5 +255,3 @@ struct TunerView: View {
         .preferredColorScheme(.dark)
     }
 }
-
-

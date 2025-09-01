@@ -21,3 +21,8 @@ FreeTuner is an iOS tuner application that detects pitch in real-time using micr
 - Color-coded volume levels (green/yellow/orange/red)
 - Peak level tracking with decay
 - Responsive volume feedback for optimal input levels
+
+### Customizable Interface
+- Card order management with persistent storage
+- Individual card visibility controls
+- Clean, organized card layout

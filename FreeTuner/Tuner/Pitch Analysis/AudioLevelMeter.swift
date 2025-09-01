@@ -32,10 +32,10 @@ class AudioLevelMeter {
         let rawPeakDb = 20 * log10(max(peak / referenceLevel, 1e-10))
 
         // Smoothing
-        smoothedDb = (1.0 - smoothingFactor) * smoothedDb + smoothingFactor * rawRmsDb
+//        smoothedDb = (1.0 - smoothingFactor) * smoothedDb + smoothingFactor * rawRmsDb
 
         // Clamping
-        let clampedRmsDb = max(minDb, min(maxDb, smoothedDb))
+        let clampedRmsDb = max(minDb, min(maxDb, rawRmsDb))
         let clampedPeakDb = max(minDb, min(maxDb, rawPeakDb))
 
         return (clampedRmsDb, clampedPeakDb)
