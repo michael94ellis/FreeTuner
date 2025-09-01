@@ -28,12 +28,19 @@ struct TunerCircleView: View {
                 
                 // Note markers around the ring
                 noteMarkers(size: size, center: center, radius: radius)
+                    .accessibilityHidden(true) // Hide individual markers from VoiceOver
                 
                 // Center display
                 centerDisplay(size: size)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Detected note")
+                    .accessibilityValue(detectedNote != nil ? "\(detectedNote!.name)\(detectedNote!.octave)" : "No note detected")
+                    .accessibilityHint("Shows the currently detected musical note")
+                    .accessibilityAddTraits(.updatesFrequently)
                 
                 // Tuning indicator
                 tuningIndicator(size: size, center: center, radius: radius)
+                    .accessibilityHidden(true) // Hide from VoiceOver as it's visual only
             }
         }
     }

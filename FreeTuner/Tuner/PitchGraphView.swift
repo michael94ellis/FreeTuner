@@ -58,6 +58,9 @@ struct PitchGraphView: View {
                                 .fill(Color.blue.opacity(0.1))
                         )
                 }
+                .accessibilityLabel("Toggle pitch graph")
+                .accessibilityValue(showingGraph ? "Expanded" : "Collapsed")
+                .accessibilityHint("Shows or hides the pitch history graph")
             }
             .contentShape(Rectangle())
             .onTapGesture {
@@ -81,6 +84,7 @@ struct PitchGraphView: View {
                     insertion: .move(edge: .top).combined(with: .opacity),
                     removal: .move(edge: .top).combined(with: .opacity)
                 ))
+                    .accessibilityAddTraits(.updatesFrequently)
             }
         }
     }
@@ -137,6 +141,10 @@ struct PitchGraphView: View {
                     )
                 }
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Pitch history graph")
+            .accessibilityValue("\(pitchData.count) data points, average frequency \(Int(averageFrequency)) Hertz")
+            .accessibilityHint("Shows frequency changes over time. Updates in real-time as new pitch data is collected.")
             .frame(height: isPad ? 180 : 120)
             .chartXAxis {
                 AxisMarks(position: .bottom) { _ in
@@ -179,10 +187,14 @@ struct PitchGraphView: View {
                     .font(isPad ? .title3 : .subheadline)
                     .foregroundColor(.secondary)
                     .frame(minWidth: 80, alignment: .trailing)
-                Text("\(Int(averageFrequency)) Hz")
-                    .font(isPad ? .title3 : .subheadline)
-                    .foregroundColor(.primary)
-                    .frame(minWidth: 80, alignment: .trailing)
+                            Text("\(Int(averageFrequency)) Hz")
+                .font(isPad ? .title3 : .subheadline)
+                .foregroundColor(.primary)
+                .frame(minWidth: 80, alignment: .trailing)
+                .accessibilityLabel("Average frequency")
+                .accessibilityValue("\(Int(averageFrequency)) Hertz")
+                .accessibilityHint("Average frequency over the recorded time period")
+                .accessibilityAddTraits(.updatesFrequently)
             }
             .padding(.vertical, isPad ? 16 : 8)
             .padding(.horizontal, isPad ? 12 : 8)

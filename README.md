@@ -75,7 +75,7 @@ FreeTuner is an iOS tuner application that provides real-time pitch detection wi
 - **iPad Optimization**: Enhanced font sizes and layout for iPad users
 - **Dark Mode Support**: Full dark mode compatibility
 - **Responsive Design**: Adaptive layouts for different screen sizes
-- **Accessibility**: VoiceOver support and accessibility labels
+- **Comprehensive Accessibility**: Full VoiceOver support with dynamic content handling
 - **Gesture Controls**: Tap to start/stop listening
 - **Collapsible Sections**: Expandable interface elements for cleaner layout
 
@@ -127,7 +127,7 @@ FreeTuner is an iOS tuner application that provides real-time pitch detection wi
 - **Intuitive Interface**: Clock-face tuner design familiar to musicians
 - **Visual Feedback**: Color-coded accuracy indicators
 - **Responsive Design**: Real-time updates with smooth animations
-- **Accessibility**: Inclusive design for all users
+- **Inclusive Accessibility**: Full VoiceOver support with dynamic content announcements
 
 ### Professional Standards
 - **Musical Accuracy**: Equal temperament with precise cents calculation

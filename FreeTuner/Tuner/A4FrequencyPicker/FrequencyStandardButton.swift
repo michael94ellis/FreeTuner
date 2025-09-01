@@ -34,6 +34,9 @@ struct FrequencyStandardButton: View {
                     )
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Select \(standard.name)")
+            .accessibilityValue(isSelected ? "Selected" : "Not selected")
+            .accessibilityHint("Sets the A4 frequency to \(standard.name)")
         }
         .padding(16)
         .frame(maxWidth: .infinity)

@@ -76,6 +76,8 @@ struct DecibelMeterView: View {
                 .popover(isPresented: $showingTooltip) {
                     toolTipContent
                 }
+                .accessibilityLabel("Information")
+                .accessibilityHint("Shows explanation of decibel measurements")
                 
                 Spacer()
                 
@@ -88,10 +90,15 @@ struct DecibelMeterView: View {
                             .font(isPad ? .title : .title2)
                             .foregroundColor(meterColor)
                             .contentTransition(.numericText())
+                            .accessibilityLabel("Signal strength")
+                            .accessibilityValue("\(Int(decibels.rms)) decibels")
+                            .accessibilityHint("Real-time audio input level. Updates continuously.")
+                            .accessibilityAddTraits(.updatesFrequently)
                         
                         Text(showingMeter ? "dB" : "  ")
                             .font(isPad ? .caption : .caption2)
                             .foregroundColor(.secondary)
+                            .accessibilityHidden(true) // Hide "dB" label from VoiceOver as it's included in the value
                     }
                     .padding(.vertical, isPad ? 16 : 8)
                     .padding(.horizontal, isPad ? 12 : 8)
@@ -132,6 +139,9 @@ struct DecibelMeterView: View {
                                 .fill(Color.blue.opacity(0.1))
                         )
                 }
+                .accessibilityLabel("Toggle signal meter")
+                .accessibilityValue(showingMeter ? "Expanded" : "Collapsed")
+                .accessibilityHint("Shows or hides the detailed signal strength meter")
             }
             .contentShape(Rectangle())
             .onTapGesture {
@@ -143,6 +153,7 @@ struct DecibelMeterView: View {
             
             if showingMeter {
                 decibelMeter
+                    .accessibilityAddTraits(.updatesFrequently)
             }
         }
     }

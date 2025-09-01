@@ -41,6 +41,9 @@ struct MidiStandardButton: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Select \(standard.name)")
+        .accessibilityValue(isSelected ? "Selected" : "Not selected")
+        .accessibilityHint("Sets the MIDI reference note to \(standard.name)")
     }
 }
 

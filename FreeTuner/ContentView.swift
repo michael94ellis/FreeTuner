@@ -55,6 +55,8 @@ struct ContentView: View {
                             .font(isPad ? .title2 : .title3)
                             .foregroundColor(.blue)
                     }
+                    .accessibilityLabel("Settings")
+                    .accessibilityHint("Opens the settings menu to configure tuner options")
                 }
             }
         }

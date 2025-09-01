@@ -43,14 +43,16 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Image(systemName: "xmark")
-                            .font(isPad ? .title2 : .title3)
-                            .foregroundColor(.blue)
-                    }
-                    .font(isPad ? .body : .callout)
+                                    Button(action: {
+                    dismiss()
+                }) {
+                    Image(systemName: "xmark")
+                        .font(isPad ? .title2 : .title3)
+                        .foregroundColor(.blue)
+                }
+                .font(isPad ? .body : .callout)
+                .accessibilityLabel("Close settings")
+                .accessibilityHint("Closes the settings menu and returns to the tuner")
                 }
             }
         }
@@ -103,6 +105,9 @@ struct SettingsView: View {
                                 .fill(Color.blue.opacity(0.1))
                         )
                 }
+                .accessibilityLabel("Toggle display options")
+                .accessibilityValue(displayOptionsCollapsed ? "Collapsed" : "Expanded")
+                .accessibilityHint("Shows or hides display option controls")
             }
             if displayOptionsCollapsed {
                 displayToggles
@@ -137,6 +142,8 @@ struct SettingsView: View {
                 
                 Toggle("", isOn: $showPitchGraph)
                     .labelsHidden()
+                    .accessibilityLabel("Show pitch graph")
+                    .accessibilityHint("Toggles visibility of the real-time pitch history graph")
             }
             .standardCardStyle()
             
@@ -156,6 +163,8 @@ struct SettingsView: View {
                 
                 Toggle("", isOn: $showSignalStrength)
                     .labelsHidden()
+                    .accessibilityLabel("Show signal strength")
+                    .accessibilityHint("Toggles visibility of the audio input level meter")
             }
             .standardCardStyle()
             
@@ -175,6 +184,8 @@ struct SettingsView: View {
                 
                 Toggle("", isOn: $showReferenceLabels)
                     .labelsHidden()
+                    .accessibilityLabel("Show reference labels")
+                    .accessibilityHint("Toggles visibility of frequency, cents, and octave information")
             }
             .standardCardStyle()
         }
@@ -208,6 +219,9 @@ struct SettingsView: View {
                                 .fill(Color.blue.opacity(0.1))
                         )
                 }
+                .accessibilityLabel("Toggle pitch history options")
+                .accessibilityValue(pitchHistoryOptionsCollapsed ? "Collapsed" : "Expanded")
+                .accessibilityHint("Shows or hides pitch history configuration options")
             }
             
             if pitchHistoryOptionsCollapsed {
@@ -254,15 +268,18 @@ struct SettingsView: View {
                         .font(isPad ? .body : .subheadline)
                         .foregroundColor(.secondary)
                     
-                    Slider(
-                        value: Binding(
-                            get: { Double(maxPitchHistorySize) },
-                            set: { maxPitchHistorySize = Int($0) }
-                        ),
-                        in: 25...maxValue,
-                        step: 25
-                    )
-                    .accentColor(.blue)
+                                    Slider(
+                    value: Binding(
+                        get: { Double(maxPitchHistorySize) },
+                        set: { maxPitchHistorySize = Int($0) }
+                    ),
+                    in: 25...maxValue,
+                    step: 25
+                )
+                .accentColor(.blue)
+                .accessibilityLabel("Maximum pitch history size")
+                .accessibilityValue("\(maxPitchHistorySize) data points")
+                .accessibilityHint("Adjusts how many pitch measurements to keep in memory")
                     
                     Text("\(Int(maxValue))")
                         .font(isPad ? .body : .subheadline)
@@ -320,6 +337,8 @@ struct SettingsView: View {
                 }
                 .standardCardStyle()
                 .contentShape(Rectangle())
+                .accessibilityLabel("A4 frequency settings")
+                .accessibilityHint("Opens A4 reference frequency configuration")
             }
             .buttonStyle(.plain)
         }
@@ -365,6 +384,8 @@ struct SettingsView: View {
                 }
                 .standardCardStyle()
                 .contentShape(Rectangle())
+                .accessibilityLabel("MIDI reference settings")
+                .accessibilityHint("Opens MIDI reference note configuration")
             }
             .buttonStyle(.plain)
         }

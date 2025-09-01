@@ -112,17 +112,20 @@ struct A4FrequencyPickerView: View {
                         removal: .move(edge: .top).combined(with: .opacity)
                     ))
                 } else {
-                    Button(action: {
-                        manualFrequencyText = "\(Int(selectedA4Frequency))"
-                        isEditingFrequency = true
-                    }) {
-                        Text("\(Int(selectedA4Frequency)) Hz")
-                            .font(isPad ? .system(size: 48) : .title)
-                            .frame(maxWidth: .infinity)
-                            .foregroundColor(.primary)
-                            .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
-                    }
-                    .buttonStyle(.plain)
+                                    Button(action: {
+                    manualFrequencyText = "\(Int(selectedA4Frequency))"
+                    isEditingFrequency = true
+                }) {
+                    Text("\(Int(selectedA4Frequency)) Hz")
+                        .font(isPad ? .system(size: 48) : .title)
+                        .frame(maxWidth: .infinity)
+                        .foregroundColor(.primary)
+                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Current A4 frequency")
+                .accessibilityValue("\(Int(selectedA4Frequency)) Hertz")
+                .accessibilityHint("Tap to edit the A4 reference frequency")
                     .transition(.asymmetric(
                         insertion: .move(edge: .top).combined(with: .opacity),
                         removal: .move(edge: .top).combined(with: .opacity)
@@ -142,6 +145,9 @@ struct A4FrequencyPickerView: View {
                         .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(pitchPlayer.isCurrentlyPlaying ? "Stop reference tone" : "Play reference tone")
+                .accessibilityValue("\(Int(selectedA4Frequency)) Hertz")
+                .accessibilityHint("Plays or stops a reference tone at the current A4 frequency")
             }
             .animation(.easeInOut(duration: 0.3), value: isEditingFrequency)
             
@@ -216,6 +222,9 @@ struct A4FrequencyPickerView: View {
                 step: 1
             )
             .accentColor(.blue)
+            .accessibilityLabel("A4 frequency slider")
+            .accessibilityValue("\(Int(selectedA4Frequency)) Hertz")
+            .accessibilityHint("Adjust the A4 reference frequency from 1 to 990 Hertz")
             .onChange(of: selectedA4Frequency) {
                 guard pitchPlayer.isCurrentlyPlaying else {
                     return
@@ -309,6 +318,8 @@ struct A4FrequencyPickerView: View {
             dismiss()
         }
         .font(isPad ? .body : .callout)
+        .accessibilityLabel("Cancel")
+        .accessibilityHint("Discards changes and returns to settings")
     }
     
     private var applyButton: some View {
@@ -320,6 +331,8 @@ struct A4FrequencyPickerView: View {
         }
         .font(isPad ? .title : .title3)
         .foregroundColor(.blue)
+        .accessibilityLabel("Apply")
+        .accessibilityHint("Saves the A4 frequency setting and returns to settings")
     }
 }
 

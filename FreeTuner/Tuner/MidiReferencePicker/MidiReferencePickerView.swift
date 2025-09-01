@@ -76,6 +76,9 @@ struct MidiReferencePickerView: View {
                 .frame(maxWidth: .infinity)
                 .foregroundColor(.primary)
                 .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
+                .accessibilityLabel("Current MIDI reference note")
+                .accessibilityValue("\(midiNoteToName(selectedMidiNote)) MIDI note \(selectedMidiNote)")
+                .accessibilityHint("Shows the currently selected MIDI reference note")
         }
         .largeCardStyle()
     }
@@ -95,6 +98,9 @@ struct MidiReferencePickerView: View {
             }
             .pickerStyle(WheelPickerStyle())
             .frame(height: 120)
+            .accessibilityLabel("MIDI note picker")
+            .accessibilityValue("\(midiNoteToName(selectedMidiNote)) MIDI note \(selectedMidiNote)")
+            .accessibilityHint("Select a MIDI reference note from 0 to 127")
         }
         .largeCardStyle()
     }
@@ -155,6 +161,8 @@ struct MidiReferencePickerView: View {
             dismiss()
         }
         .font(isPad ? .body : .callout)
+        .accessibilityLabel("Cancel")
+        .accessibilityHint("Discards changes and returns to settings")
     }
     
     private var applyButton: some View {
@@ -166,6 +174,8 @@ struct MidiReferencePickerView: View {
         }
         .font(isPad ? .title : .title3)
         .foregroundColor(.blue)
+        .accessibilityLabel("Apply")
+        .accessibilityHint("Saves the MIDI reference note setting and returns to settings")
     }
 }
 

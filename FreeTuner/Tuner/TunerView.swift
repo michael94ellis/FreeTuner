@@ -108,6 +108,8 @@ struct TunerView: View {
             }
             .animation(.easeInOut(duration: 0.2), value: isListening)
             .accessibilityLabel(isListening ? "Audio processing active" : "Tap to start listening")
+            .accessibilityHint("Tap once to start or stop audio input for pitch detection")
+            .accessibilityAddTraits(.allowsDirectInteraction)
     }
     
     @ViewBuilder
@@ -128,6 +130,10 @@ struct TunerView: View {
                     .frame(minWidth: 80, alignment: .trailing)
                     .foregroundColor(.primary)
                     .monospacedDigit()
+                    .accessibilityLabel("Frequency")
+                    .accessibilityValue("\(Int(currentPitch ?? 0)) Hertz")
+                    .accessibilityHint("Real-time frequency measurement. Value updates continuously when audio is detected.")
+                    .accessibilityAddTraits(.updatesFrequently)
             }
             .frame(minWidth: minWidth, alignment: .trailing)
             
@@ -147,6 +153,10 @@ struct TunerView: View {
                     .fontWeight(.bold)
                     .scaleEffect(detectedNote?.cents.centsColor == .green ? 1.1 : 1.0)
                     .animation(.easeInOut(duration: 0.2), value: detectedNote?.cents.centsColor)
+                    .accessibilityLabel("Cents deviation")
+                    .accessibilityValue("\(detectedNote?.cents ?? 0) cents")
+                    .accessibilityHint("Shows how far the note is from perfect tuning. Updates in real-time.")
+                    .accessibilityAddTraits(.updatesFrequently)
             }
             .frame(minWidth: minWidth, alignment: .trailing)
             
@@ -164,6 +174,10 @@ struct TunerView: View {
                     .frame(minWidth: 80, alignment: .trailing)
                     .foregroundColor(.primary)
                     .fontWeight(.semibold)
+                    .accessibilityLabel("Octave")
+                    .accessibilityValue("Octave \(detectedNote?.octave ?? 0)")
+                    .accessibilityHint("Musical octave of the detected note. Updates when pitch changes significantly.")
+                    .accessibilityAddTraits(.updatesFrequently)
             }
             .frame(minWidth: minWidth, alignment: .trailing)
         }
@@ -193,6 +207,9 @@ struct TunerView: View {
                     .multilineTextAlignment(.leading)
             }
             .warningCardStyle()
+            .accessibilityLabel("Error")
+            .accessibilityValue(error)
+            .accessibilityAddTraits(.isStaticText)
         }
     }
     
