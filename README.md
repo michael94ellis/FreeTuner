@@ -3,6 +3,17 @@
 ## Overview
 FreeTuner is an iOS tuner application that provides real-time pitch detection with professional-grade accuracy. Built with SwiftUI and leveraging Apple's Accelerate framework for high-performance audio processing, FreeTuner offers musicians and audio professionals a comprehensive tuning solution with customizable reference standards and advanced visualization features.
 
+## 📱 Screenshots
+
+| Device | Screenshot | Description |
+|--------|------------|-------------|
+| iPad | <img src="screenshots/iPad_screenshot_2.png" width="140" alt="iPad Screenshot 2"> | Main tuner interface with circular display |
+| iPad | <img src="screenshots/iPad_screenshot_1.png" width="140" alt="iPad Screenshot 1"> |Settings and configuration view |
+| iPhone | <img src="screenshots/iPhone_screenshot_3.png" width="140" alt="iPhone Screenshot 1"> | Main tuner interface on iPhone |
+| iPhone | <img src="screenshots/iPhone_screenshot_2.png" width="140" alt="iPhone Screenshot 2"> | A4 frequency picker interface |
+| iPhone | <img src="screenshots/iPhone_screenshot_4.png" width="140" alt="iPhone Screenshot 4"> | Expanded pitch graph view |
+| iPhone | <img src="screenshots/iPhone_screenshot_5.png" width="140" alt="iPhone Screenshot 5"> | Decibel meter and signal monitoring |
+
 ## 🎵 Core Features
 
 ### Real-Time Pitch Detection
