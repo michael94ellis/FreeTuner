@@ -64,12 +64,36 @@ struct TunerView: View {
                 VStack(spacing: 16) {
                     // Signal Strength Meter (only show if enabled)
                     if showSignalStrength {
-                        DecibelMeterView(decibels: currentDecibels, isListening: isListening)
+                        VStack(spacing: 0) {
+                            DecibelMeterView(decibels: currentDecibels, isListening: isListening)
+                        }
+                        .padding(20)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color(.systemBackground))
+                                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                        )
                     }
                     
                     // Pitch Graph (only show if enabled)
                     if showPitchGraph {
-                        PitchGraphView(pitchData: pitchData, isListening: isListening)
+                        VStack(spacing: 0) {
+                            PitchGraphView(pitchData: pitchData, isListening: isListening)
+                        }
+                        .padding(20)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color(.systemBackground))
+                                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                        )
                     }
                 }
                 
@@ -121,18 +145,6 @@ struct TunerView: View {
                         .foregroundColor(.primary)
                 }
                 .frame(maxWidth: .infinity)
-//                // Frequency display
-//                Text
-//                    .font(.system(size: isPad ? 28 : 22, weight: .medium, design: .monospaced))
-//                    .frame(width: isPad ? 120 : 100, alignment: .trailing)
-//                    .foregroundColor(.secondary)
-//                    .padding(.horizontal, isPad ? 16 : 12)
-//                    .padding(.vertical, isPad ? 6 : 4)
-//                    .background(
-//                        Capsule()
-//                            .fill(Color(.systemBackground))
-//                            .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 2, x: 0, y: 1)
-//                    )
                 
                 // MIDI Reference
                 VStack(spacing: 4) {
