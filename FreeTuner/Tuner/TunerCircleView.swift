@@ -95,7 +95,7 @@ struct TunerCircleView: View {
                 
                 // Note name with background
                 Text(noteName)
-                    .noteMarkerFont(isPad: isPad)
+                    .font(isPad ? .title2 : .headline)
                     .foregroundColor(noteColor(for: noteName))
                     .padding(.horizontal, isPad ? 12 : 8)
                     .padding(.vertical, isPad ? 6 : 4)
@@ -119,7 +119,7 @@ struct TunerCircleView: View {
                 // Main note display
                 VStack(spacing: 8) {
                                     Text(note.name)
-                    .mainNoteFont(isPad: isPad)
+                    .font(isPad ? .largeTitle : .title)
                     .foregroundColor(.primary)
                     .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
                 }
@@ -127,11 +127,11 @@ struct TunerCircleView: View {
                 // No note detected state
                 VStack(spacing: 12) {
                     Image(systemName: "music.note")
-                        .iconFont(isPad: isPad)
+                        .font(isPad ? .largeTitle : .title)
                         .foregroundColor(.secondary)
                     
                     Text("No Note Detected")
-                        .subheadingFont(isPad: isPad)
+                        .font(isPad ? .title2 : .headline)
                         .foregroundColor(.secondary)
                 }
             }

@@ -62,7 +62,7 @@ struct DecibelMeterView: View {
             // Header with collapsible button
             HStack {
                 Text("Signal Strength")
-                    .font(.title2.weight(.semibold))
+                    .font(isPad ? .title : .title2)
                     .foregroundColor(.primary)
                 
                 // Info button
@@ -70,7 +70,7 @@ struct DecibelMeterView: View {
                     showingTooltip.toggle()
                 }) {
                     Image(systemName: "info.circle")
-                        .font(.title2)
+                        .font(isPad ? .title2 : .title3)
                         .foregroundColor(.blue)
                 }
                 .popover(isPresented: $showingTooltip) {
@@ -84,12 +84,12 @@ struct DecibelMeterView: View {
                 HStack {
                     Text(showingMeter ? "\(Int(decibels.rms))" : "  ")
                         .fixedSize()
-                        .font(.title.weight(.bold))
+                        .font(isPad ? .title : .title2)
                         .foregroundColor(meterColor)
                         .contentTransition(.numericText())
                     
                     Text(showingMeter ? "dB" : "  ")
-                        .font(.caption.weight(.medium))
+                        .font(isPad ? .caption : .caption2)
                         .foregroundColor(.secondary)
                 }
                 .padding(.horizontal, isPad ? 32 : 0)
@@ -107,7 +107,7 @@ struct DecibelMeterView: View {
                     }
                 }) {
                     Image(systemName: showingMeter ? "thermometer.high" : "thermometer.medium.slash")
-                        .font(.title2.weight(.medium))
+                        .font(isPad ? .title2 : .title3)
                         .foregroundColor(.blue)
                         .frame(width: isPad ? 65 : 44, height: isPad ? 65 : 44)
                         .background(
@@ -165,13 +165,13 @@ struct DecibelMeterView: View {
             // Decibel scale markers
             HStack {
                 Text("-100")
-                    .font(.caption2.weight(.medium))
+                    .font(isPad ? .caption : .caption2)
                     .foregroundColor(.secondary)
                 
                 Spacer()
                 
                 Text("0")
-                    .font(.caption2.weight(.medium))
+                    .font(isPad ? .caption : .caption2)
                     .foregroundColor(.secondary)
             }
             .frame(maxWidth: .infinity)
@@ -198,11 +198,11 @@ struct DecibelMeterView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Decibel Range Explained")
-                    .font(.title)
+                    .font(isPad ? .largeTitle : .title)
                     .foregroundColor(.primary)
                 
                 Text("This tuner uses a digital audio scale called dBFS, decibels relative to full scale.")
-                    .font(.body)
+                    .font(isPad ? .body : .callout)
                     .foregroundColor(.secondary)
                 
                 VStack(alignment: .leading, spacing: 8) {
@@ -211,26 +211,26 @@ struct DecibelMeterView: View {
                             .foregroundColor(.blue)
                         Text("0 dB means the signal is at its maximum possible level (clipping)")
                     }
-                    .font(.headline)
+                    .font(isPad ? .headline : .subheadline)
                     
                     HStack(alignment: .top, spacing: 8) {
                         Text("•")
                             .foregroundColor(.blue)
                         Text("−60 dB is very quiet")
                     }
-                    .font(.headline)
+                    .font(isPad ? .headline : .subheadline)
                 }
                 
                 Text("The colored bar shows the average loudness of the sound (RMS), while the thin red line marks the loudest moment detected (peak).")
-                    .font(.body)
+                    .font(isPad ? .body : .callout)
                     .foregroundColor(.secondary)
                 
                 Text("Unlike the typically expected physical sound pressure levels (SPL), which range from 0 to 140 dB, digital audio uses a scale from −∞ to 0 dBFS, where 0 is the loudest possible value.")
-                    .font(.body)
+                    .font(isPad ? .body : .callout)
                     .foregroundColor(.secondary)
                 
-                Text("So if you see values like −45 dB or −30 dB, that’s normal, it means your signal is active but not overpowering.")
-                    .font(.body)
+                Text("So if you see values like −45 dB or −30 dB, that's normal, it means your signal is active but not overpowering.")
+                    .font(isPad ? .body : .callout)
                     .foregroundColor(.secondary)
             }
             .padding(20)

@@ -52,7 +52,7 @@ struct ContentView: View {
                         showingSettings = true
                     }) {
                         Image(systemName: "slider.vertical.3")
-                            .font(.title2.weight(.medium))
+                            .font(isPad ? .title2 : .title3)
                             .foregroundColor(.blue)
                     }
                 }

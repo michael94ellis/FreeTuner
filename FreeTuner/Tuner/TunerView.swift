@@ -93,7 +93,7 @@ struct TunerView: View {
     var listeningHeader: some View {
         // Add tap hint when not listening
         Text(isListening ? "Listening…" : "🎙 Tap anywhere to start")
-            .font(.headline.weight(.semibold))
+            .font(isPad ? .headline : .subheadline)
             .foregroundColor(isListening ? .white : .blue)
             .padding(.horizontal, isPad ? 32 : 16)
             .padding(.vertical, isPad ? 16 : 8)
@@ -115,13 +115,13 @@ struct TunerView: View {
             // Current Frequency Display
             VStack(spacing: isPad ? 8 : 6) {
                 Text("Frequency")
-                    .captionFont(isPad: isPad)
+                    .font(isPad ? .headline : .subheadline)
                     .foregroundColor(.secondary)
                     .textCase(.uppercase)
                     .tracking(0.5)
                 
                 Text(String(format: "%4d Hz", Int(currentPitch ?? 0)))
-                    .frequencyFont(isPad: isPad)
+                    .font(isPad ? .largeTitle : .headline)
                     .foregroundColor(.primary)
                     .monospacedDigit()
             }
@@ -129,13 +129,13 @@ struct TunerView: View {
             // Cents Display
             VStack(spacing: isPad ? 6 : 4) {
                 Text("Cents")
-                    .labelFont(isPad: isPad)
+                    .font(isPad ? .caption : .caption2)
                     .foregroundColor(.secondary)
                     .textCase(.uppercase)
                     .tracking(0.5)
                 
                 Text(detectedNote?.cents.formatCents ?? "0")
-                    .centsFont(isPad: isPad)
+                    .font(isPad ? .subheadline : .caption)
                     .foregroundColor(detectedNote?.cents.centsColor)
                     .fontWeight(.bold)
                     .scaleEffect(detectedNote?.cents.centsColor == .green ? 1.1 : 1.0)
@@ -145,13 +145,13 @@ struct TunerView: View {
             // Octave Display
             VStack(spacing: isPad ? 6 : 4) {
                 Text("Octave")
-                    .labelFont(isPad: isPad)
+                    .font(isPad ? .caption : .caption2)
                     .foregroundColor(.secondary)
                     .textCase(.uppercase)
                     .tracking(0.5)
                 
                 Text("\(detectedNote?.octave ?? 0)")
-                    .octaveFont(isPad: isPad)
+                    .font(isPad ? .subheadline : .caption)
                     .foregroundColor(.primary)
                     .fontWeight(.semibold)
             }
@@ -174,10 +174,10 @@ struct TunerView: View {
             HStack {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundColor(.orange)
-                    .font(.subheadline.weight(.medium))
+                    .font(isPad ? .subheadline : .caption)
                 
                 Text(error)
-                    .font(.subheadline.weight(.medium))
+                    .font(isPad ? .subheadline : .caption)
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.leading)
             }
