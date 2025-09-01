@@ -107,7 +107,7 @@ struct TunerView: View {
                     )
             }
             .animation(.easeInOut(duration: 0.2), value: isListening)
-            .accessibilityLabel(isListening ? "Voice recognition active" : "Tap to start listening")
+            .accessibilityLabel(isListening ? "Audio processing active" : "Tap to start listening")
     }
     
     @ViewBuilder
