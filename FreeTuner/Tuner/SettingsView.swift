@@ -19,6 +19,7 @@ struct SettingsView: View {
     @AppStorage("showPitchGraph") private var showPitchGraph: Bool = true
     @AppStorage("showSignalStrength") private var showSignalStrength: Bool = true
     @AppStorage("showReferenceLabels") private var showReferenceLabels: Bool = true
+    @AppStorage("useSharps") private var useSharps: Bool = true
     @AppStorage("displayOptionsCollapsed") private var displayOptionsCollapsed: Bool = false
     @AppStorage("maxPitchHistorySize") private var maxPitchHistorySize: Int = 100
     @AppStorage("pitchHistoryOptionsCollapsed") private var pitchHistoryOptionsCollapsed: Bool = false
@@ -186,6 +187,27 @@ struct SettingsView: View {
                     .labelsHidden()
                     .accessibilityLabel("Show reference labels")
                     .accessibilityHint("Toggles visibility of frequency, cents, and octave information")
+            }
+            .standardCardStyle()
+
+            // Sharps/Flats Toggle
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Use Sharps")
+                        .font(isPad ? .title : .title3)
+                        .foregroundColor(.primary)
+                    
+                    Text("Display notes using sharps or flats")
+                        .font(isPad ? .body : .subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Toggle("", isOn: $useSharps)
+                    .labelsHidden()
+                    .accessibilityLabel("Use sharps")
+                    .accessibilityHint("Toggles whether notes are displayed using sharps or flats")
             }
             .standardCardStyle()
         }

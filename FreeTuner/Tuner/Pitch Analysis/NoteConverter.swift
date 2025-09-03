@@ -12,11 +12,19 @@ class NoteConverter {
     private(set) var a4Frequency: Float = 440.0
     private(set) var a4MidiNote: Int = 69
     
-    // Note names in order
-    private let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+    // Note names in order - sharps
+    private let sharpNoteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+    
+    // Note names in order - flats
+    private let flatNoteNames = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
+    
+    /// Get note names based on preference
+    func getNoteNames(useSharps: Bool) -> [String] {
+        return useSharps ? sharpNoteNames : flatNoteNames
+    }
     
     /// Convert frequency to the closest musical note using equal temperament
-    func frequencyToNote(_ frequency: Float) -> Note? {
+    func frequencyToNote(_ frequency: Float, useSharps: Bool) -> Note? {
         guard frequency > 0 else { return nil }
         guard frequency >= 20.0 && frequency <= 20000.0 else { return nil }
 
@@ -35,6 +43,7 @@ class NoteConverter {
         // Extract note name and octave
         let noteIndex = Int(roundedMidiNote) % 12
         let octave = Int(roundedMidiNote) / 12 - 1
+        let noteNames = getNoteNames(useSharps: useSharps)
         guard noteIndex >= 0 && noteIndex < noteNames.count else { return nil }
 
         let noteName = noteNames[noteIndex]
@@ -48,8 +57,8 @@ class NoteConverter {
     }
     
     /// Get a human-readable string representation of the note
-    func frequencyToNoteString(_ frequency: Float) -> String {
-        guard let note = frequencyToNote(frequency) else {
+    func frequencyToNoteString(_ frequency: Float, useSharps: Bool = true) -> String {
+        guard let note = frequencyToNote(frequency, useSharps: useSharps) else {
             return "Unknown"
         }
         

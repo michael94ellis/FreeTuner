@@ -10,10 +10,17 @@ import SwiftUI
 struct TunerCircleView: View {
     let detectedNote: Note?
     @Binding var isListening: Bool
+    let useSharps: Bool
     @Environment(\.isPad) private var isPad
     
-    // Note names in order (like a clock face)
-    private let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+    // Note names in order (like a clock face) - will be set based on useSharps
+    private var noteNames: [String] {
+        if useSharps {
+            return ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+        } else {
+            return ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
+        }
+    }
     
     var body: some View {
         GeometryReader { geometry in
@@ -197,13 +204,15 @@ struct TunerCircleView: View {
         VStack(spacing: 20) {
             TunerCircleView(
                 detectedNote: Note(name: "A", octave: 4, frequency: 440.0, cents: 5),
-                isListening: .constant(true)
+                isListening: .constant(true),
+                useSharps: true
             )
             .frame(width: 300, height: 300)
             
             TunerCircleView(
                 detectedNote: nil,
-                isListening: .constant(false)
+                isListening: .constant(false),
+                useSharps: true
             )
             .frame(width: 300, height: 300)
         }
@@ -213,13 +222,15 @@ struct TunerCircleView: View {
         VStack(spacing: 20) {
             TunerCircleView(
                 detectedNote: Note(name: "A", octave: 4, frequency: 440.0, cents: 5),
-                isListening: .constant(false)
+                isListening: .constant(false),
+                useSharps: false
             )
             .frame(width: 300, height: 300)
             
             TunerCircleView(
                 detectedNote: nil,
-                isListening: .constant(false)
+                isListening: .constant(false),
+                useSharps: false
             )
             .frame(width: 300, height: 300)
         }

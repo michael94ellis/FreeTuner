@@ -24,6 +24,7 @@ struct TunerView: View {
     @AppStorage("showPitchGraph") private var showPitchGraph: Bool = true
     @AppStorage("showSignalStrength") private var showSignalStrength: Bool = true
     @AppStorage("showReferenceLabels") private var showReferenceLabels: Bool = true
+    @AppStorage("useSharps") private var useSharps: Bool = true
     @AppStorage("maxPitchHistorySize") private var maxPitchHistorySize: Int = 100
     
     var body: some View {
@@ -33,7 +34,7 @@ struct TunerView: View {
                 listeningHeader
                 
                 let detectedNote = currentPitch.flatMap({
-                    noteConverter.frequencyToNote($0)
+                    noteConverter.frequencyToNote($0, useSharps: useSharps)
                 })
                 
                 if showReferenceLabels {
@@ -42,7 +43,8 @@ struct TunerView: View {
                 }
                 
                 let tunerView = TunerCircleView(detectedNote: detectedNote,
-                                                isListening: $isListening)
+                                                isListening: $isListening,
+                                                useSharps: useSharps)
                     .padding(.horizontal, isPad ? 32 : 20)
                     .frame(maxHeight: isPad ? .infinity : 500)
                     .frame(minHeight: isPad ? 500 : 300)
