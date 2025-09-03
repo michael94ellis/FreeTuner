@@ -1,6 +1,6 @@
 //
-//  FreeTunerApp.swift
-//  FreeTuner
+//  TunerGaugeApp.swift
+//  TunerGauge
 //
 //  Created by Michael Ellis on 8/22/25.
 //
@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct FreeTunerApp: App {
+struct TunerGaugeApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

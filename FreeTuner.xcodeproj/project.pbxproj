@@ -12,13 +12,13 @@
 			containerPortal = 2F66BA6C2E59117A00750FBA /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 2F66BA732E59117A00750FBA;
-			remoteInfo = FreeTuner;
+			remoteInfo = TunerGauge;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2F66BA742E59117A00750FBA /* FreeTuner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FreeTuner.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		2FCFB8C82E61BF9700D8C9A4 /* FreeTunerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FreeTunerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2F66BA742E59117A00750FBA /* TunerGauge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TunerGauge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2FCFB8C82E61BF9700D8C9A4 /* TunerGaugeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TunerGaugeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -64,8 +64,8 @@
 		2F66BA752E59117A00750FBA /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2F66BA742E59117A00750FBA /* FreeTuner.app */,
-				2FCFB8C82E61BF9700D8C9A4 /* FreeTunerTests.xctest */,
+				2F66BA742E59117A00750FBA /* TunerGauge.app */,
+				2FCFB8C82E61BF9700D8C9A4 /* TunerGaugeTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -73,9 +73,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		2F66BA732E59117A00750FBA /* FreeTuner */ = {
+		2F66BA732E59117A00750FBA /* TunerGauge */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2F66BA7F2E59117C00750FBA /* Build configuration list for PBXNativeTarget "FreeTuner" */;
+			buildConfigurationList = 2F66BA7F2E59117C00750FBA /* Build configuration list for PBXNativeTarget "TunerGauge" */;
 			buildPhases = (
 				2F66BA702E59117A00750FBA /* Sources */,
 				2F66BA712E59117A00750FBA /* Frameworks */,
@@ -88,16 +88,16 @@
 			fileSystemSynchronizedGroups = (
 				2F66BA762E59117A00750FBA /* FreeTuner */,
 			);
-			name = FreeTuner;
+			name = TunerGauge;
 			packageProductDependencies = (
 			);
-			productName = FreeTuner;
-			productReference = 2F66BA742E59117A00750FBA /* FreeTuner.app */;
+			productName = TunerGauge;
+			productReference = 2F66BA742E59117A00750FBA /* TunerGauge.app */;
 			productType = "com.apple.product-type.application";
 		};
-		2FCFB8C72E61BF9700D8C9A4 /* FreeTunerTests */ = {
+		2FCFB8C72E61BF9700D8C9A4 /* TunerGaugeTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2FCFB8CE2E61BF9700D8C9A4 /* Build configuration list for PBXNativeTarget "FreeTunerTests" */;
+			buildConfigurationList = 2FCFB8CE2E61BF9700D8C9A4 /* Build configuration list for PBXNativeTarget "TunerGaugeTests" */;
 			buildPhases = (
 				2FCFB8C42E61BF9700D8C9A4 /* Sources */,
 				2FCFB8C52E61BF9700D8C9A4 /* Frameworks */,
@@ -111,11 +111,11 @@
 			fileSystemSynchronizedGroups = (
 				2FCFB8C92E61BF9700D8C9A4 /* FreeTunerTests */,
 			);
-			name = FreeTunerTests;
+			name = TunerGaugeTests;
 			packageProductDependencies = (
 			);
-			productName = FreeTunerTests;
-			productReference = 2FCFB8C82E61BF9700D8C9A4 /* FreeTunerTests.xctest */;
+			productName = TunerGaugeTests;
+			productReference = 2FCFB8C82E61BF9700D8C9A4 /* TunerGaugeTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -151,8 +151,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2F66BA732E59117A00750FBA /* FreeTuner */,
-				2FCFB8C72E61BF9700D8C9A4 /* FreeTunerTests */,
+				2F66BA732E59117A00750FBA /* TunerGauge */,
+				2FCFB8C72E61BF9700D8C9A4 /* TunerGaugeTests */,
 			);
 		};
 /* End PBXProject section */
@@ -194,7 +194,7 @@
 /* Begin PBXTargetDependency section */
 		2FCFB8CD2E61BF9700D8C9A4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2F66BA732E59117A00750FBA /* FreeTuner */;
+			target = 2F66BA732E59117A00750FBA /* TunerGauge */;
 			targetProxy = 2FCFB8CC2E61BF9700D8C9A4 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -326,12 +326,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BUNDLE_DISPLAY_NAME = "Tuner Gauge";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KLQC884752;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "FreeTuner needs microphone access to detect pitch from your instrument for tuning purposes.";
+				INFOPLIST_KEY_CFBundleDisplayName = "$(BUNDLE_DISPLAY_NAME)";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Tuner Gauge needs microphone access to detect pitch from your instrument for tuning purposes.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -342,7 +344,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.michaelrobertellis.FreeTuner;
+				PRODUCT_BUNDLE_IDENTIFIER = com.michaelrobertellis.TunerGauge;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -355,12 +357,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BUNDLE_DISPLAY_NAME = "Tuner Gauge";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KLQC884752;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "FreeTuner needs microphone access to detect pitch from your instrument for tuning purposes.";
+				INFOPLIST_KEY_CFBundleDisplayName = "$(BUNDLE_DISPLAY_NAME)";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Tuner Gauge needs microphone access to detect pitch from your instrument for tuning purposes.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -371,7 +375,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.michaelrobertellis.FreeTuner;
+				PRODUCT_BUNDLE_IDENTIFIER = com.michaelrobertellis.TunerGauge;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -389,12 +393,12 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.michaelrobertellis.FreeTunerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.michaelrobertellis.TunerGaugeTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FreeTuner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FreeTuner";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TunerGauge.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TunerGauge";
 			};
 			name = Debug;
 		};
@@ -408,12 +412,12 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.michaelrobertellis.FreeTunerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.michaelrobertellis.TunerGaugeTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FreeTuner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FreeTuner";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TunerGauge.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TunerGauge";
 			};
 			name = Release;
 		};
@@ -429,7 +433,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2F66BA7F2E59117C00750FBA /* Build configuration list for PBXNativeTarget "FreeTuner" */ = {
+		2F66BA7F2E59117C00750FBA /* Build configuration list for PBXNativeTarget "TunerGauge" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2F66BA802E59117C00750FBA /* Debug */,
@@ -438,7 +442,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2FCFB8CE2E61BF9700D8C9A4 /* Build configuration list for PBXNativeTarget "FreeTunerTests" */ = {
+		2FCFB8CE2E61BF9700D8C9A4 /* Build configuration list for PBXNativeTarget "TunerGaugeTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2FCFB8CF2E61BF9700D8C9A4 /* Debug */,

@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  FreeTuner
+//  TunerGauge
 //
 //  Created by Michael Ellis on 8/22/25.
 //
@@ -44,7 +44,7 @@ struct ContentView: View {
                     currentDecibels: $currentDecibels
                 )
             }
-            .navigationTitle("FreeTuner")
+            .navigationTitle("Tuner Gauge")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

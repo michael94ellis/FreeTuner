@@ -1,7 +1,7 @@
-# FreeTuner - Professional iOS Tuner App
+# TunerGauge - Professional iOS Tuner App
 
 ## Overview
-FreeTuner is an iOS tuner application that provides real-time pitch detection with professional-grade accuracy. Built with SwiftUI and leveraging Apple's Accelerate framework for high-performance audio processing, FreeTuner offers musicians and audio professionals a comprehensive tuning solution with customizable reference standards and advanced visualization features.
+TunerGauge is an iOS tuner application that provides real-time pitch detection with professional-grade accuracy. Built with SwiftUI and leveraging Apple's Accelerate framework for high-performance audio processing, TunerGauge offers musicians and audio professionals a comprehensive tuning solution with customizable reference standards and advanced visualization features.
 
 ## 📱 Screenshots
 
