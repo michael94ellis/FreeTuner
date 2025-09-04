@@ -1,7 +1,8 @@
-# TunerGauge - Professional iOS Tuner App
+# Tuner Gauge: Chromatic Tuner
+## An iOS App
 
 ## Overview
-TunerGauge is an iOS tuner application that provides real-time pitch detection with professional-grade accuracy. Built with SwiftUI and leveraging Apple's Accelerate framework for high-performance audio processing, TunerGauge offers musicians and audio professionals a comprehensive tuning solution with customizable reference standards and advanced visualization features.
+Tuner Gauge is an iOS chromatic tuner app that provides real-time pitch detection with professional-grade accuracy. Built with SwiftUI and leveraging Apple's Accelerate framework for high-performance audio processing, TunerGauge offers musical enthusiasts a valuable tuning solution with customizable reference standards and easy to understand visualization features.
 
 ## 📱 Screenshots
 
@@ -20,24 +21,14 @@ TunerGauge is an iOS tuner application that provides real-time pitch detection w
 - **Advanced FFT Analysis**: Uses Apple's Accelerate framework with 2048-point FFT for precise frequency detection
 - **Parabolic Interpolation**: Improves frequency resolution beyond FFT bin limitations for sub-Hz accuracy
 - **Noise Threshold Filtering**: Intelligent noise gate prevents false detections
-- **Frequency Range**: Supports A0 (27.5 Hz) to C8 (4186 Hz) - full piano range
+- **Frequency Range**: Supports 69.5 Hz to 4108 Hz - nearly full piano range, help wanted to reach full piano range / higher with accuracy
 - **Low Latency**: Optimized for responsive real-time performance
 
 ### Visual Tuning Interface
-- **Circular Tuner Display**: Intuitive clock-face design with note markers around the perimeter
+- **Circular Tuner Display**: Intuitive clock-face gauge design with note markers around the perimeter
 - **Tuning Needle**: Real-time visual indicator showing cents deviation with color coding
 - **Note Highlighting**: Active note prominently displayed with color-coded accuracy
 - **Octave Support**: Full octave range display with clear visual hierarchy
-
-### Comprehensive Data Display
-- **Frequency Display**: Real-time frequency in Hz with high precision
-- **Cents Deviation**: Shows tuning accuracy in cents with color coding:
-  - 🟢 Green: Perfect tuning (±5 cents)
-  - 🟡 Yellow: Good tuning (±10 cents) 
-  - 🟠 Orange: Fair tuning (±20 cents)
-  - 🔴 Red: Poor tuning (>20 cents)
-- **Octave Information**: Current octave display
-- **Reference Labels**: Optional display of frequency, cents, and octave data
 
 ### Audio Monitoring
 - **Decibel Meter**: Real-time signal strength monitoring with visual bar meter
@@ -76,7 +67,7 @@ TunerGauge is an iOS tuner application that provides real-time pitch detection w
   - G4 - MIDI 67
   - D4 - MIDI 62
 
-### Audio Playback
+### Audio Playback for Different Pitches
 - **Reference Tone Generator**: Built-in tone generator for tuning reference
 - **Multiple Waveforms**: Sine, Square, Triangle, and Sawtooth waveforms
 - **Real-Time Frequency Control**: Adjustable frequency with live playback
@@ -135,28 +126,12 @@ TunerGauge is an iOS tuner application that provides real-time pitch detection w
 ## 🎨 Design Philosophy
 
 ### User Experience
-- **Intuitive Interface**: Clock-face tuner design familiar to musicians
+- **Intuitive Interface**: Clock-face like gauge tuner design familiar to many people
 - **Visual Feedback**: Color-coded accuracy indicators
-- **Responsive Design**: Real-time updates with smooth animations
-- **Inclusive Accessibility**: Full VoiceOver support with dynamic content announcements
+- **Responsive Design**: Real-time updates on all displays
 
 ### Professional Standards
 - **Musical Accuracy**: Equal temperament with precise cents calculation
 - **Historical Support**: Multiple tuning standards for period performance
 - **Professional Tools**: Reference tone generator and signal monitoring
 - **Data Visualization**: Comprehensive pitch analysis and history
-
-## 🔧 Development
-
-### Technology Stack
-- **SwiftUI**: Modern declarative UI framework
-- **AVFoundation**: Professional audio processing
-- **Accelerate**: High-performance mathematical operations
-- **Charts**: SwiftUI Charts for data visualization
-- **Combine**: Reactive programming for data flow
-
-### Code Organization
-- **Modular Architecture**: Separated concerns with clear component boundaries
-- **Observable Pattern**: @Observable for reactive state management
-- **Environment Values**: Device-specific adaptations (@Environment)
-- **View Modifiers**: Reusable styling with custom modifiers
