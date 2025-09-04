@@ -1,6 +1,10 @@
 # Tuner Gauge: Chromatic Tuner
 ## An iOS App
 
+Renamed from Free Tuner. 
+
+[![Download on the App Store](https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg)](https://apps.apple.com/us/app/tuner-gauge-chromatic-tuner/id6751610479)
+
 ## Overview
 Tuner Gauge is an iOS chromatic tuner app that provides real-time pitch detection with professional-grade accuracy. Built with SwiftUI and leveraging Apple's Accelerate framework for high-performance audio processing, TunerGauge offers musical enthusiasts a valuable tuning solution with customizable reference standards and easy to understand visualization features.
 
