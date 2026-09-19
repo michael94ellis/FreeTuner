@@ -70,7 +70,7 @@ class AudioInputManager {
         }
         
         // Configure audio session
-        try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
+        try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothHFP])
         try audioSession.setActive(true)
     }
     

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import DesignSystem
 
 struct MidiReferencePickerView: View {
     @Bindable var noteConverter: NoteConverter
@@ -55,27 +56,27 @@ struct MidiReferencePickerView: View {
     private var backgroundGradient: some View {
         LinearGradient(
             gradient: Gradient(colors: [
-                Color(.systemBackground),
-                Color(.systemGray6).opacity(0.3)
+                Color.systemBackgroundColor,
+                Color.backgroundElevated.opacity(0.3)
             ]),
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
         .ignoresSafeArea()
     }
-    
+
     // MARK: - Current MIDI Note Display
     private var currentMidiNoteDisplay: some View {
         VStack(spacing: 12) {
             Text("Current MIDI Reference Note")
                 .font(isPad ? .body : .subheadline)
-                .foregroundColor(.secondary)
-            
+                .foregroundColor(.textSecondary)
+
             Text("\(midiNoteToName(selectedMidiNote)) (MIDI \(selectedMidiNote))")
                 .font(isPad ? .system(size: 48) : .title)
                 .frame(maxWidth: .infinity)
-                .foregroundColor(.primary)
-                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
+                .foregroundColor(.text)
+                .shadow(color: Color.shadow.opacity(0.1), radius: 2, x: 0, y: 1)
                 .accessibilityLabel("Current MIDI reference note")
                 .accessibilityValue("\(midiNoteToName(selectedMidiNote)) MIDI note \(selectedMidiNote)")
                 .accessibilityHint("Shows the currently selected MIDI reference note")
@@ -173,7 +174,7 @@ struct MidiReferencePickerView: View {
             }
         }
         .font(isPad ? .title : .title3)
-        .foregroundColor(.blue)
+        .foregroundColor(.accent)
         .accessibilityLabel("Apply")
         .accessibilityHint("Saves the MIDI reference note setting and returns to settings")
     }

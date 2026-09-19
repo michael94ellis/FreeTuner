@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		81165053305E99730039F079 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 81165052305E99730039F079 /* DesignSystem */; };
+		81165056305E9DAB0039F079 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 81165055305E9DAB0039F079 /* DesignSystem */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		2FCFB8CC2E61BF9700D8C9A4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -39,6 +44,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				81165053305E99730039F079 /* DesignSystem in Frameworks */,
+				81165056305E9DAB0039F079 /* DesignSystem in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,6 +97,8 @@
 			);
 			name = TunerGauge;
 			packageProductDependencies = (
+				81165052305E99730039F079 /* DesignSystem */,
+				81165055305E9DAB0039F079 /* DesignSystem */,
 			);
 			productName = TunerGauge;
 			productReference = 2F66BA742E59117A00750FBA /* TunerGauge.app */;
@@ -146,6 +155,9 @@
 			);
 			mainGroup = 2F66BA6B2E59117A00750FBA;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				81165054305E9DAB0039F079 /* XCRemoteSwiftPackageReference "DesignSystem" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2F66BA752E59117A00750FBA /* Products */;
 			projectDirPath = "";
@@ -452,6 +464,29 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		81165054305E9DAB0039F079 /* XCRemoteSwiftPackageReference "DesignSystem" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/michael94ellis/DesignSystem";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		81165052305E99730039F079 /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DesignSystem;
+		};
+		81165055305E9DAB0039F079 /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 81165054305E9DAB0039F079 /* XCRemoteSwiftPackageReference "DesignSystem" */;
+			productName = DesignSystem;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2F66BA6C2E59117A00750FBA /* Project object */;
 }

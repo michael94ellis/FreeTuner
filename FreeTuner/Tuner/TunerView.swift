@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import DesignSystem
 
 struct TunerView: View {
     let pitchManager: AudioInputManager
@@ -15,66 +16,90 @@ struct TunerView: View {
     @Binding var currentPitch: Float?
     @Binding var currentSpectrum: [FrequencyMagnitude]
     @Binding var currentDecibels: (rms: CGFloat, peak: CGFloat)
-    
+
     @Environment(\.isPad) private var isPad
-    
+
     @State private var pitchData: [PitchDataPoint] = []
     @State private var pitchDetectionTask: Task<Void, Never>?
-    
+
+    @StateObject private var stringReferencePlayer = PitchPlayer()
+    @State private var playingStringID: String?
+    @State private var showingProUpsell = false
+
     @AppStorage("showPitchGraph") private var showPitchGraph: Bool = true
     @AppStorage("showSignalStrength") private var showSignalStrength: Bool = true
     @AppStorage("showReferenceLabels") private var showReferenceLabels: Bool = true
     @AppStorage("useSharps") private var useSharps: Bool = true
     @AppStorage("maxPitchHistorySize") private var maxPitchHistorySize: Int = 100
-    
+    @AppStorage("selectedInstrumentID") private var selectedInstrumentID: String = Instrument.chromatic.id
+
+    private var selectedInstrument: Instrument {
+        Instrument.withID(selectedInstrumentID)
+    }
+
     var body: some View {
         ScrollView {
-            VStack(spacing: isPad ? 24 : 8) {
-                
-                listeningHeader
-                
-                let detectedNote = currentPitch.flatMap({
-                    noteConverter.frequencyToNote($0, useSharps: useSharps)
-                })
-                
+            VStack(spacing: isPad ? 20 : 14) {
+
+                hudTopRow
+
+                InstrumentSelectorView(selectedInstrumentID: $selectedInstrumentID)
+                    .onChange(of: selectedInstrumentID) {
+                        stringReferencePlayer.stop()
+                        playingStringID = nil
+                    }
+
+                let instrument = selectedInstrument
+                let stringMatch = instrument.isChromatic ? nil : currentPitch.flatMap {
+                    noteConverter.closestString(to: $0, in: instrument)
+                }
+
+                if !instrument.isChromatic {
+                    StringSelectorView(
+                        instrument: instrument,
+                        matchedStringID: stringMatch?.string.id,
+                        matchedCents: stringMatch?.cents,
+                        noteConverter: noteConverter,
+                        pitchPlayer: stringReferencePlayer,
+                        playingStringID: $playingStringID
+                    )
+                }
+
+                let detectedNote: Note? = {
+                    if let match = stringMatch {
+                        let octave = match.string.midiNote / 12 - 1
+                        return Note(name: match.string.label, octave: octave, frequency: currentPitch ?? 0, cents: match.cents)
+                    }
+                    return currentPitch.flatMap {
+                        noteConverter.frequencyToNote($0, useSharps: useSharps)
+                    }
+                }()
+
+                TunerCircleView(
+                    detectedNote: detectedNote,
+                    isListening: $isListening,
+                    useSharps: useSharps,
+                    showsStringGuidance: !instrument.isChromatic
+                )
+                .padding(.vertical, isPad ? 12 : 4)
+
                 if showReferenceLabels {
-                    pitchSummaryView(detectedNote: detectedNote)
-                        .standardCardStyle()
+                    bottomInfoBlock(detectedNote: detectedNote, instrument: instrument, stringMatch: stringMatch)
                 }
-                
-                let tunerView = TunerCircleView(detectedNote: detectedNote,
-                                                isListening: $isListening,
-                                                useSharps: useSharps)
-                    .padding(.horizontal, isPad ? 32 : 20)
-                    .frame(maxHeight: isPad ? .infinity : 500)
-                    .frame(minHeight: isPad ? 500 : 300)
-                
-                let onlyShowTuner = !showReferenceLabels && !showPitchGraph && !showSignalStrength
-                if onlyShowTuner {
-                    tunerView
-                } else {
-                    tunerView
-                        .largeCardStyle()
-                }
-                
+
                 if showSignalStrength {
-                    VStack(spacing: 0) {
-                        DecibelMeterView(decibels: currentDecibels, isListening: isListening)
-                    }
-                    .largeCardStyle()
+                    DecibelMeterView(decibels: currentDecibels, isListening: isListening)
                 }
-                
+
                 if showPitchGraph {
-                    VStack(spacing: 0) {
-                        PitchGraphView(pitchData: pitchData, isListening: isListening, maxDataPoints: maxPitchHistorySize)
-                    }
-                    .largeCardStyle()
+                    PitchGraphView(pitchData: pitchData, isListening: isListening, maxDataPoints: maxPitchHistorySize)
                 }
-                
+
                 errorMessageView
-                
+
                 Spacer()
             }
+            .padding(.horizontal, isPad ? 32 : 20)
             .contentShape(Rectangle())
             .onTapGesture {
                 withAnimation(.easeInOut(duration: 0.2)) {
@@ -85,153 +110,184 @@ struct TunerView: View {
                         pitchDetectionTask?.cancel()
                         pitchDetectionTask = nil
                     } else {
+                        stringReferencePlayer.stop()
+                        playingStringID = nil
                         startListening()
                     }
                 }
             }
         }
-    }
-    
-    var listeningHeader: some View {
-        // Add tap hint when not listening
-        Text(isListening ? "Listening ..." : "🎙 Tap anywhere to start")
-            .font(isPad ? .title3 : .subheadline)
-            .foregroundColor(isListening ? .white : .blue)
-            .padding(.horizontal, isPad ? 32 : 16)
-            .padding(.vertical, isPad ? 16 : 8)
-            .background {
-                let color = isListening ? Color.orange : .blue
-                Capsule()
-                    .fill(isListening ? color : color.opacity(0.1))
-                    .overlay(
-                        Capsule()
-                            .stroke(color.opacity(isListening ? 0.5 : 0.3), lineWidth: 1)
-                    )
-            }
-            .animation(.easeInOut(duration: 0.2), value: isListening)
-            .accessibilityLabel(isListening ? "Audio processing active" : "Tap to start listening")
-            .accessibilityHint("Tap once to start or stop audio input for pitch detection")
-            .accessibilityAddTraits(.allowsDirectInteraction)
-    }
-    
-    @ViewBuilder
-    func pitchSummaryView(detectedNote: Note?) -> some View {
-        HStack(spacing: isPad ? 48 : 16) {
-            let minWidth: CGFloat = isPad ? 120 : 0
-            // Current Frequency Display
-            VStack(alignment: .trailing, spacing: isPad ? 6 : 4) {
-                Text("Frequency")
-                    .font(isPad ? .headline : .subheadline)
-                    .frame(minWidth: 80, alignment: .trailing)
-                    .foregroundColor(.secondary)
-                    .textCase(.uppercase)
-                    .tracking(0.5)
-                
-                Text(String(format: "%4d Hz", Int(currentPitch ?? 0)))
-                    .font(isPad ? .largeTitle : .headline)
-                    .frame(minWidth: 80, alignment: .trailing)
-                    .foregroundColor(.primary)
-                    .monospacedDigit()
-                    .accessibilityLabel("Frequency")
-                    .accessibilityValue("\(Int(currentPitch ?? 0)) Hertz")
-                    .accessibilityHint("Real-time frequency measurement. Value updates continuously when audio is detected.")
-                    .accessibilityAddTraits(.updatesFrequently)
-            }
-            .frame(minWidth: minWidth, alignment: .trailing)
-            
-            // Cents Display
-            VStack(alignment: .trailing, spacing: isPad ? 6 : 4) {
-                Text("Cents")
-                    .font(isPad ? .headline : .subheadline)
-                    .frame(minWidth: 80, alignment: .trailing)
-                    .foregroundColor(.secondary)
-                    .textCase(.uppercase)
-                    .tracking(0.5)
-                
-                Text(detectedNote?.cents.formatCents ?? "0")
-                    .font(isPad ? .largeTitle : .headline)
-                    .frame(minWidth: 80, alignment: .trailing)
-                    .foregroundColor(detectedNote?.cents.centsColor)
-                    .fontWeight(.bold)
-                    .scaleEffect(detectedNote?.cents.centsColor == .green ? 1.1 : 1.0)
-                    .animation(.easeInOut(duration: 0.2), value: detectedNote?.cents.centsColor)
-                    .accessibilityLabel("Cents deviation")
-                    .accessibilityValue("\(detectedNote?.cents ?? 0) cents")
-                    .accessibilityHint("Shows how far the note is from perfect tuning. Updates in real-time.")
-                    .accessibilityAddTraits(.updatesFrequently)
-            }
-            .frame(minWidth: minWidth, alignment: .trailing)
-            
-            // Octave Display
-            VStack(alignment: .trailing, spacing: isPad ? 6 : 4) {
-                Text("Octave")
-                    .font(isPad ? .headline : .subheadline)
-                    .frame(minWidth: 80, alignment: .trailing)
-                    .foregroundColor(.secondary)
-                    .textCase(.uppercase)
-                    .tracking(0.5)
-                
-                Text("\(detectedNote?.octave ?? 0)")
-                    .font(isPad ? .largeTitle : .headline)
-                    .frame(minWidth: 80, alignment: .trailing)
-                    .foregroundColor(.primary)
-                    .fontWeight(.semibold)
-                    .accessibilityLabel("Octave")
-                    .accessibilityValue("Octave \(detectedNote?.octave ?? 0)")
-                    .accessibilityHint("Musical octave of the detected note. Updates when pitch changes significantly.")
-                    .accessibilityAddTraits(.updatesFrequently)
-            }
-            .frame(minWidth: minWidth, alignment: .trailing)
+        .background(Color.systemBackgroundColor)
+        .onDisappear {
+            stringReferencePlayer.stop()
+            playingStringID = nil
         }
-        .frame(maxWidth: .infinity)
+        .sheet(isPresented: $showingProUpsell) {
+            ProUpsellView()
+        }
     }
-    
-    // MARK: - Helper Methods
-    private func midiNoteToName(_ midiNote: Int) -> String {
-        let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-        let noteIndex = midiNote % 12
-        let octave = (midiNote / 12) - 1
-        return "\(noteNames[noteIndex])\(octave)"
+
+    // MARK: - Top Row
+    private var hudTopRow: some View {
+        HStack {
+            HStack(spacing: 7) {
+                Circle()
+                    .fill(isListening ? Color.success : Color.textSecondary.opacity(0.35))
+                    .frame(width: 8, height: 8)
+                Text(isListening ? "Listening" : "Tap to Start")
+                    .font(.system(size: 10, weight: .semibold))
+                    .tracking(1.4)
+                    .textCase(.uppercase)
+                    .foregroundColor(.textSecondary.opacity(0.7))
+            }
+            Spacer()
+            Text("A4 = \(Int(noteConverter.getA4Frequency())) Hz")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.textSecondary.opacity(0.85))
+        }
+        .padding(.top, isPad ? 12 : 6)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(isListening ? "Audio processing active" : "Tap to start listening")
+        .accessibilityHint("Tap once to start or stop audio input for pitch detection")
+        .accessibilityAddTraits(.allowsDirectInteraction)
     }
-    
+
+    // MARK: - Readouts + Signal + Pro Teaser
+    @ViewBuilder
+    private func bottomInfoBlock(detectedNote: Note?, instrument: Instrument, stringMatch: (string: InstrumentString, cents: Int)?) -> some View {
+        VStack(spacing: 14) {
+            HStack(alignment: .top) {
+                readout(label: "Frequency", value: String(format: "%.1f", currentPitch ?? 0), unit: "Hz", alignment: .leading)
+                Spacer()
+                readout(label: "Cents", value: detectedNote?.cents.formatCents ?? "0", color: detectedNote?.cents.centsColor ?? .text, alignment: .center)
+                Spacer()
+                if instrument.isChromatic {
+                    readout(label: "Input", value: String(format: "%.0f", currentDecibels.rms), unit: "dB", alignment: .trailing)
+                } else if let stringMatch {
+                    let targetHz = noteConverter.frequency(forMidiNote: stringMatch.string.midiNote)
+                    readout(label: "Target", value: String(format: "%.1f", targetHz), unit: "Hz", alignment: .trailing)
+                } else {
+                    readout(label: "Target", value: "—", alignment: .trailing)
+                }
+            }
+
+            signalBarRow
+
+            proTeaserRow
+        }
+    }
+
+    private func readout(label: String, value: String, unit: String? = nil, color: Color = .text, alignment: HorizontalAlignment) -> some View {
+        VStack(alignment: alignment, spacing: 3) {
+            Text(label)
+                .font(.system(size: 10, weight: .semibold))
+                .tracking(1)
+                .textCase(.uppercase)
+                .foregroundColor(.textSecondary.opacity(0.6))
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(value)
+                    .font(.system(size: 20, weight: .bold, design: .monospaced))
+                    .foregroundColor(color)
+                if let unit {
+                    Text(unit)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.textSecondary.opacity(0.6))
+                }
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.updatesFrequently)
+    }
+
+    private var signalBarRow: some View {
+        HStack(spacing: 10) {
+            Text("SIGNAL")
+                .font(.system(size: 10, weight: .semibold))
+                .tracking(1)
+                .foregroundColor(.textSecondary.opacity(0.6))
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Color.fillSubtle)
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(signalColor)
+                        .frame(width: max(0, signalLevel) * geo.size.width)
+                        .animation(.easeInOut(duration: 0.1), value: signalLevel)
+                }
+            }
+            .frame(height: 3)
+        }
+    }
+
+    private var signalLevel: CGFloat {
+        let minDb: CGFloat = -100, maxDb: CGFloat = 0
+        let clamped = max(minDb, min(maxDb, currentDecibels.rms))
+        return (clamped - minDb) / (maxDb - minDb)
+    }
+
+    private var signalColor: Color {
+        if currentDecibels.rms < -40 { return .success }
+        if currentDecibels.rms < -20 { return .warning }
+        if currentDecibels.rms < -10 { return .orange }
+        return .destructive
+    }
+
+    private var proTeaserRow: some View {
+        Button {
+            showingProUpsell = true
+        } label: {
+            HStack(spacing: 10) {
+                (Text("Record This Session ").fontWeight(.semibold).foregroundColor(.text)
+                 + Text("— every note, octave & timing").foregroundColor(.textSecondary))
+                    .font(.system(size: 13))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                Spacer(minLength: 8)
+                Text("PRO")
+                    .font(.system(size: 11, weight: .bold))
+                    .tracking(0.4)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.accent, in: Capsule())
+            }
+            .padding(.top, 14)
+            .overlay(alignment: .top) {
+                Rectangle().fill(Color.text.opacity(0.10)).frame(height: 1)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Record This Session, Pro feature")
+        .accessibilityHint("Opens Tuner Gauge Pro details")
+    }
+
     @ViewBuilder
     var errorMessageView: some View {
-        // Error message with better styling
         if let error = errorMessage {
-            HStack {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundColor(.orange)
-                    .font(isPad ? .subheadline : .caption)
-                
-                Text(error)
-                    .font(isPad ? .subheadline : .caption)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.leading)
-            }
-            .warningCardStyle()
-            .accessibilityLabel("Error")
-            .accessibilityValue(error)
-            .accessibilityAddTraits(.isStaticText)
+            Banner(title: "Error", message: error, tone: .error)
+                .accessibilityLabel("Error")
+                .accessibilityValue(error)
+                .accessibilityAddTraits(.isStaticText)
         }
     }
-    
+
     private func setupPitchDetection() {
         pitchDetectionTask = Task {
             guard let pitchStream = pitchManager.stream else { return }
-            
+
             for await (pitch, spectrum, decibels) in pitchStream {
                 await MainActor.run {
                     self.currentPitch = pitch > 0 ? pitch : nil
                     self.currentSpectrum = spectrum
                     self.currentDecibels = (rms: CGFloat(decibels.rms), peak: CGFloat(decibels.peak))
-                    
+
                     // Update pitch data for graph
                     if pitch > 0 {
                         let dataPoint = PitchDataPoint(
                             timestamp: Date(),
                             frequency: pitch
                         )
-                        
+
                         // Add new data point and maintain max data points
                         pitchData.append(dataPoint)
                         if pitchData.count > maxPitchHistorySize {
@@ -242,7 +298,7 @@ struct TunerView: View {
             }
         }
     }
-    
+
     private func startListening() {
         errorMessage = nil
         currentPitch = nil
@@ -272,7 +328,7 @@ struct TunerView: View {
             currentDecibels: .constant((-60.0, -60.0))
         )
         .preferredColorScheme(.light)
-        
+
         TunerView(
             pitchManager: AudioInputManager(),
             noteConverter: NoteConverter(),

@@ -89,23 +89,34 @@ class PitchAnalyzer {
         var windowedSignal = [Float](repeating: 0, count: fftSize)
         vDSP_vmul(buffer, 1, window, 1, &windowedSignal, 1, vDSP_Length(fftSize))
 
-        // Convert to split complex format
+        // Convert to split complex format.
+        // A DSPSplitComplex built from `&realp` / `&imagp` holds pointers that are
+        // only valid for the duration of that initializer call, so every vDSP call
+        // that uses it runs inside the buffer-pointer scopes that keep them alive.
         var realp = [Float](repeating: 0, count: fftSize / 2)
         var imagp = [Float](repeating: 0, count: fftSize / 2)
-        var splitComplex = DSPSplitComplex(realp: &realp, imagp: &imagp)
+        var magnitudes = [Float](repeating: 0, count: fftSize / 2)
 
-        windowedSignal.withUnsafeBufferPointer { ptr in
-            ptr.baseAddress!.withMemoryRebound(to: DSPComplex.self, capacity: fftSize / 2) {
-                vDSP_ctoz($0, 2, &splitComplex, 1, vDSP_Length(fftSize / 2))
+        realp.withUnsafeMutableBufferPointer { realBuffer in
+            imagp.withUnsafeMutableBufferPointer { imagBuffer in
+                var splitComplex = DSPSplitComplex(
+                    realp: realBuffer.baseAddress!,
+                    imagp: imagBuffer.baseAddress!
+                )
+
+                windowedSignal.withUnsafeBufferPointer { ptr in
+                    ptr.baseAddress!.withMemoryRebound(to: DSPComplex.self, capacity: fftSize / 2) {
+                        vDSP_ctoz($0, 2, &splitComplex, 1, vDSP_Length(fftSize / 2))
+                    }
+                }
+
+                // Perform FFT
+                vDSP_fft_zrip(fftSetup, &splitComplex, 1, log2n, FFTDirection(FFT_FORWARD))
+
+                // Compute magnitudes (only need first half due to symmetry)
+                vDSP_zvmags(&splitComplex, 1, &magnitudes, 1, vDSP_Length(fftSize / 2))
             }
         }
-
-        // Perform FFT
-        vDSP_fft_zrip(fftSetup, &splitComplex, 1, log2n, FFTDirection(FFT_FORWARD))
-
-        // Compute magnitudes (only need first half due to symmetry)
-        var magnitudes = [Float](repeating: 0, count: fftSize / 2)
-        vDSP_zvmags(&splitComplex, 1, &magnitudes, 1, vDSP_Length(fftSize / 2))
 
         // Convert to dB
         var zero: Float = 1e-10
@@ -139,24 +150,12 @@ class PitchAnalyzer {
             return (nil, spectrum)
         }
         
-        let rawFrequency = relevantFrequencies[maxIndex]
-//        print("Raw peak: bin \(maxIndex + minBin) at \(rawFrequency) Hz (magnitude: \(maxMagnitude) dB)")
-        
         // Apply parabolic interpolation around the peak bin for more accurate frequency estimation
         let interpolatedFrequency = parabolicInterpolation(
             magnitudes: relevantMagnitudes,
             frequencies: relevantFrequencies,
             peakIndex: maxIndex
         )
-        
-//        print("Max magnitude: \(maxMagnitude) dB at \(interpolatedFrequency) Hz (interpolated)")
-//        
-//        // Debug: Check if this looks like a reasonable frequency
-//        if interpolatedFrequency > 0 && interpolatedFrequency < sampleRate / 2 {
-//            print("✅ Frequency within valid range (0-\(sampleRate/2) Hz)")
-//        } else {
-//            print("❌ Frequency outside valid range: \(interpolatedFrequency) Hz")
-//        }
         
         // Apply noise threshold (only detect if magnitude is above a certain threshold)
         let noiseThreshold: Float = -80.0 // dB threshold

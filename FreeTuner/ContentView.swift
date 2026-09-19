@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import DesignSystem
 
 struct ContentView: View {
     let pitchManager = AudioInputManager()
@@ -26,8 +27,8 @@ struct ContentView: View {
                 // Background gradient
                 LinearGradient(
                     gradient: Gradient(colors: [
-                        Color(.systemBackground),
-                        Color(.systemGray6).opacity(0.3)
+                        Color.systemBackgroundColor,
+                        Color.backgroundElevated.opacity(0.3)
                     ]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -53,7 +54,7 @@ struct ContentView: View {
                     }) {
                         Image(systemName: "slider.vertical.3")
                             .font(isPad ? .title2 : .title3)
-                            .foregroundColor(.blue)
+                            .foregroundColor(.accent)
                     }
                     .accessibilityLabel("Settings")
                     .accessibilityHint("Opens the settings menu to configure tuner options")

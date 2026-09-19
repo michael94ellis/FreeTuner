@@ -6,196 +6,164 @@
 //
 
 import SwiftUI
+import DesignSystem
 
+/// Analog-style tuner gauge: a digital note readout above a dial with a
+/// smoothly-swinging needle, like a classic clip-on tuner face.
 struct TunerCircleView: View {
     let detectedNote: Note?
     @Binding var isListening: Bool
     let useSharps: Bool
+    /// When true, the verdict includes string-tensioning language ("LOOSEN"/"TIGHTEN").
+    var showsStringGuidance: Bool = false
     @Environment(\.isPad) private var isPad
-    
-    // Note names in order (like a clock face) - will be set based on useSharps
-    private var noteNames: [String] {
-        if useSharps {
-            return ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-        } else {
-            return ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
-        }
-    }
-    
+
+    /// Full-scale range of the dial. A semitone is 100 cents, so ±50¢ covers the
+    /// whole gap between two adjacent notes.
+    private let fullScaleCents: Double = 50
+    private let sweepDegrees: Double = 48
+
     var body: some View {
-        GeometryReader { geometry in
-            let size = min(geometry.size.width, geometry.size.height)
-            let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
-            let radius = size * 0.4
-            
-            ZStack {
-                
-                // Main tuning ring
-                tuningRing(size: size, center: center, radius: radius)
-                
-                // Note markers around the ring
-                noteMarkers(size: size, center: center, radius: radius)
-                    .accessibilityHidden(true) // Hide individual markers from VoiceOver
-                
-                // Center display
-                centerDisplay(size: size)
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Detected note")
-                    .accessibilityValue(detectedNote != nil ? "\(detectedNote!.name)\(detectedNote!.octave)" : "No note detected")
-                    .accessibilityHint("Shows the currently detected musical note")
-                    .accessibilityAddTraits(.updatesFrequently)
-                
-                // Tuning indicator
-                tuningIndicator(size: size, center: center, radius: radius)
-                    .accessibilityHidden(true) // Hide from VoiceOver as it's visual only
-            }
+        VStack(spacing: isPad ? 18 : 12) {
+            bigNoteDisplay
+            dial
+            verdictLabel
         }
+        .frame(maxWidth: .infinity)
     }
-    
-    // MARK: - Tuning Ring
-    @ViewBuilder
-    private func tuningRing(size: CGFloat, center: CGPoint, radius: CGFloat) -> some View {
-        ZStack {
-            // Inner ring for visual depth
-            Circle()
-                .stroke(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color(.systemGray5),
-                            Color(.systemGray6)
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 2
-                )
-                .frame(width: size * 0.7, height: size * 0.7)
-            
-            // Center circle for note display
-            Circle()
-                .fill(
-                    RadialGradient(
-                        gradient: Gradient(colors: [
-                            Color(.systemBackground),
-                            Color(.systemGray6).opacity(0.5)
-                        ]),
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: size * 0.25
-                    )
-                )
-                .frame(width: size * 0.5, height: size * 0.5)
-                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 8, x: 0, y: 4)
-        }
-    }
-    
-    // MARK: - Note Markers
-    @ViewBuilder
-    private func noteMarkers(size: CGFloat, center: CGPoint, radius: CGFloat) -> some View {
-        ForEach(0..<12, id: \.self) { noteIndex in
-            let angle = Double(noteIndex) * 30 - 90 // Start from top
-            let noteName = noteNames[noteIndex]
-            let x = center.x + cos(angle * .pi / 180) * (radius * 0.9)
-            let y = center.y + sin(angle * .pi / 180) * (radius * 0.9)
-            
-            ZStack {
-                // Prominent note marker dot
-                Circle()
-                    .fill(noteColor(for: noteName))
-                    .frame(width: 16, height: 16)
-                    .scaleEffect(noteColor(for: noteName) != .secondary.opacity(0.4) ? 1.3 : 1.0)
-                    .shadow(color: noteColor(for: noteName).opacity(0.5), radius: 3, x: 0, y: 1)
-                    .animation(.easeInOut(duration: 0.3), value: detectedNote?.name)
-                
-                // Note name with background
-                Text(noteName)
-                    .font(isPad ? .title2 : .headline)
-                    .foregroundColor(noteColor(for: noteName))
-                    .padding(.horizontal, isPad ? 12 : 8)
-                    .padding(.vertical, isPad ? 6 : 4)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color(.systemBackground).opacity(0.9))
-                            .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
-                    )
-                    .scaleEffect(noteColor(for: noteName) != .secondary.opacity(0.4) ? 1.1 : 1.0)
-                    .animation(.easeInOut(duration: 0.3), value: detectedNote?.name)
-            }
-            .position(x: x, y: y)
-        }
-    }
-    
-    // MARK: - Center Display
-    @ViewBuilder
-    private func centerDisplay(size: CGFloat) -> some View {
-        VStack(spacing: 16) {
+
+    // MARK: - Big Note
+    private var bigNoteDisplay: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            Text(detectedNote?.name ?? "–")
+                .font(.system(size: isPad ? 76 : 54, weight: .bold))
+                .tracking(-2)
+                .foregroundColor(.text)
             if let note = detectedNote {
-                // Main note display
-                VStack(spacing: 8) {
-                                    Text(note.name)
-                    .font(isPad ? .largeTitle : .title)
-                    .foregroundColor(.primary)
-                    .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
-                }
-            } else {
-                // No note detected state
-                VStack(spacing: 12) {
-                    Image(systemName: "music.note")
-                        .font(isPad ? .largeTitle : .title)
-                        .foregroundColor(.secondary)
-                    
-                    Text("No Note Detected")
-                        .font(isPad ? .title2 : .headline)
-                        .foregroundColor(.secondary)
-                }
+                Text("\(note.octave)")
+                    .font(.system(size: isPad ? 26 : 19, weight: .semibold))
+                    .foregroundColor(.textSecondary)
+                    .padding(.bottom, isPad ? 10 : 6)
             }
         }
+        .contentTransition(.numericText())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Detected note")
+        .accessibilityValue(detectedNote != nil ? "\(detectedNote!.name)\(detectedNote!.octave)" : "No note detected")
+        .accessibilityHint("Shows the currently detected musical note")
+        .accessibilityAddTraits(.updatesFrequently)
     }
-    
-    // MARK: - Tuning Indicator
-    @ViewBuilder
-    private func tuningIndicator(size: CGFloat, center: CGPoint, radius: CGFloat) -> some View {
-        if let note = detectedNote {
-            let baseAngle = noteAngle(for: note.name)
-            let centsOffset = Double(note.cents) * 0.6 // 0.6 degrees per cent
-            let angle = baseAngle + centsOffset + 90
-            let needleLength: CGFloat = radius * 0.85
-            
-            // Tuning needle
-            Rectangle()
-                .fill(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            note.cents.centsColor,
-                            note.cents.centsColor.opacity(0.8)
-                        ]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .frame(width: 6, height: needleLength)
-                .offset(y: -needleLength / 2)
-                .rotationEffect(.degrees(angle))
-                .shadow(color: note.cents.centsColor.opacity(0.3), radius: 4, x: 0, y: 2)
-                .animation(.easeInOut(duration: 0.3), value: note.cents)
-                .zIndex(-1)
+
+    // MARK: - Dial
+    private var needleAngle: Double {
+        let cents = min(max(Double(detectedNote?.cents ?? 0), -fullScaleCents), fullScaleCents)
+        return cents / fullScaleCents * sweepDegrees
+    }
+
+    private var dial: some View {
+        ZStack(alignment: .bottom) {
+            dialFace
+            GaugeNeedle()
+                .fill(pointerColor)
+                .frame(width: isPad ? 16 : 12, height: isPad ? 190 : 140)
+                .rotationEffect(.degrees(needleAngle), anchor: .bottom)
+                .animation(.easeOut(duration: 0.18), value: needleAngle)
+                .shadow(color: pointerColor.opacity(0.35), radius: 4, y: -2)
+        }
+        .frame(height: isPad ? 210 : 156)
+        .accessibilityHidden(true)
+    }
+
+    private var dialFace: some View {
+        Canvas { context, size in
+            let pivot = CGPoint(x: size.width / 2, y: size.height)
+            let radius = min(size.width / 2, size.height) - (isPad ? 22 : 16)
+
+            func point(angle: Double, radius: CGFloat) -> CGPoint {
+                let rad = (angle - 90) * .pi / 180
+                return CGPoint(x: pivot.x + radius * cos(rad), y: pivot.y + radius * sin(rad))
+            }
+
+            // Face arc
+            var face = Path()
+            face.addArc(center: pivot, radius: radius, startAngle: .degrees(-sweepDegrees - 90), endAngle: .degrees(sweepDegrees - 90), clockwise: false)
+            context.stroke(face, with: .color(Color.text.opacity(0.12)), lineWidth: 2)
+
+            // In-tune zone highlight
+            let tolAngle = Double(CentsTolerance) / fullScaleCents * sweepDegrees
+            var zone = Path()
+            zone.addArc(center: pivot, radius: radius, startAngle: .degrees(-tolAngle - 90), endAngle: .degrees(tolAngle - 90), clockwise: false)
+            context.stroke(zone, with: .color(Color.success.opacity(0.6)), lineWidth: 3)
+
+            // Ticks every 10¢
+            let step = 10
+            for tick in stride(from: -Int(fullScaleCents), through: Int(fullScaleCents), by: step) {
+                let angle = Double(tick) / fullScaleCents * sweepDegrees
+                let isMajor = tick == 0 || abs(tick) == Int(fullScaleCents)
+                let outer = point(angle: angle, radius: radius)
+                let inner = point(angle: angle, radius: radius - (isMajor ? 14 : 8))
+                var tickPath = Path()
+                tickPath.move(to: inner)
+                tickPath.addLine(to: outer)
+                let tickColor: Color = tick == 0 ? Color.text.opacity(0.55) : Color.text.opacity(0.28)
+                context.stroke(tickPath, with: .color(tickColor), lineWidth: isMajor ? 2.5 : 1.5)
+            }
+
+            // Pivot cap
+            let capRadius: CGFloat = isPad ? 9 : 7
+            context.fill(Path(ellipseIn: CGRect(x: pivot.x - capRadius, y: pivot.y - capRadius, width: capRadius * 2, height: capRadius * 2)), with: .color(.text))
+
+            // Scale labels
+            let flatPoint = point(angle: -sweepDegrees, radius: radius + (isPad ? 16 : 12))
+            let sharpPoint = point(angle: sweepDegrees, radius: radius + (isPad ? 16 : 12))
+            context.draw(Text("♭").font(.system(size: isPad ? 15 : 12, weight: .semibold)).foregroundColor(.textSecondary.opacity(0.7)), at: flatPoint)
+            context.draw(Text("♯").font(.system(size: isPad ? 15 : 12, weight: .semibold)).foregroundColor(.textSecondary.opacity(0.7)), at: sharpPoint)
         }
     }
-    
-    // MARK: - Helper Methods
-    private func noteAngle(for noteName: String) -> Double {
-        guard let index = noteNames.firstIndex(of: noteName) else { return 0 }
-        return Double(index) * 30 - 90
+
+    // MARK: - Verdict
+    private var verdictLabel: some View {
+        Text(verdictText)
+            .font(.system(size: 12, weight: .bold))
+            .tracking(2)
+            .foregroundColor(pointerColor)
+            .animation(.easeOut(duration: 0.18), value: verdictText)
     }
-    
-    private func noteColor(for noteName: String) -> Color {
-        guard let detectedNote = detectedNote else { return .secondary.opacity(0.4) }
-        
-        if detectedNote.name == noteName {
-            return detectedNote.cents.centsColor
-        } else {
-            return .secondary.opacity(0.4)
+
+    // MARK: - Helper State
+    private var isInTune: Bool {
+        guard let note = detectedNote else { return false }
+        return abs(note.cents) <= CentsTolerance
+    }
+
+    private var pointerColor: Color {
+        guard detectedNote != nil else { return Color.textSecondary.opacity(0.35) }
+        return isInTune ? .success : .destructive
+    }
+
+    private var verdictText: String {
+        guard let note = detectedNote else { return "LISTENING" }
+        if isInTune { return "IN TUNE" }
+        if note.cents > 0 {
+            return showsStringGuidance ? "SHARP · LOOSEN" : "SHARP"
         }
+        return showsStringGuidance ? "FLAT · TIGHTEN" : "FLAT"
+    }
+}
+
+/// A needle shape pointing straight up from the bottom-center of its frame,
+/// meant to be rotated with `.rotationEffect(_:anchor: .bottom)`.
+private struct GaugeNeedle: Shape {
+    func path(in rect: CGRect) -> Path {
+        let baseWidth = rect.width
+        let tipWidth: CGFloat = max(2, rect.width * 0.18)
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX - baseWidth / 2, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.midX - tipWidth / 2, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.midX + tipWidth / 2, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.midX + baseWidth / 2, y: rect.maxY))
+        path.closeSubpath()
+        return path
     }
 }
 
@@ -207,34 +175,22 @@ struct TunerCircleView: View {
                 isListening: .constant(true),
                 useSharps: true
             )
-            .frame(width: 300, height: 300)
-            
+
+            TunerCircleView(
+                detectedNote: Note(name: "E", octave: 2, frequency: 83.0, cents: 22),
+                isListening: .constant(true),
+                useSharps: true,
+                showsStringGuidance: true
+            )
+
             TunerCircleView(
                 detectedNote: nil,
                 isListening: .constant(false),
                 useSharps: true
             )
-            .frame(width: 300, height: 300)
         }
         .padding()
+        .background(Color.systemBackgroundColor)
         .preferredColorScheme(.light)
-        
-        VStack(spacing: 20) {
-            TunerCircleView(
-                detectedNote: Note(name: "A", octave: 4, frequency: 440.0, cents: 5),
-                isListening: .constant(false),
-                useSharps: false
-            )
-            .frame(width: 300, height: 300)
-            
-            TunerCircleView(
-                detectedNote: nil,
-                isListening: .constant(false),
-                useSharps: false
-            )
-            .frame(width: 300, height: 300)
-        }
-        .padding()
-        .preferredColorScheme(.dark)
     }
 }

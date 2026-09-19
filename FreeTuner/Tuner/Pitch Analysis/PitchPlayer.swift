@@ -8,7 +8,7 @@
 import AVFoundation
 import Foundation
 
-enum WaveformType: String, CaseIterable {
+enum WaveformType: String, CaseIterable, Hashable {
     case sine = "Sine"
     case square = "Square"
     case triangle = "Triangle"
@@ -25,10 +25,6 @@ class PitchPlayer: ObservableObject {
     
     @Published var isCurrentlyPlaying = false
     @Published var selectedWaveform: WaveformType = .sine
-    
-    init() {
-        setupAudioEngine()
-    }
     
     deinit {
         stop()
@@ -75,11 +71,15 @@ class PitchPlayer: ObservableObject {
     }
     
     func play(frequency: Float, duration: TimeInterval? = nil) {
+        if audioEngine == nil {
+            setupAudioEngine()
+        }
+
         guard let player = playerNode,
               let format = audioFormat else {
             return
         }
-        
+
         // Stop any currently playing tone
         stop()
         
