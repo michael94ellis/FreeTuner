@@ -31,7 +31,10 @@ struct A4FrequencyPickerView: View {
     
     init(noteConverter: NoteConverter) {
         self.noteConverter = noteConverter
-        self._selectedA4Frequency = State(initialValue: noteConverter.getA4Frequency())
+        // Use the actual A4 pitch (not the raw stored reference), since the
+        // stored reference may currently be anchored to a different MIDI note
+        // via the MIDI Reference Note picker.
+        self._selectedA4Frequency = State(initialValue: noteConverter.getActualA4Frequency())
     }
     
     var body: some View {
@@ -325,7 +328,13 @@ struct A4FrequencyPickerView: View {
     private var applyButton: some View {
         Button("Apply") {
             withAnimation(.easeInOut(duration: 0.2)) {
+                // This screen always defines true A4, so applying a value here
+                // re-anchors the reference to MIDI note 69. Otherwise, if the
+                // reference had been shifted to a different note via the MIDI
+                // Reference Note picker, the value chosen here would silently
+                // become that other note's pitch instead of A4's.
                 noteConverter.setA4Frequency(selectedA4Frequency)
+                noteConverter.setA4MidiNote(69)
                 dismiss()
             }
         }

@@ -88,7 +88,21 @@ class NoteConverter {
     func getA4Frequency() -> Float {
         return a4Frequency
     }
-    
+
+    /// Get the actual frequency of A4 (MIDI note 69), derived from the current
+    /// reference frequency and reference MIDI note under equal temperament.
+    ///
+    /// `a4Frequency` is only the literal pitch of A4 when `a4MidiNote == 69`.
+    /// If the MIDI reference note has been changed to something else (e.g. C4),
+    /// `a4Frequency` instead represents the pitch of that other note, so it can
+    /// no longer be shown to the user as "the A4 frequency" without converting
+    /// it back first. This method performs that conversion so UI that labels
+    /// itself "A4 Frequency" always displays what A4 actually is right now.
+    func getActualA4Frequency() -> Float {
+        let semitonesToA4 = Float(69 - a4MidiNote)
+        return a4Frequency * pow(2.0, semitonesToA4 / 12.0)
+    }
+
     /// Set the A4 MIDI reference note
     func setA4MidiNote(_ midiNote: Int) {
         a4MidiNote = max(0, min(127, midiNote)) // Limit to valid MIDI range
