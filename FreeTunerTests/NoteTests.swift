@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import FreeTuner
+@testable import TunerGauge
 
 final class NoteTests: XCTestCase {
     

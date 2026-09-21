@@ -346,11 +346,11 @@ struct SettingsView: View {
                             .font(isPad ? .body : .subheadline)
                             .foregroundColor(.secondary)
                         
-                        Text("\(Int(noteConverter.getA4Frequency())) Hz")
+                        Text("\(Int(noteConverter.getActualA4Frequency())) Hz")
                             .font(isPad ? .title : .title3)
                             .foregroundColor(.primary)
                     }
-                    
+
                     Spacer()
                     
                     Image(systemName: "chevron.right")
