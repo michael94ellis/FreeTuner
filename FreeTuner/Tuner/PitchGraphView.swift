@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Charts
+import DesignSystem
 
 struct PitchDataPoint: Identifiable {
     let id = UUID()
@@ -28,39 +29,38 @@ struct PitchGraphView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Pitch History")
-                        .font(isPad ? .title : .title2)
-                        .foregroundColor(.primary)
+                        .font(.system(size: isPad ? 18 : 15, weight: .semibold))
+                        .foregroundColor(.text)
                 }
                 
+                Spacer()
                 if showingGraph {
-                    averageFrequencyView
+                    AverageFrequencyLabel(pitchData: pitchData)
                         .id("avgfrq")
                 } else {
-                    averageFrequencyView
+                    AverageFrequencyLabel(pitchData: [])
                         .hidden()
                         .frame(height: 0)
                         .id("avgfrq")
                 }
                 
-                Spacer()
                 
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         showingGraph.toggle()
                     }
                 }) {
-                    Image(systemName: showingGraph ? "chart.line.downtrend.xyaxis" : "chart.line.uptrend.xyaxis")
-                        .font(isPad ? .title2 : .title3)
-                        .foregroundColor(.blue)
-                        .frame(width: isPad ? 65 : 44, height: isPad ? 65 : 44)
-                        .background(
-                            Circle()
-                                .fill(Color.blue.opacity(0.1))
-                        )
+                    Image(systemName: showingGraph ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.textSecondary.opacity(0.6))
                 }
                 .accessibilityLabel("Toggle pitch graph")
                 .accessibilityValue(showingGraph ? "Expanded" : "Collapsed")
                 .accessibilityHint("Shows or hides the pitch history graph")
+            }
+            .padding(.top, 16)
+            .overlay(alignment: .top) {
+                Rectangle().fill(Color.text.opacity(0.10)).frame(height: 1)
             }
             .contentShape(Rectangle())
             .onTapGesture {
@@ -68,7 +68,6 @@ struct PitchGraphView: View {
                     showingGraph.toggle()
                 }
             }
-            .padding(.horizontal, isPad ? 32 : 0)
             
             if showingGraph {
                 // Graph content
@@ -79,7 +78,7 @@ struct PitchGraphView: View {
                         chartView
                     }
                 }
-                .padding(.horizontal, isPad ? 32 : 0)
+                .padding(.top, 12)
                 .transition(.asymmetric(
                     insertion: .move(edge: .top).combined(with: .opacity),
                     removal: .move(edge: .top).combined(with: .opacity)
@@ -94,21 +93,21 @@ struct PitchGraphView: View {
         VStack(spacing: isPad ? 16 : 12) {
             Image(systemName: "chart.line.uptrend.xyaxis")
                 .font(isPad ? .title : .title2)
-                .foregroundColor(.secondary)
-            
+                .foregroundColor(.textSecondary)
+
             Text("No pitch data yet")
                 .font(isPad ? .subheadline : .caption)
-                .foregroundColor(.secondary)
-            
+                .foregroundColor(.textSecondary)
+
             Text("Start listening to see pitch history")
                 .font(isPad ? .caption : .caption2)
-                .foregroundColor(.secondary.opacity(0.8))
+                .foregroundColor(.textSecondary.opacity(0.8))
         }
         .frame(height: isPad ? 160 : 120)
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemGray6).opacity(0.5))
+                .fill(Color.backgroundElevated.opacity(0.5))
         )
     }
     
@@ -117,24 +116,24 @@ struct PitchGraphView: View {
         VStack(alignment: .leading, spacing: isPad ? 12 : 8) {
             Text("Frequency over Time")
                 .font(isPad ? .subheadline : .caption)
-                .foregroundColor(.secondary)
-            
+                .foregroundColor(.textSecondary)
+
             Chart {
                 ForEach(pitchData) { point in
                     LineMark(
                         x: .value("Time", point.timestamp),
                         y: .value("Frequency", point.frequency)
                     )
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.accent)
                     .lineStyle(StrokeStyle(lineWidth: 2))
-                    
+
                     AreaMark(
                         x: .value("Time", point.timestamp),
                         y: .value("Frequency", point.frequency)
                     )
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [.blue.opacity(0.3), .blue.opacity(0.05)],
+                            colors: [Color.accent.opacity(0.3), Color.accent.opacity(0.05)],
                             startPoint: .top,
                             endPoint: .bottom
                         )
@@ -143,66 +142,32 @@ struct PitchGraphView: View {
             }
             .accessibilityElement(children: .combine)
             .accessibilityLabel("Pitch history graph")
-            .accessibilityValue("\(pitchData.count) data points, average frequency \(Int(averageFrequency)) Hertz")
+            .accessibilityValue("Data graph for average frequency in Hertz")
             .accessibilityHint("Shows frequency changes over time. Updates in real-time as new pitch data is collected.")
             .frame(height: isPad ? 180 : 120)
             .chartXAxis {
                 AxisMarks(position: .bottom) { _ in
                     AxisGridLine()
-                        .foregroundStyle(.gray.opacity(0.2))
+                        .foregroundStyle(Color.textSecondary.opacity(0.2))
                     AxisTick()
-                        .foregroundStyle(.gray.opacity(0.5))
+                        .foregroundStyle(Color.textSecondary.opacity(0.5))
                     AxisValueLabel()
                         .font(isPad ? .caption : .caption2)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
             }
             .chartYAxis {
                 AxisMarks(position: .leading) { _ in
                     AxisGridLine()
-                        .foregroundStyle(.gray.opacity(0.2))
+                        .foregroundStyle(Color.textSecondary.opacity(0.2))
                     AxisTick()
-                        .foregroundStyle(.gray.opacity(0.5))
+                        .foregroundStyle(Color.textSecondary.opacity(0.5))
                     AxisValueLabel()
                         .font(isPad ? .caption : .caption2)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
             }
             .chartYScale(domain: frequencyRange)
-        }
-        .smallCardStyle(
-            cornerRadius: 12,
-            horizontalPadding: isPad ? 24 : 8,
-            verticalPadding: isPad ? 24 : 12
-        )
-    }
-    
-    @ViewBuilder
-    private var averageFrequencyView: some View {
-        HStack(spacing: 16) {
-            
-            // Average frequency
-            VStack(spacing: isPad ? 6 : 4) {
-                Text("Average")
-                    .font(isPad ? .title3 : .subheadline)
-                    .foregroundColor(.secondary)
-                    .frame(minWidth: 80, alignment: .trailing)
-                            Text("\(Int(averageFrequency)) Hz")
-                .font(isPad ? .title3 : .subheadline)
-                .foregroundColor(.primary)
-                .frame(minWidth: 80, alignment: .trailing)
-                .accessibilityLabel("Average frequency")
-                .accessibilityValue("\(Int(averageFrequency)) Hertz")
-                .accessibilityHint("Average frequency over the recorded time period")
-                .accessibilityAddTraits(.updatesFrequently)
-            }
-            .padding(.vertical, isPad ? 16 : 8)
-            .padding(.horizontal, isPad ? 12 : 8)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(.systemGray6).opacity(0.5))
-            )
-            .frame(maxWidth: .infinity)
         }
     }
     
@@ -219,12 +184,6 @@ struct PitchGraphView: View {
         // Add some padding to the range
         let padding = range * 0.1
         return (minFreq - padding)...(maxFreq + padding)
-    }
-    
-    private var averageFrequency: Float {
-        guard !pitchData.isEmpty else { return 0 }
-        let sum = pitchData.reduce(0) { $0 + $1.frequency }
-        return sum / Float(pitchData.count)
     }
     
     private var stabilityText: String {
@@ -252,15 +211,15 @@ struct PitchGraphView: View {
     private var stabilityColor: Color {
         switch stabilityText {
         case "Excellent":
-            return .green
+            return .success
         case "Good":
-            return .blue
+            return .accent
         case "Fair":
-            return .orange
+            return .warning
         case "Poor":
-            return .red
+            return .destructive
         default:
-            return .secondary
+            return .textSecondary
         }
     }
 }
@@ -283,5 +242,5 @@ struct PitchGraphView: View {
         PitchGraphView(pitchData: sampleData, isListening: true, maxDataPoints: 100)
     }
     .padding()
-    .background(Color(.systemBackground))
+    .background(Color.systemBackgroundColor)
 }

@@ -6,38 +6,39 @@
 //
 
 import SwiftUI
+import DesignSystem
 
 struct MidiStandardButton: View {
     let standard: (name: String, note: Int, description: String)
     let isSelected: Bool
     let onSelect: () -> Void
-    
+
     @Environment(\.isPad) private var isPad
-    
+
     var body: some View {
         Button(action: onSelect) {
             VStack(spacing: 8) {
                 Text(standard.name)
                     .font(isPad ? .title : .title3)
-                    .foregroundColor(isSelected ? .white : .primary)
+                    .foregroundColor(isSelected ? .white : .text)
                     .multilineTextAlignment(.center)
-                
+
                 Text(standard.description)
                     .font(isPad ? .body : .subheadline)
-                    .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
+                    .foregroundColor(isSelected ? .white.opacity(0.8) : .textSecondary)
                     .multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .padding(.horizontal, 12)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? Color.blue : Color(.systemBackground))
-                    .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 4, x: 0, y: 2)
+                RoundedRectangle(cornerRadius: CornerRadius.card)
+                    .fill(isSelected ? Color.accent : Color.systemBackgroundColor)
+                    .shadow(color: Color.shadow.opacity(0.05), radius: 4, x: 0, y: 2)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.blue : Color.gray.opacity(0.1), lineWidth: 1)
+                RoundedRectangle(cornerRadius: CornerRadius.card)
+                    .stroke(isSelected ? Color.accent : Color.textSecondary.opacity(0.1), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -55,7 +56,7 @@ struct MidiStandardButton: View {
             onSelect: {}
         )
         .preferredColorScheme(.light)
-        
+
         MidiStandardButton(
             standard: ("C4 (Middle C)", 60, "Middle C reference"),
             isSelected: false,

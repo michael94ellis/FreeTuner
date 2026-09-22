@@ -112,4 +112,30 @@ class NoteConverter {
     func getA4MidiNote() -> Int {
         return a4MidiNote
     }
+
+    /// Compute the equal-temperament frequency for a given MIDI note under the current reference.
+    func frequency(forMidiNote midiNote: Int) -> Float {
+        let semitonesFromA4 = midiNote - a4MidiNote
+        return a4Frequency * pow(2.0, Float(semitonesFromA4) / 12.0)
+    }
+
+    /// Find the instrument string whose target pitch is closest to the given frequency,
+    /// along with the cents deviation from that string's exact pitch.
+    func closestString(to frequency: Float, in instrument: Instrument) -> (string: InstrumentString, cents: Int)? {
+        guard frequency > 0, !instrument.strings.isEmpty else { return nil }
+
+        var bestString: InstrumentString?
+        var bestCents = Int.max
+        for string in instrument.strings {
+            let targetFrequency = self.frequency(forMidiNote: string.midiNote)
+            let cents = Int(round(1200 * log2(frequency / targetFrequency)))
+            if abs(cents) < abs(bestCents) {
+                bestCents = cents
+                bestString = string
+            }
+        }
+
+        guard let string = bestString else { return nil }
+        return (string, bestCents)
+    }
 }

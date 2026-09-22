@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import DesignSystem
 
 struct A4FrequencyPickerView: View {
     @Bindable var noteConverter: NoteConverter
@@ -69,21 +70,21 @@ struct A4FrequencyPickerView: View {
     private var backgroundGradient: some View {
         LinearGradient(
             gradient: Gradient(colors: [
-                Color(.systemBackground),
-                Color(.systemGray6).opacity(0.3)
+                Color.systemBackgroundColor,
+                Color.backgroundElevated.opacity(0.3)
             ]),
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
         .ignoresSafeArea()
     }
-    
+
     // MARK: - Current Frequency Display
     private var currentFrequencyDisplay: some View {
         VStack(spacing: 16) {
             Text("Current A4 Frequency")
                 .font(isPad ? .body : .subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.textSecondary)
             
             HStack(spacing: 20) {
                 if isEditingFrequency {
@@ -107,7 +108,7 @@ struct A4FrequencyPickerView: View {
                             isEditingFrequency = false
                         }
                         .font(isPad ? .title : .subheadline)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.accent)
                     }
                     .frame(maxWidth: .infinity)
                     .transition(.asymmetric(
@@ -122,8 +123,8 @@ struct A4FrequencyPickerView: View {
                     Text("\(Int(selectedA4Frequency)) Hz")
                         .font(isPad ? .system(size: 48) : .title)
                         .frame(maxWidth: .infinity)
-                        .foregroundColor(.primary)
-                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
+                        .foregroundColor(.text)
+                        .shadow(color: Color.shadow.opacity(0.1), radius: 2, x: 0, y: 1)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Current A4 frequency")
@@ -144,8 +145,8 @@ struct A4FrequencyPickerView: View {
                 }) {
                     Image(systemName: pitchPlayer.isCurrentlyPlaying ? "stop.circle.fill" : "play.circle.fill")
                         .font(isPad ? .system(size: 48) : .title)
-                        .foregroundColor(pitchPlayer.isCurrentlyPlaying ? .red : .blue)
-                        .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.1), radius: 2, x: 0, y: 1)
+                        .foregroundColor(pitchPlayer.isCurrentlyPlaying ? .destructive : .accent)
+                        .shadow(color: Color.shadow.opacity(0.1), radius: 2, x: 0, y: 1)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(pitchPlayer.isCurrentlyPlaying ? "Stop reference tone" : "Play reference tone")
@@ -156,75 +157,54 @@ struct A4FrequencyPickerView: View {
             
             waveformSelector
         }
-        .background(customBackground)
         .largeCardStyle()
     }
-    
+
     private var waveformSelector: some View {
         VStack(spacing: 8) {
             Text("Waveform")
                 .font(isPad ? .body : .subheadline)
-                .foregroundColor(.secondary)
-            
-            HStack(spacing: 8) {
-                ForEach(WaveformType.allCases, id: \.self) { waveform in
-                    Button(action: {
-                        pitchPlayer.selectedWaveform = waveform
-                    }) {
-                        Text(waveform.rawValue)
-                            .font(isPad ? .body : .caption2)
-                            .foregroundColor(pitchPlayer.selectedWaveform == waveform ? .white : .primary)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(pitchPlayer.selectedWaveform == waveform ? Color.blue : Color(.systemGray5))
-                            )
-                    }
-                    .buttonStyle(.plain)
-                    .onChange(of: pitchPlayer.selectedWaveform, {
-                        guard pitchPlayer.isCurrentlyPlaying else {
-                            return
-                        }
+                .foregroundColor(.textSecondary)
+
+            SegmentedPicker(
+                options: WaveformType.allCases.map { ($0.rawValue, $0) },
+                selection: Binding(
+                    get: { pitchPlayer.selectedWaveform },
+                    set: { newWaveform in
+                        pitchPlayer.selectedWaveform = newWaveform
+                        guard pitchPlayer.isCurrentlyPlaying else { return }
                         pitchPlayer.stop()
                         pitchPlayer.play(frequency: selectedA4Frequency)
-                    })
-                }
-            }
+                    }
+                )
+            )
         }
     }
-    
-    private var customBackground: some View {
-        RoundedRectangle(cornerRadius: 16)
-            .fill(Color(.systemBackground))
-            .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.05), radius: 8, x: 0, y: 2)
-    }
-    
+
     // MARK: - Custom Frequency Slider
     private var customFrequencySlider: some View {
         VStack(spacing: 16) {
             Text("Custom Frequency")
                 .font(isPad ? .title : .title3)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
+
             sliderControls
         }
-        .background(customSliderBackground)
         .largeCardStyle()
     }
-    
+
     private var sliderControls: some View {
         HStack {
             Text("1 Hz")
                 .font(isPad ? .body : .subheadline)
-                .foregroundColor(.secondary)
-            
+                .foregroundColor(.textSecondary)
+
             Slider(
                 value: $selectedA4Frequency,
                 in: 1...990,
                 step: 1
             )
-            .accentColor(.blue)
+            .tint(.accent)
             .accessibilityLabel("A4 frequency slider")
             .accessibilityValue("\(Int(selectedA4Frequency)) Hertz")
             .accessibilityHint("Adjust the A4 reference frequency from 1 to 990 Hertz")
@@ -234,42 +214,20 @@ struct A4FrequencyPickerView: View {
                 }
                 // Cancel any existing timer
                 debounceTimer?.invalidate()
-                
+
                 // Create a new timer with 0.3 second delay
                 debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
                     pitchPlayer.stop()
                     pitchPlayer.play(frequency: selectedA4Frequency)
                 }
             }
-            
+
             Text("990 Hz")
                 .font(isPad ? .body : .subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.textSecondary)
         }
     }
-    
-    private var frequencyDisplay: some View {
-        HStack(spacing: 16) {
-            Text("\(Int(selectedA4Frequency)) Hz")
-                .font(isPad ? .title : .title2)
-                .foregroundColor(.blue)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(frequencyDisplayBackground)
-        }
-    }
-    
-    private var frequencyDisplayBackground: some View {
-        Capsule()
-            .fill(Color.blue.opacity(0.1))
-    }
-    
-    private var customSliderBackground: some View {
-        RoundedRectangle(cornerRadius: 16)
-            .fill(Color(.systemBackground))
-            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
-    }
-    
+
     // MARK: - Common Standards Section
     private var commonStandardsSection: some View {
         VStack(spacing: 16) {
@@ -293,10 +251,9 @@ struct A4FrequencyPickerView: View {
                 }
             }
         }
-        .background(customBackground)
         .largeCardStyle()
     }
-    
+
     private var gridColumns: [GridItem] {
         [
             GridItem(.flexible()),
@@ -339,7 +296,7 @@ struct A4FrequencyPickerView: View {
             }
         }
         .font(isPad ? .title : .title3)
-        .foregroundColor(.blue)
+        .foregroundColor(.accent)
         .accessibilityLabel("Apply")
         .accessibilityHint("Saves the A4 frequency setting and returns to settings")
     }

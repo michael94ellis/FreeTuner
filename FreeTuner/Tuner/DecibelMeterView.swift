@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import DesignSystem
 
 struct DecibelMeterView: View {
     let decibels: (rms: CGFloat, peak: CGFloat)
@@ -46,13 +47,13 @@ struct DecibelMeterView: View {
     // Color based on decibel level
     private var meterColor: Color {
         if decibels.rms < -40 {
-            return .green
+            return .success
         } else if decibels.rms < -20 {
-            return .yellow
+            return .warning
         } else if decibels.rms < -10 {
             return .orange
         } else {
-            return .red
+            return .destructive
         }
     }
     
@@ -62,16 +63,16 @@ struct DecibelMeterView: View {
             // Header with collapsible button
             HStack {
                 Text("Signal Strength")
-                    .font(isPad ? .title : .title2)
-                    .foregroundColor(.primary)
-                
+                    .font(.system(size: isPad ? 18 : 15, weight: .semibold))
+                    .foregroundColor(.text)
+
                 // Info button
                 Button(action: {
                     showingTooltip.toggle()
                 }) {
                     Image(systemName: "info.circle")
                         .font(isPad ? .title2 : .title3)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.accent)
                 }
                 .popover(isPresented: $showingTooltip) {
                     toolTipContent
@@ -97,7 +98,7 @@ struct DecibelMeterView: View {
                         
                         Text(showingMeter ? "dB" : "  ")
                             .font(isPad ? .caption : .caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.textSecondary)
                             .accessibilityHidden(true) // Hide "dB" label from VoiceOver as it's included in the value
                     }
                     .padding(.vertical, isPad ? 16 : 8)
@@ -105,7 +106,7 @@ struct DecibelMeterView: View {
                     .frame(minWidth: 80, alignment: .trailing)
                     .background(
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(Color(.systemGray6).opacity(0.5))
+                            .fill(Color.backgroundElevated.opacity(0.5))
                     )
                     .frame(maxWidth: .infinity)
                     .id("decibelmeteravg")
@@ -130,18 +131,17 @@ struct DecibelMeterView: View {
                         showingMeter.toggle()
                     }
                 }) {
-                    Image(systemName: showingMeter ? "thermometer.high" : "thermometer.medium.slash")
-                        .font(isPad ? .title2 : .title3)
-                        .foregroundColor(.blue)
-                        .frame(width: isPad ? 65 : 44, height: isPad ? 65 : 44)
-                        .background(
-                            Circle()
-                                .fill(Color.blue.opacity(0.1))
-                        )
+                    Image(systemName: showingMeter ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.textSecondary.opacity(0.6))
                 }
                 .accessibilityLabel("Toggle signal meter")
                 .accessibilityValue(showingMeter ? "Expanded" : "Collapsed")
                 .accessibilityHint("Shows or hides the detailed signal strength meter")
+            }
+            .padding(.top, 16)
+            .overlay(alignment: .top) {
+                Rectangle().fill(Color.text.opacity(0.10)).frame(height: 1)
             }
             .contentShape(Rectangle())
             .onTapGesture {
@@ -149,7 +149,6 @@ struct DecibelMeterView: View {
                     showingMeter.toggle()
                 }
             }
-            .padding(.horizontal, isPad ? 32 : 0)
             
             if showingMeter {
                 decibelMeter
@@ -165,15 +164,15 @@ struct DecibelMeterView: View {
             ZStack(alignment: .leading) {
                 // Background bar
                 RoundedRectangle(cornerRadius: isPad ? 12 : 8)
-                    .fill(Color.gray.opacity(0.2))
+                    .fill(Color.fillSubtle)
                     .frame(height: isPad ? 24 : 18)
-                
+
                 // Progress bar
                 GeometryReader { geo in
                     RoundedRectangle(cornerRadius: isPad ? 12 : 8)
                         .fill(
                             LinearGradient(
-                                gradient: Gradient(colors: [.green, meterColor]),
+                                gradient: Gradient(colors: [Color.success, meterColor]),
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -184,7 +183,7 @@ struct DecibelMeterView: View {
                 // Peak indicator
                 let peakNormalized = (max(minDb, min(maxDb, peakDecibels)) - minDb) / (maxDb - minDb)
                 Rectangle()
-                    .fill(Color.red)
+                    .fill(Color.destructive)
                     .frame(width: 3, height: isPad ? 28 : 22)
                     .offset(x: max(0, peakNormalized * (isPad ? 300 : 220) - 1.5))
                     .opacity(0.8)
@@ -194,22 +193,21 @@ struct DecibelMeterView: View {
             HStack {
                 Text("-100")
                     .font(isPad ? .caption : .caption2)
-                    .foregroundColor(.secondary)
-                
+                    .foregroundColor(.textSecondary)
+
                 Spacer()
-                
+
                 Text("0")
                     .font(isPad ? .caption : .caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
             }
             .frame(maxWidth: .infinity)
         }
-        .padding(.horizontal, isPad ? 32 : 0)
+        .padding(.top, 14)
         .transition(.asymmetric(
             insertion: .move(edge: .top).combined(with: .opacity),
             removal: .move(edge: .top).combined(with: .opacity)
         ))
-        .largeCardStyle()
         .opacity(isListening ? 1.0 : 0.6)
         .animation(.easeInOut(duration: 0.2), value: isListening)
         .onChange(of: decibels.peak) { _, _ in
@@ -227,39 +225,39 @@ struct DecibelMeterView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Decibel Range Explained")
                     .font(isPad ? .largeTitle : .title)
-                    .foregroundColor(.primary)
-                
+                    .foregroundColor(.text)
+
                 Text("This tuner uses a digital audio scale called dBFS, decibels relative to full scale.")
                     .font(isPad ? .body : .callout)
-                    .foregroundColor(.secondary)
-                
+                    .foregroundColor(.textSecondary)
+
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .top, spacing: 8) {
                         Text("•")
-                            .foregroundColor(.blue)
+                            .foregroundColor(.accent)
                         Text("0 dB means the signal is at its maximum possible level (clipping)")
                     }
                     .font(isPad ? .headline : .subheadline)
-                    
+
                     HStack(alignment: .top, spacing: 8) {
                         Text("•")
-                            .foregroundColor(.blue)
+                            .foregroundColor(.accent)
                         Text("−60 dB is very quiet")
                     }
                     .font(isPad ? .headline : .subheadline)
                 }
-                
+
                 Text("The colored bar shows the average loudness of the sound (RMS), while the thin red line marks the loudest moment detected (peak).")
                     .font(isPad ? .body : .callout)
-                    .foregroundColor(.secondary)
-                
+                    .foregroundColor(.textSecondary)
+
                 Text("Unlike the typically expected physical sound pressure levels (SPL), which range from 0 to 140 dB, digital audio uses a scale from −∞ to 0 dBFS, where 0 is the loudest possible value.")
                     .font(isPad ? .body : .callout)
-                    .foregroundColor(.secondary)
-                
+                    .foregroundColor(.textSecondary)
+
                 Text("So if you see values like −45 dB or −30 dB, that's normal, it means your signal is active but not overpowering.")
                     .font(isPad ? .body : .callout)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
             }
             .padding(20)
         }
