@@ -1,0 +1,15 @@
+{
+  "originHash" : "b602493a143bf20b1a0157c344a8b4f53d72f265b46df2ddd64e2e3d597bd529",
+  "pins" : [
+    {
+      "identity" : "designsystem",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/michael94ellis/DesignSystem",
+      "state" : {
+        "revision" : "1fedd69442d47db6c2d23c1412d9438170db9793",
+        "version" : "1.0.2"
+      }
+    }
+  ],
+  "version" : 3
+}
